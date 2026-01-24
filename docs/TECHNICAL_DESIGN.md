@@ -199,6 +199,49 @@ One case per vanpool (multiple employees):
 | Vanpool Detail (`/vanpools/[id]`) | Google Maps with employee ZIP markers, rider list, shifts |
 | Employee Detail (`/employees/[id]`) | Profile, shift history, case history |
 
+### API Routes
+
+FastAPI backend with auto-generated documentation at `/docs` (Swagger UI) and `/redoc`.
+
+**Vanpools** (`/api/vanpools`)
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/vanpools` | List all vanpools |
+| `GET` | `/api/vanpools/{vanpool_id}` | Get single vanpool with riders |
+| `GET` | `/api/vanpools/{vanpool_id}/riders` | Get riders for a vanpool |
+
+**Employees** (`/api/employees`)
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/employees` | List all employees (supports filters) |
+| `GET` | `/api/employees/{employee_id}` | Get employee profile |
+| `GET` | `/api/employees/{employee_id}/shifts` | Get employee shift schedule |
+
+**Cases** (`/api/cases`)
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/cases` | List cases (filter by status, vanpool) |
+| `GET` | `/api/cases/{case_id}` | Get case details |
+| `POST` | `/api/cases` | Create new investigation case |
+| `PATCH` | `/api/cases/{case_id}` | Update case status |
+| `GET` | `/api/cases/{case_id}/emails` | Get email threads for a case |
+
+**Email Threads** (`/api/emails`)
+
+| Method | Route | Description |
+|--------|-------|-------------|
+| `GET` | `/api/emails/threads` | List all email threads |
+| `GET` | `/api/emails/threads/{thread_id}` | Get thread by ID (direct lookup) |
+| `POST` | `/api/emails/threads/{thread_id}/messages` | Add message to thread |
+
+> **Note:** `/api/cases/{case_id}/emails` vs `/api/emails/threads/{thread_id}`:
+> - Use `/api/cases/{case_id}/emails` when viewing a case and need all related threads
+> - Use `/api/emails/threads/{thread_id}` for direct thread lookup (e.g., deep link)
+> - Current design: 1:1 relationship (one thread per case)
+
 ### LangSmith Evaluation
 
 **Test Dataset:** 40+ scenarios covering:

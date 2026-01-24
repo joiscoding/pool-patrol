@@ -3,11 +3,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from pool_patrol_api.routers import vanpools
+
 app = FastAPI(
     title="Pool Patrol API",
     description="Multi-agent vanpool misuse detection system",
     version="0.1.0",
 )
+
+# Mount routers
+app.include_router(vanpools.router)
 
 # CORS middleware for Next.js frontend
 app.add_middleware(
