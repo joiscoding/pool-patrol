@@ -1,0 +1,198 @@
+[
+  {
+    "case_id": "CASE-001",
+    "vanpool_id": "VP-101",
+    "created_at": "2024-01-15T09:00:00Z",
+    "updated_at": "2024-01-16T15:30:00Z",
+    "status": "pending_reply",
+    "flagged_employee_ids": ["EMP-1003"],
+    "metadata": {
+      "reason": "location_mismatch",
+      "details": "Employee home address is significantly far from work site",
+      "additional_info": {
+        "distance_miles": 165,
+        "employee_zip": "77002",
+        "work_site_zip": "78701"
+      }
+    },
+    "email_thread_id": "THREAD-001",
+    "outcome": null,
+    "resolved_at": null
+  },
+  {
+    "case_id": "CASE-002",
+    "vanpool_id": "VP-102",
+    "created_at": "2024-01-10T11:00:00Z",
+    "updated_at": "2024-01-18T09:15:00Z",
+    "status": "resolved",
+    "flagged_employee_ids": ["EMP-1008"],
+    "metadata": {
+      "reason": "location_mismatch",
+      "details": "Employee home address is in Dallas, far from Austin work site",
+      "additional_info": {
+        "distance_miles": 195,
+        "employee_zip": "75201",
+        "work_site_zip": "78701"
+      }
+    },
+    "email_thread_id": "THREAD-002",
+    "outcome": "address_updated",
+    "resolved_at": "2024-01-18T09:15:00Z"
+  },
+  {
+    "case_id": "CASE-003",
+    "vanpool_id": "VP-106",
+    "created_at": "2024-01-20T08:30:00Z",
+    "updated_at": "2024-01-22T14:00:00Z",
+    "status": "under_review",
+    "flagged_employee_ids": ["EMP-1025"],
+    "metadata": {
+      "reason": "location_mismatch",
+      "details": "Employee lives in San Antonio, commute to San Marcos seems excessive",
+      "additional_info": {
+        "distance_miles": 52,
+        "employee_zip": "78201",
+        "work_site_zip": "78666"
+      }
+    },
+    "email_thread_id": "THREAD-003",
+    "outcome": null,
+    "resolved_at": null
+  },
+  {
+    "case_id": "CASE-004",
+    "vanpool_id": "VP-103",
+    "created_at": "2024-01-08T10:00:00Z",
+    "updated_at": "2024-01-12T16:45:00Z",
+    "status": "resolved",
+    "flagged_employee_ids": ["EMP-1010", "EMP-1011", "EMP-1012", "EMP-1013", "EMP-1014", "EMP-1015"],
+    "metadata": {
+      "reason": "shift_mismatch",
+      "details": "Vanpool schedule does not align with reported employee shift times",
+      "additional_info": {
+        "vanpool_departure": "06:30",
+        "shift_start_times": ["08:00"],
+        "time_gap_minutes": 90
+      }
+    },
+    "email_thread_id": "THREAD-004",
+    "outcome": "schedule_adjusted",
+    "resolved_at": "2024-01-12T16:45:00Z"
+  },
+  {
+    "case_id": "CASE-005",
+    "vanpool_id": "VP-104",
+    "created_at": "2024-01-22T09:00:00Z",
+    "updated_at": "2024-01-22T09:00:00Z",
+    "status": "open",
+    "flagged_employee_ids": ["EMP-1016", "EMP-1017", "EMP-1018", "EMP-1019"],
+    "metadata": {
+      "reason": "shift_mismatch",
+      "details": "Employees on swing shift (14:00-22:00) but vanpool runs standard day schedule",
+      "additional_info": {
+        "shift_type": "Swing Shift",
+        "vanpool_schedule": "day"
+      }
+    },
+    "email_thread_id": null,
+    "outcome": null,
+    "resolved_at": null
+  },
+  {
+    "case_id": "CASE-006",
+    "vanpool_id": "VP-107",
+    "created_at": "2024-01-05T14:00:00Z",
+    "updated_at": "2024-01-15T11:30:00Z",
+    "status": "cancelled",
+    "flagged_employee_ids": ["EMP-1029"],
+    "metadata": {
+      "reason": "location_mismatch",
+      "details": "Initial flag for distance, but employee lives in Georgetown near work site",
+      "additional_info": {
+        "distance_miles": 3,
+        "false_positive": true
+      }
+    },
+    "email_thread_id": "THREAD-005",
+    "outcome": "false_positive",
+    "resolved_at": "2024-01-15T11:30:00Z"
+  },
+  {
+    "case_id": "CASE-007",
+    "vanpool_id": "VP-108",
+    "created_at": "2024-01-18T08:00:00Z",
+    "updated_at": "2024-01-23T10:00:00Z",
+    "status": "pending_reply",
+    "flagged_employee_ids": ["EMP-1034", "EMP-1035", "EMP-1036", "EMP-1037"],
+    "metadata": {
+      "reason": "shift_mismatch",
+      "details": "Swing shift employees (Wed-Sat) using vanpool that runs Mon-Fri",
+      "additional_info": {
+        "shift_days": ["Wed", "Thu", "Fri", "Sat"],
+        "vanpool_days": ["Mon", "Tue", "Wed", "Thu", "Fri"]
+      }
+    },
+    "email_thread_id": "THREAD-006",
+    "outcome": null,
+    "resolved_at": null
+  },
+  {
+    "case_id": "CASE-008",
+    "vanpool_id": "VP-109",
+    "created_at": "2024-01-19T13:00:00Z",
+    "updated_at": "2024-01-19T13:00:00Z",
+    "status": "open",
+    "flagged_employee_ids": ["EMP-1038", "EMP-1039", "EMP-1040", "EMP-1041", "EMP-1042"],
+    "metadata": {
+      "reason": "capacity_review",
+      "details": "Vanpool has 5 riders but capacity is 8, reviewing for consolidation",
+      "additional_info": {
+        "current_riders": 5,
+        "capacity": 8,
+        "utilization_percent": 62.5
+      }
+    },
+    "email_thread_id": null,
+    "outcome": null,
+    "resolved_at": null
+  },
+  {
+    "case_id": "CASE-009",
+    "vanpool_id": "VP-111",
+    "created_at": "2024-01-21T10:30:00Z",
+    "updated_at": "2024-01-23T08:45:00Z",
+    "status": "under_review",
+    "flagged_employee_ids": ["EMP-1049"],
+    "metadata": {
+      "reason": "location_mismatch",
+      "details": "Employee in Bastrop, 35 miles from Austin Manufacturing Plant",
+      "additional_info": {
+        "distance_miles": 35,
+        "employee_zip": "78602",
+        "work_site_zip": "78701"
+      }
+    },
+    "email_thread_id": "THREAD-007",
+    "outcome": null,
+    "resolved_at": null
+  },
+  {
+    "case_id": "CASE-010",
+    "vanpool_id": "VP-112",
+    "created_at": "2024-01-17T09:00:00Z",
+    "updated_at": "2024-01-20T14:20:00Z",
+    "status": "resolved",
+    "flagged_employee_ids": ["EMP-1053", "EMP-1054", "EMP-1055", "EMP-1056"],
+    "metadata": {
+      "reason": "verification_complete",
+      "details": "Routine quarterly verification of Cedar Park R&D vanpool",
+      "additional_info": {
+        "verification_type": "quarterly",
+        "all_clear": true
+      }
+    },
+    "email_thread_id": "THREAD-008",
+    "outcome": "verified_compliant",
+    "resolved_at": "2024-01-20T14:20:00Z"
+  }
+]

@@ -1,0 +1,1162 @@
+[
+  {
+    "employee_id": "EMP-1001",
+    "first_name": "John",
+    "last_name": "Smith",
+    "email": "john.smith@innovatecorp.com",
+    "work_site": "Austin Manufacturing Plant",
+    "home_address": "456 Oak St, Round Rock, TX 78664",
+    "home_zip": "78664",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
+      ],
+      "pto_dates": ["2024-12-25", "2024-12-26"]
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1002",
+    "first_name": "Jane",
+    "last_name": "Doe",
+    "email": "jane.doe@innovatecorp.com",
+    "work_site": "Austin Manufacturing Plant",
+    "home_address": "789 Elm Ave, Pflugerville, TX 78660",
+    "home_zip": "78660",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1003",
+    "first_name": "Bob",
+    "last_name": "Johnson",
+    "email": "bob.johnson@innovatecorp.com",
+    "work_site": "Austin Manufacturing Plant",
+    "home_address": "2100 Main St, Houston, TX 77002",
+    "home_zip": "77002",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1004",
+    "first_name": "Alice",
+    "last_name": "Wong",
+    "email": "alice.wong@innovatecorp.com",
+    "work_site": "Austin Manufacturing Plant",
+    "home_address": "321 Cedar Ln, Georgetown, TX 78626",
+    "home_zip": "78626",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
+      ],
+      "pto_dates": ["2024-11-28", "2024-11-29"]
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1005",
+    "first_name": "Carlos",
+    "last_name": "Garcia",
+    "email": "carlos.garcia@innovatecorp.com",
+    "work_site": "Austin Manufacturing Plant",
+    "home_address": "555 Pine Dr, Austin, TX 78745",
+    "home_zip": "78745",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1006",
+    "first_name": "David",
+    "last_name": "Lee",
+    "email": "david.lee@innovatecorp.com",
+    "work_site": "Austin Manufacturing Plant",
+    "home_address": "888 Maple Way, Austin, TX 78702",
+    "home_zip": "78702",
+    "shifts": {
+      "type": "Night Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Tue", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Wed", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Thu", "start_time": "22:00", "end_time": "06:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1007",
+    "first_name": "Emma",
+    "last_name": "Wilson",
+    "email": "emma.wilson@innovatecorp.com",
+    "work_site": "Austin Manufacturing Plant",
+    "home_address": "123 Birch St, Cedar Park, TX 78613",
+    "home_zip": "78613",
+    "shifts": {
+      "type": "Night Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Tue", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Wed", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Thu", "start_time": "22:00", "end_time": "06:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1008",
+    "first_name": "Frank",
+    "last_name": "Miller",
+    "email": "frank.miller@innovatecorp.com",
+    "work_site": "Austin Manufacturing Plant",
+    "home_address": "999 Walnut Blvd, Dallas, TX 75201",
+    "home_zip": "75201",
+    "shifts": {
+      "type": "Night Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Tue", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Wed", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Thu", "start_time": "22:00", "end_time": "06:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1009",
+    "first_name": "Grace",
+    "last_name": "Chen",
+    "email": "grace.chen@innovatecorp.com",
+    "work_site": "Austin Manufacturing Plant",
+    "home_address": "444 Spruce Ct, Leander, TX 78641",
+    "home_zip": "78641",
+    "shifts": {
+      "type": "Night Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Tue", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Wed", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Thu", "start_time": "22:00", "end_time": "06:00" }
+      ],
+      "pto_dates": ["2024-12-31"]
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1010",
+    "first_name": "Henry",
+    "last_name": "Taylor",
+    "email": "henry.taylor@innovatecorp.com",
+    "work_site": "Round Rock Assembly Center",
+    "home_address": "200 Tech Rd, Round Rock, TX 78664",
+    "home_zip": "78664",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Tue", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Wed", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Thu", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Fri", "start_time": "08:00", "end_time": "16:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1011",
+    "first_name": "Iris",
+    "last_name": "Martinez",
+    "email": "iris.martinez@innovatecorp.com",
+    "work_site": "Round Rock Assembly Center",
+    "home_address": "350 Assembly Dr, Hutto, TX 78634",
+    "home_zip": "78634",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Tue", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Wed", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Thu", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Fri", "start_time": "08:00", "end_time": "16:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1012",
+    "first_name": "Jack",
+    "last_name": "Brown",
+    "email": "jack.brown@innovatecorp.com",
+    "work_site": "Round Rock Assembly Center",
+    "home_address": "777 Circuit Ln, Taylor, TX 76574",
+    "home_zip": "76574",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Tue", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Wed", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Thu", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Fri", "start_time": "08:00", "end_time": "16:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1013",
+    "first_name": "Karen",
+    "last_name": "Davis",
+    "email": "karen.davis@innovatecorp.com",
+    "work_site": "Round Rock Assembly Center",
+    "home_address": "600 Processor Pkwy, Pflugerville, TX 78660",
+    "home_zip": "78660",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Tue", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Wed", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Thu", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Fri", "start_time": "08:00", "end_time": "16:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1014",
+    "first_name": "Leo",
+    "last_name": "Nguyen",
+    "email": "leo.nguyen@innovatecorp.com",
+    "work_site": "Round Rock Assembly Center",
+    "home_address": "150 Memory Ln, Georgetown, TX 78626",
+    "home_zip": "78626",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Tue", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Wed", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Thu", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Fri", "start_time": "08:00", "end_time": "16:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1015",
+    "first_name": "Maria",
+    "last_name": "Rodriguez",
+    "email": "maria.rodriguez@innovatecorp.com",
+    "work_site": "Round Rock Assembly Center",
+    "home_address": "900 Chip Ave, Round Rock, TX 78665",
+    "home_zip": "78665",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Tue", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Wed", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Thu", "start_time": "08:00", "end_time": "17:00" },
+        { "day": "Fri", "start_time": "08:00", "end_time": "16:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1016",
+    "first_name": "Nathan",
+    "last_name": "White",
+    "email": "nathan.white@innovatecorp.com",
+    "work_site": "Round Rock Assembly Center",
+    "home_address": "425 Silicon St, Austin, TX 78758",
+    "home_zip": "78758",
+    "shifts": {
+      "type": "Swing Shift",
+      "schedule": [
+        { "day": "Tue", "start_time": "14:00", "end_time": "22:00" },
+        { "day": "Wed", "start_time": "14:00", "end_time": "22:00" },
+        { "day": "Thu", "start_time": "14:00", "end_time": "22:00" },
+        { "day": "Fri", "start_time": "14:00", "end_time": "22:00" },
+        { "day": "Sat", "start_time": "14:00", "end_time": "22:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1017",
+    "first_name": "Olivia",
+    "last_name": "Thomas",
+    "email": "olivia.thomas@innovatecorp.com",
+    "work_site": "Round Rock Assembly Center",
+    "home_address": "333 Data Dr, Cedar Park, TX 78613",
+    "home_zip": "78613",
+    "shifts": {
+      "type": "Swing Shift",
+      "schedule": [
+        { "day": "Tue", "start_time": "14:00", "end_time": "22:00" },
+        { "day": "Wed", "start_time": "14:00", "end_time": "22:00" },
+        { "day": "Thu", "start_time": "14:00", "end_time": "22:00" },
+        { "day": "Fri", "start_time": "14:00", "end_time": "22:00" },
+        { "day": "Sat", "start_time": "14:00", "end_time": "22:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1018",
+    "first_name": "Peter",
+    "last_name": "Jackson",
+    "email": "peter.jackson@innovatecorp.com",
+    "work_site": "Round Rock Assembly Center",
+    "home_address": "222 Byte Blvd, Leander, TX 78641",
+    "home_zip": "78641",
+    "shifts": {
+      "type": "Swing Shift",
+      "schedule": [
+        { "day": "Tue", "start_time": "14:00", "end_time": "22:00" },
+        { "day": "Wed", "start_time": "14:00", "end_time": "22:00" },
+        { "day": "Thu", "start_time": "14:00", "end_time": "22:00" },
+        { "day": "Fri", "start_time": "14:00", "end_time": "22:00" },
+        { "day": "Sat", "start_time": "14:00", "end_time": "22:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1019",
+    "first_name": "Quinn",
+    "last_name": "Harris",
+    "email": "quinn.harris@innovatecorp.com",
+    "work_site": "Round Rock Assembly Center",
+    "home_address": "111 Logic Loop, Round Rock, TX 78664",
+    "home_zip": "78664",
+    "shifts": {
+      "type": "Swing Shift",
+      "schedule": [
+        { "day": "Tue", "start_time": "14:00", "end_time": "22:00" },
+        { "day": "Wed", "start_time": "14:00", "end_time": "22:00" },
+        { "day": "Thu", "start_time": "14:00", "end_time": "22:00" },
+        { "day": "Fri", "start_time": "14:00", "end_time": "22:00" },
+        { "day": "Sat", "start_time": "14:00", "end_time": "22:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1020",
+    "first_name": "Rachel",
+    "last_name": "Clark",
+    "email": "rachel.clark@innovatecorp.com",
+    "work_site": "San Marcos Distribution Hub",
+    "home_address": "500 Warehouse Way, San Marcos, TX 78666",
+    "home_zip": "78666",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "06:00", "end_time": "14:00" },
+        { "day": "Tue", "start_time": "06:00", "end_time": "14:00" },
+        { "day": "Wed", "start_time": "06:00", "end_time": "14:00" },
+        { "day": "Thu", "start_time": "06:00", "end_time": "14:00" },
+        { "day": "Fri", "start_time": "06:00", "end_time": "14:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1021",
+    "first_name": "Steve",
+    "last_name": "Lewis",
+    "email": "steve.lewis@innovatecorp.com",
+    "work_site": "San Marcos Distribution Hub",
+    "home_address": "750 Shipping St, Kyle, TX 78640",
+    "home_zip": "78640",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "06:00", "end_time": "14:00" },
+        { "day": "Tue", "start_time": "06:00", "end_time": "14:00" },
+        { "day": "Wed", "start_time": "06:00", "end_time": "14:00" },
+        { "day": "Thu", "start_time": "06:00", "end_time": "14:00" },
+        { "day": "Fri", "start_time": "06:00", "end_time": "14:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1022",
+    "first_name": "Tina",
+    "last_name": "Walker",
+    "email": "tina.walker@innovatecorp.com",
+    "work_site": "San Marcos Distribution Hub",
+    "home_address": "300 Freight Rd, Buda, TX 78610",
+    "home_zip": "78610",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "06:00", "end_time": "14:00" },
+        { "day": "Tue", "start_time": "06:00", "end_time": "14:00" },
+        { "day": "Wed", "start_time": "06:00", "end_time": "14:00" },
+        { "day": "Thu", "start_time": "06:00", "end_time": "14:00" },
+        { "day": "Fri", "start_time": "06:00", "end_time": "14:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1023",
+    "first_name": "Victor",
+    "last_name": "Hall",
+    "email": "victor.hall@innovatecorp.com",
+    "work_site": "San Marcos Distribution Hub",
+    "home_address": "600 Pallet Pkwy, New Braunfels, TX 78130",
+    "home_zip": "78130",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "06:00", "end_time": "14:00" },
+        { "day": "Tue", "start_time": "06:00", "end_time": "14:00" },
+        { "day": "Wed", "start_time": "06:00", "end_time": "14:00" },
+        { "day": "Thu", "start_time": "06:00", "end_time": "14:00" },
+        { "day": "Fri", "start_time": "06:00", "end_time": "14:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1024",
+    "first_name": "Wendy",
+    "last_name": "Allen",
+    "email": "wendy.allen@innovatecorp.com",
+    "work_site": "San Marcos Distribution Hub",
+    "home_address": "125 Cargo Ct, Wimberley, TX 78676",
+    "home_zip": "78676",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "06:00", "end_time": "14:00" },
+        { "day": "Tue", "start_time": "06:00", "end_time": "14:00" },
+        { "day": "Wed", "start_time": "06:00", "end_time": "14:00" },
+        { "day": "Thu", "start_time": "06:00", "end_time": "14:00" },
+        { "day": "Fri", "start_time": "06:00", "end_time": "14:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1025",
+    "first_name": "Xavier",
+    "last_name": "Young",
+    "email": "xavier.young@innovatecorp.com",
+    "work_site": "San Marcos Distribution Hub",
+    "home_address": "450 Loading Ln, San Antonio, TX 78201",
+    "home_zip": "78201",
+    "shifts": {
+      "type": "Night Shift",
+      "schedule": [
+        { "day": "Sun", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Mon", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Tue", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Wed", "start_time": "22:00", "end_time": "06:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1026",
+    "first_name": "Yvonne",
+    "last_name": "King",
+    "email": "yvonne.king@innovatecorp.com",
+    "work_site": "San Marcos Distribution Hub",
+    "home_address": "275 Dock Dr, Lockhart, TX 78644",
+    "home_zip": "78644",
+    "shifts": {
+      "type": "Night Shift",
+      "schedule": [
+        { "day": "Sun", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Mon", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Tue", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Wed", "start_time": "22:00", "end_time": "06:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1027",
+    "first_name": "Zach",
+    "last_name": "Wright",
+    "email": "zach.wright@innovatecorp.com",
+    "work_site": "San Marcos Distribution Hub",
+    "home_address": "888 Inventory Blvd, Seguin, TX 78155",
+    "home_zip": "78155",
+    "shifts": {
+      "type": "Night Shift",
+      "schedule": [
+        { "day": "Sun", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Mon", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Tue", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Wed", "start_time": "22:00", "end_time": "06:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1028",
+    "first_name": "Amy",
+    "last_name": "Scott",
+    "email": "amy.scott@innovatecorp.com",
+    "work_site": "San Marcos Distribution Hub",
+    "home_address": "999 Supply St, San Marcos, TX 78666",
+    "home_zip": "78666",
+    "shifts": {
+      "type": "Night Shift",
+      "schedule": [
+        { "day": "Sun", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Mon", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Tue", "start_time": "22:00", "end_time": "06:00" },
+        { "day": "Wed", "start_time": "22:00", "end_time": "06:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1029",
+    "first_name": "Brian",
+    "last_name": "Green",
+    "email": "brian.green@innovatecorp.com",
+    "work_site": "Georgetown Tech Campus",
+    "home_address": "100 Innovation Way, Georgetown, TX 78626",
+    "home_zip": "78626",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Tue", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Wed", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Thu", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Fri", "start_time": "09:00", "end_time": "17:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1030",
+    "first_name": "Cathy",
+    "last_name": "Adams",
+    "email": "cathy.adams@innovatecorp.com",
+    "work_site": "Georgetown Tech Campus",
+    "home_address": "250 Research Rd, Round Rock, TX 78664",
+    "home_zip": "78664",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Tue", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Wed", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Thu", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Fri", "start_time": "09:00", "end_time": "17:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1031",
+    "first_name": "Derek",
+    "last_name": "Baker",
+    "email": "derek.baker@innovatecorp.com",
+    "work_site": "Georgetown Tech Campus",
+    "home_address": "375 Science St, Hutto, TX 78634",
+    "home_zip": "78634",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Tue", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Wed", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Thu", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Fri", "start_time": "09:00", "end_time": "17:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1032",
+    "first_name": "Elena",
+    "last_name": "Gonzalez",
+    "email": "elena.gonzalez@innovatecorp.com",
+    "work_site": "Georgetown Tech Campus",
+    "home_address": "450 Lab Ln, Taylor, TX 76574",
+    "home_zip": "76574",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Tue", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Wed", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Thu", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Fri", "start_time": "09:00", "end_time": "17:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1033",
+    "first_name": "Fred",
+    "last_name": "Nelson",
+    "email": "fred.nelson@innovatecorp.com",
+    "work_site": "Georgetown Tech Campus",
+    "home_address": "525 Tech Terrace, Georgetown, TX 78628",
+    "home_zip": "78628",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Tue", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Wed", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Thu", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Fri", "start_time": "09:00", "end_time": "17:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1034",
+    "first_name": "Gina",
+    "last_name": "Carter",
+    "email": "gina.carter@innovatecorp.com",
+    "work_site": "Georgetown Tech Campus",
+    "home_address": "600 Campus Cir, Pflugerville, TX 78660",
+    "home_zip": "78660",
+    "shifts": {
+      "type": "Swing Shift",
+      "schedule": [
+        { "day": "Wed", "start_time": "12:00", "end_time": "20:00" },
+        { "day": "Thu", "start_time": "12:00", "end_time": "20:00" },
+        { "day": "Fri", "start_time": "12:00", "end_time": "20:00" },
+        { "day": "Sat", "start_time": "12:00", "end_time": "20:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1035",
+    "first_name": "Harold",
+    "last_name": "Mitchell",
+    "email": "harold.mitchell@innovatecorp.com",
+    "work_site": "Georgetown Tech Campus",
+    "home_address": "700 Discovery Dr, Austin, TX 78759",
+    "home_zip": "78759",
+    "shifts": {
+      "type": "Swing Shift",
+      "schedule": [
+        { "day": "Wed", "start_time": "12:00", "end_time": "20:00" },
+        { "day": "Thu", "start_time": "12:00", "end_time": "20:00" },
+        { "day": "Fri", "start_time": "12:00", "end_time": "20:00" },
+        { "day": "Sat", "start_time": "12:00", "end_time": "20:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1036",
+    "first_name": "Isla",
+    "last_name": "Perez",
+    "email": "isla.perez@innovatecorp.com",
+    "work_site": "Georgetown Tech Campus",
+    "home_address": "800 Quantum Ct, Cedar Park, TX 78613",
+    "home_zip": "78613",
+    "shifts": {
+      "type": "Swing Shift",
+      "schedule": [
+        { "day": "Wed", "start_time": "12:00", "end_time": "20:00" },
+        { "day": "Thu", "start_time": "12:00", "end_time": "20:00" },
+        { "day": "Fri", "start_time": "12:00", "end_time": "20:00" },
+        { "day": "Sat", "start_time": "12:00", "end_time": "20:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1037",
+    "first_name": "James",
+    "last_name": "Roberts",
+    "email": "james.roberts@innovatecorp.com",
+    "work_site": "Georgetown Tech Campus",
+    "home_address": "900 Nucleus Blvd, Leander, TX 78641",
+    "home_zip": "78641",
+    "shifts": {
+      "type": "Swing Shift",
+      "schedule": [
+        { "day": "Wed", "start_time": "12:00", "end_time": "20:00" },
+        { "day": "Thu", "start_time": "12:00", "end_time": "20:00" },
+        { "day": "Fri", "start_time": "12:00", "end_time": "20:00" },
+        { "day": "Sat", "start_time": "12:00", "end_time": "20:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1038",
+    "first_name": "Kim",
+    "last_name": "Turner",
+    "email": "kim.turner@innovatecorp.com",
+    "work_site": "Pflugerville Operations Center",
+    "home_address": "100 Operations Ave, Pflugerville, TX 78660",
+    "home_zip": "78660",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "07:30", "end_time": "16:30" },
+        { "day": "Tue", "start_time": "07:30", "end_time": "16:30" },
+        { "day": "Wed", "start_time": "07:30", "end_time": "16:30" },
+        { "day": "Thu", "start_time": "07:30", "end_time": "16:30" },
+        { "day": "Fri", "start_time": "07:30", "end_time": "15:30" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1039",
+    "first_name": "Larry",
+    "last_name": "Phillips",
+    "email": "larry.phillips@innovatecorp.com",
+    "work_site": "Pflugerville Operations Center",
+    "home_address": "200 Service Rd, Manor, TX 78653",
+    "home_zip": "78653",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "07:30", "end_time": "16:30" },
+        { "day": "Tue", "start_time": "07:30", "end_time": "16:30" },
+        { "day": "Wed", "start_time": "07:30", "end_time": "16:30" },
+        { "day": "Thu", "start_time": "07:30", "end_time": "16:30" },
+        { "day": "Fri", "start_time": "07:30", "end_time": "15:30" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1040",
+    "first_name": "Megan",
+    "last_name": "Campbell",
+    "email": "megan.campbell@innovatecorp.com",
+    "work_site": "Pflugerville Operations Center",
+    "home_address": "300 Support St, Austin, TX 78753",
+    "home_zip": "78753",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "07:30", "end_time": "16:30" },
+        { "day": "Tue", "start_time": "07:30", "end_time": "16:30" },
+        { "day": "Wed", "start_time": "07:30", "end_time": "16:30" },
+        { "day": "Thu", "start_time": "07:30", "end_time": "16:30" },
+        { "day": "Fri", "start_time": "07:30", "end_time": "15:30" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1041",
+    "first_name": "Nick",
+    "last_name": "Parker",
+    "email": "nick.parker@innovatecorp.com",
+    "work_site": "Pflugerville Operations Center",
+    "home_address": "400 Admin Blvd, Round Rock, TX 78665",
+    "home_zip": "78665",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "07:30", "end_time": "16:30" },
+        { "day": "Tue", "start_time": "07:30", "end_time": "16:30" },
+        { "day": "Wed", "start_time": "07:30", "end_time": "16:30" },
+        { "day": "Thu", "start_time": "07:30", "end_time": "16:30" },
+        { "day": "Fri", "start_time": "07:30", "end_time": "15:30" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1042",
+    "first_name": "Olivia",
+    "last_name": "Evans",
+    "email": "olivia.evans@innovatecorp.com",
+    "work_site": "Pflugerville Operations Center",
+    "home_address": "500 Control Ct, Hutto, TX 78634",
+    "home_zip": "78634",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "07:30", "end_time": "16:30" },
+        { "day": "Tue", "start_time": "07:30", "end_time": "16:30" },
+        { "day": "Wed", "start_time": "07:30", "end_time": "16:30" },
+        { "day": "Thu", "start_time": "07:30", "end_time": "16:30" },
+        { "day": "Fri", "start_time": "07:30", "end_time": "15:30" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1043",
+    "first_name": "Paul",
+    "last_name": "Edwards",
+    "email": "paul.edwards@innovatecorp.com",
+    "work_site": "Pflugerville Operations Center",
+    "home_address": "600 Monitor Way, Taylor, TX 76574",
+    "home_zip": "76574",
+    "shifts": {
+      "type": "Night Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "23:00", "end_time": "07:00" },
+        { "day": "Tue", "start_time": "23:00", "end_time": "07:00" },
+        { "day": "Wed", "start_time": "23:00", "end_time": "07:00" },
+        { "day": "Thu", "start_time": "23:00", "end_time": "07:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1044",
+    "first_name": "Quincy",
+    "last_name": "Collins",
+    "email": "quincy.collins@innovatecorp.com",
+    "work_site": "Pflugerville Operations Center",
+    "home_address": "700 Dashboard Dr, Georgetown, TX 78626",
+    "home_zip": "78626",
+    "shifts": {
+      "type": "Night Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "23:00", "end_time": "07:00" },
+        { "day": "Tue", "start_time": "23:00", "end_time": "07:00" },
+        { "day": "Wed", "start_time": "23:00", "end_time": "07:00" },
+        { "day": "Thu", "start_time": "23:00", "end_time": "07:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1045",
+    "first_name": "Rosa",
+    "last_name": "Stewart",
+    "email": "rosa.stewart@innovatecorp.com",
+    "work_site": "Pflugerville Operations Center",
+    "home_address": "800 Alert Ave, Austin, TX 78754",
+    "home_zip": "78754",
+    "shifts": {
+      "type": "Night Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "23:00", "end_time": "07:00" },
+        { "day": "Tue", "start_time": "23:00", "end_time": "07:00" },
+        { "day": "Wed", "start_time": "23:00", "end_time": "07:00" },
+        { "day": "Thu", "start_time": "23:00", "end_time": "07:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1046",
+    "first_name": "Sam",
+    "last_name": "Sanchez",
+    "email": "sam.sanchez@innovatecorp.com",
+    "work_site": "Pflugerville Operations Center",
+    "home_address": "900 System St, Pflugerville, TX 78660",
+    "home_zip": "78660",
+    "shifts": {
+      "type": "Night Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "23:00", "end_time": "07:00" },
+        { "day": "Tue", "start_time": "23:00", "end_time": "07:00" },
+        { "day": "Wed", "start_time": "23:00", "end_time": "07:00" },
+        { "day": "Thu", "start_time": "23:00", "end_time": "07:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1047",
+    "first_name": "Tom",
+    "last_name": "Morris",
+    "email": "tom.morris@innovatecorp.com",
+    "work_site": "Austin Manufacturing Plant",
+    "home_address": "111 Production Pkwy, Austin, TX 78744",
+    "home_zip": "78744",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1048",
+    "first_name": "Uma",
+    "last_name": "Rogers",
+    "email": "uma.rogers@innovatecorp.com",
+    "work_site": "Austin Manufacturing Plant",
+    "home_address": "222 Assembly Rd, Del Valle, TX 78617",
+    "home_zip": "78617",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1049",
+    "first_name": "Vince",
+    "last_name": "Reed",
+    "email": "vince.reed@innovatecorp.com",
+    "work_site": "Austin Manufacturing Plant",
+    "home_address": "333 Factory Ln, Bastrop, TX 78602",
+    "home_zip": "78602",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1050",
+    "first_name": "Wanda",
+    "last_name": "Cook",
+    "email": "wanda.cook@innovatecorp.com",
+    "work_site": "Austin Manufacturing Plant",
+    "home_address": "444 Plant Pl, Elgin, TX 78621",
+    "home_zip": "78621",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1051",
+    "first_name": "Xena",
+    "last_name": "Morgan",
+    "email": "xena.morgan@innovatecorp.com",
+    "work_site": "Austin Manufacturing Plant",
+    "home_address": "555 Build Blvd, Manor, TX 78653",
+    "home_zip": "78653",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1052",
+    "first_name": "Yusuf",
+    "last_name": "Bell",
+    "email": "yusuf.bell@innovatecorp.com",
+    "work_site": "Austin Manufacturing Plant",
+    "home_address": "666 Craft Ct, Austin, TX 78741",
+    "home_zip": "78741",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
+        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1053",
+    "first_name": "Zoe",
+    "last_name": "Murphy",
+    "email": "zoe.murphy@innovatecorp.com",
+    "work_site": "Cedar Park R&D Facility",
+    "home_address": "100 Research Way, Cedar Park, TX 78613",
+    "home_zip": "78613",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Tue", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Wed", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Thu", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Fri", "start_time": "09:00", "end_time": "17:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1054",
+    "first_name": "Adam",
+    "last_name": "Bailey",
+    "email": "adam.bailey@innovatecorp.com",
+    "work_site": "Cedar Park R&D Facility",
+    "home_address": "200 Dev Dr, Leander, TX 78641",
+    "home_zip": "78641",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Tue", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Wed", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Thu", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Fri", "start_time": "09:00", "end_time": "17:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1055",
+    "first_name": "Bella",
+    "last_name": "Rivera",
+    "email": "bella.rivera@innovatecorp.com",
+    "work_site": "Cedar Park R&D Facility",
+    "home_address": "300 Prototype Pkwy, Austin, TX 78750",
+    "home_zip": "78750",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Tue", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Wed", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Thu", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Fri", "start_time": "09:00", "end_time": "17:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  },
+  {
+    "employee_id": "EMP-1056",
+    "first_name": "Charlie",
+    "last_name": "Cooper",
+    "email": "charlie.cooper@innovatecorp.com",
+    "work_site": "Cedar Park R&D Facility",
+    "home_address": "400 Test Terrace, Round Rock, TX 78681",
+    "home_zip": "78681",
+    "shifts": {
+      "type": "Day Shift",
+      "schedule": [
+        { "day": "Mon", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Tue", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Wed", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Thu", "start_time": "09:00", "end_time": "18:00" },
+        { "day": "Fri", "start_time": "09:00", "end_time": "17:00" }
+      ],
+      "pto_dates": []
+    },
+    "status": "active"
+  }
+]

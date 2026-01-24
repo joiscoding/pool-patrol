@@ -1,0 +1,345 @@
+[
+  {
+    "thread_id": "THREAD-001",
+    "case_id": "CASE-001",
+    "vanpool_id": "VP-101",
+    "subject": "Vanpool Eligibility Review - VP-101 - Action Required",
+    "created_at": "2024-01-15T10:00:00Z",
+    "status": "active",
+    "messages": [
+      {
+        "message_id": "MSG-001-001",
+        "from": "poolpatrol@innovatecorp.com",
+        "to": ["john.smith@innovatecorp.com", "jane.doe@innovatecorp.com", "bob.johnson@innovatecorp.com", "alice.wong@innovatecorp.com", "carlos.garcia@innovatecorp.com"],
+        "sent_at": "2024-01-15T10:00:00Z",
+        "body": "Dear VP-101 Vanpool Members,\n\nAs part of our routine vanpool program review, we are verifying the eligibility of all participants. Our records indicate a potential discrepancy with one or more rider addresses.\n\nPlease confirm your current home address and work site assignment by replying to this email within 5 business days.\n\nIf your address has changed recently, please provide your updated information.\n\nThank you for your cooperation.\n\nPool Patrol Team",
+        "direction": "outbound",
+        "classification": null,
+        "status": "sent"
+      },
+      {
+        "message_id": "MSG-001-002",
+        "from": "bob.johnson@innovatecorp.com",
+        "to": ["poolpatrol@innovatecorp.com"],
+        "sent_at": "2024-01-16T14:30:00Z",
+        "body": "Hi,\n\nI received your email about the vanpool review. I should mention that I recently moved to Houston for family reasons but I'm still commuting to Austin for work. I stay with a friend during the week.\n\nIs this going to be a problem for the vanpool?\n\nBob Johnson",
+        "direction": "inbound",
+        "classification": {
+          "bucket": "address_change",
+          "confidence": 0.78
+        },
+        "status": "read"
+      }
+    ]
+  },
+  {
+    "thread_id": "THREAD-002",
+    "case_id": "CASE-002",
+    "vanpool_id": "VP-102",
+    "subject": "Vanpool Eligibility Review - VP-102 - Action Required",
+    "created_at": "2024-01-10T12:00:00Z",
+    "status": "closed",
+    "messages": [
+      {
+        "message_id": "MSG-002-001",
+        "from": "poolpatrol@innovatecorp.com",
+        "to": ["david.lee@innovatecorp.com", "emma.wilson@innovatecorp.com", "frank.miller@innovatecorp.com", "grace.chen@innovatecorp.com"],
+        "sent_at": "2024-01-10T12:00:00Z",
+        "body": "Dear VP-102 Vanpool Members,\n\nWe are conducting a review of vanpool eligibility. Our records show that one or more participants may have an address that is outside the typical service area.\n\nPlease confirm your current home address by replying to this email.\n\nThank you,\nPool Patrol Team",
+        "direction": "outbound",
+        "classification": null,
+        "status": "sent"
+      },
+      {
+        "message_id": "MSG-002-002",
+        "from": "frank.miller@innovatecorp.com",
+        "to": ["poolpatrol@innovatecorp.com"],
+        "sent_at": "2024-01-11T09:15:00Z",
+        "body": "Hello,\n\nI apologize for the confusion. My address in your system is outdated. I moved from Dallas to Cedar Park three months ago but forgot to update my records.\n\nMy new address is: 456 Lakeline Blvd, Cedar Park, TX 78613\n\nPlease update my information. I'm much closer to the plant now.\n\nThanks,\nFrank Miller",
+        "direction": "inbound",
+        "classification": {
+          "bucket": "address_change",
+          "confidence": 0.95
+        },
+        "status": "read"
+      },
+      {
+        "message_id": "MSG-002-003",
+        "from": "poolpatrol@innovatecorp.com",
+        "to": ["frank.miller@innovatecorp.com"],
+        "sent_at": "2024-01-11T10:30:00Z",
+        "body": "Hi Frank,\n\nThank you for the update. We have noted your new address in Cedar Park. Your vanpool eligibility has been confirmed.\n\nNo further action is needed.\n\nBest regards,\nPool Patrol Team",
+        "direction": "outbound",
+        "classification": null,
+        "status": "sent"
+      }
+    ]
+  },
+  {
+    "thread_id": "THREAD-003",
+    "case_id": "CASE-003",
+    "vanpool_id": "VP-106",
+    "subject": "Vanpool Eligibility Review - VP-106 - Action Required",
+    "created_at": "2024-01-20T09:00:00Z",
+    "status": "active",
+    "messages": [
+      {
+        "message_id": "MSG-003-001",
+        "from": "poolpatrol@innovatecorp.com",
+        "to": ["xavier.young@innovatecorp.com", "yvonne.king@innovatecorp.com", "zach.wright@innovatecorp.com", "amy.scott@innovatecorp.com"],
+        "sent_at": "2024-01-20T09:00:00Z",
+        "body": "Dear VP-106 Vanpool Members,\n\nWe are reviewing vanpool program eligibility. Please confirm your current home address and work schedule.\n\nReply to this email within 5 business days.\n\nThank you,\nPool Patrol Team",
+        "direction": "outbound",
+        "classification": null,
+        "status": "sent"
+      },
+      {
+        "message_id": "MSG-003-002",
+        "from": "xavier.young@innovatecorp.com",
+        "to": ["poolpatrol@innovatecorp.com"],
+        "sent_at": "2024-01-21T11:00:00Z",
+        "body": "I don't understand why I'm being reviewed. I've been on this vanpool for 2 years without any issues. My address is the same as it's always been. This feels like harassment.\n\nXavier",
+        "direction": "inbound",
+        "classification": {
+          "bucket": "dispute",
+          "confidence": 0.88
+        },
+        "status": "read"
+      },
+      {
+        "message_id": "MSG-003-003",
+        "from": "poolpatrol@innovatecorp.com",
+        "to": ["xavier.young@innovatecorp.com"],
+        "sent_at": "2024-01-21T14:00:00Z",
+        "body": "Hi Xavier,\n\nThank you for your response. This is a routine review conducted for all vanpool participants, not targeted at any individual.\n\nOur records show your address is in San Antonio (78201), which is approximately 52 miles from the San Marcos Distribution Hub. We want to ensure this commute arrangement still works for you.\n\nCould you please confirm this is still your current situation?\n\nBest regards,\nPool Patrol Team",
+        "direction": "outbound",
+        "classification": null,
+        "status": "sent"
+      }
+    ]
+  },
+  {
+    "thread_id": "THREAD-004",
+    "case_id": "CASE-004",
+    "vanpool_id": "VP-103",
+    "subject": "Vanpool Schedule Review - VP-103",
+    "created_at": "2024-01-08T11:00:00Z",
+    "status": "closed",
+    "messages": [
+      {
+        "message_id": "MSG-004-001",
+        "from": "poolpatrol@innovatecorp.com",
+        "to": ["henry.taylor@innovatecorp.com", "iris.martinez@innovatecorp.com", "jack.brown@innovatecorp.com", "karen.davis@innovatecorp.com", "leo.nguyen@innovatecorp.com", "maria.rodriguez@innovatecorp.com"],
+        "sent_at": "2024-01-08T11:00:00Z",
+        "body": "Dear VP-103 Vanpool Members,\n\nWe noticed that the vanpool departure time (6:30 AM) may not align with your shift start times (8:00 AM). This creates a 90-minute gap.\n\nPlease let us know if the current schedule works for you or if adjustments are needed.\n\nThank you,\nPool Patrol Team",
+        "direction": "outbound",
+        "classification": null,
+        "status": "sent"
+      },
+      {
+        "message_id": "MSG-004-002",
+        "from": "henry.taylor@innovatecorp.com",
+        "to": ["poolpatrol@innovatecorp.com"],
+        "sent_at": "2024-01-09T08:30:00Z",
+        "body": "Hi,\n\nYes, we've been meaning to bring this up. The early departure doesn't match our shifts anymore since we moved to the 8 AM start time last month.\n\nCan we adjust the vanpool to depart at 7:15 AM instead?\n\nThanks,\nHenry Taylor (on behalf of VP-103 riders)",
+        "direction": "inbound",
+        "classification": {
+          "bucket": "shift_change",
+          "confidence": 0.92
+        },
+        "status": "read"
+      },
+      {
+        "message_id": "MSG-004-003",
+        "from": "poolpatrol@innovatecorp.com",
+        "to": ["henry.taylor@innovatecorp.com", "iris.martinez@innovatecorp.com", "jack.brown@innovatecorp.com", "karen.davis@innovatecorp.com", "leo.nguyen@innovatecorp.com", "maria.rodriguez@innovatecorp.com"],
+        "sent_at": "2024-01-12T16:00:00Z",
+        "body": "Dear VP-103 Members,\n\nGood news! Your vanpool schedule has been adjusted. Starting Monday, January 15th, VP-103 will depart at 7:15 AM.\n\nPlease confirm you've received this update.\n\nBest regards,\nPool Patrol Team",
+        "direction": "outbound",
+        "classification": null,
+        "status": "sent"
+      }
+    ]
+  },
+  {
+    "thread_id": "THREAD-005",
+    "case_id": "CASE-006",
+    "vanpool_id": "VP-107",
+    "subject": "Vanpool Eligibility Review - VP-107",
+    "created_at": "2024-01-05T15:00:00Z",
+    "status": "closed",
+    "messages": [
+      {
+        "message_id": "MSG-005-001",
+        "from": "poolpatrol@innovatecorp.com",
+        "to": ["brian.green@innovatecorp.com", "cathy.adams@innovatecorp.com", "derek.baker@innovatecorp.com", "elena.gonzalez@innovatecorp.com", "fred.nelson@innovatecorp.com"],
+        "sent_at": "2024-01-05T15:00:00Z",
+        "body": "Dear VP-107 Vanpool Members,\n\nWe are conducting a routine eligibility review. Please confirm your current home address.\n\nThank you,\nPool Patrol Team",
+        "direction": "outbound",
+        "classification": null,
+        "status": "sent"
+      },
+      {
+        "message_id": "MSG-005-002",
+        "from": "brian.green@innovatecorp.com",
+        "to": ["poolpatrol@innovatecorp.com"],
+        "sent_at": "2024-01-06T09:00:00Z",
+        "body": "Hi,\n\nMy address is 100 Innovation Way, Georgetown, TX 78626. I live about 3 miles from the Georgetown Tech Campus.\n\nLet me know if you need anything else.\n\nBrian Green",
+        "direction": "inbound",
+        "classification": {
+          "bucket": "acknowledgment",
+          "confidence": 0.94
+        },
+        "status": "read"
+      }
+    ]
+  },
+  {
+    "thread_id": "THREAD-006",
+    "case_id": "CASE-007",
+    "vanpool_id": "VP-108",
+    "subject": "Vanpool Schedule Mismatch - VP-108 - Action Required",
+    "created_at": "2024-01-18T09:00:00Z",
+    "status": "active",
+    "messages": [
+      {
+        "message_id": "MSG-006-001",
+        "from": "poolpatrol@innovatecorp.com",
+        "to": ["gina.carter@innovatecorp.com", "harold.mitchell@innovatecorp.com", "isla.perez@innovatecorp.com", "james.roberts@innovatecorp.com"],
+        "sent_at": "2024-01-18T09:00:00Z",
+        "body": "Dear VP-108 Vanpool Members,\n\nOur records show that your shift schedule (Wednesday-Saturday, 12:00 PM - 8:00 PM) may not align with the VP-108 vanpool schedule (Monday-Friday).\n\nPlease clarify your current work schedule and vanpool needs.\n\nThank you,\nPool Patrol Team",
+        "direction": "outbound",
+        "classification": null,
+        "status": "sent"
+      },
+      {
+        "message_id": "MSG-006-002",
+        "from": "gina.carter@innovatecorp.com",
+        "to": ["poolpatrol@innovatecorp.com"],
+        "sent_at": "2024-01-19T10:30:00Z",
+        "body": "Hi Pool Patrol Team,\n\nYou're right that our shifts are Wed-Sat. We only use the vanpool on Wed, Thu, and Fri. On Saturdays, we carpool separately since the van doesn't run.\n\nIs there a Saturday option we could join instead?\n\nThanks,\nGina Carter",
+        "direction": "inbound",
+        "classification": {
+          "bucket": "shift_change",
+          "confidence": 0.85
+        },
+        "status": "read"
+      }
+    ]
+  },
+  {
+    "thread_id": "THREAD-007",
+    "case_id": "CASE-009",
+    "vanpool_id": "VP-111",
+    "subject": "Vanpool Eligibility Review - VP-111",
+    "created_at": "2024-01-21T11:00:00Z",
+    "status": "active",
+    "messages": [
+      {
+        "message_id": "MSG-007-001",
+        "from": "poolpatrol@innovatecorp.com",
+        "to": ["tom.morris@innovatecorp.com", "uma.rogers@innovatecorp.com", "vince.reed@innovatecorp.com", "wanda.cook@innovatecorp.com", "xena.morgan@innovatecorp.com", "yusuf.bell@innovatecorp.com"],
+        "sent_at": "2024-01-21T11:00:00Z",
+        "body": "Dear VP-111 Vanpool Members,\n\nWe are reviewing eligibility for your vanpool. Our records indicate one participant may have an address that requires verification.\n\nPlease confirm your current home address.\n\nThank you,\nPool Patrol Team",
+        "direction": "outbound",
+        "classification": null,
+        "status": "sent"
+      },
+      {
+        "message_id": "MSG-007-002",
+        "from": "vince.reed@innovatecorp.com",
+        "to": ["poolpatrol@innovatecorp.com"],
+        "sent_at": "2024-01-22T15:45:00Z",
+        "body": "Hello,\n\nMy address is 333 Factory Ln, Bastrop, TX 78602. Yes, it's about 35 miles from the plant, but the vanpool route passes through Bastrop on the way to Austin.\n\nThe driver picks me up at 6:15 AM and I'm at the plant by 6:50 AM. It's been working great for 8 months.\n\nPlease don't remove me from the vanpool. This is my only affordable commute option.\n\nVince Reed",
+        "direction": "inbound",
+        "classification": {
+          "bucket": "unknown",
+          "confidence": 0.62
+        },
+        "status": "read"
+      }
+    ]
+  },
+  {
+    "thread_id": "THREAD-008",
+    "case_id": "CASE-010",
+    "vanpool_id": "VP-112",
+    "subject": "Quarterly Verification - VP-112",
+    "created_at": "2024-01-17T10:00:00Z",
+    "status": "closed",
+    "messages": [
+      {
+        "message_id": "MSG-008-001",
+        "from": "poolpatrol@innovatecorp.com",
+        "to": ["zoe.murphy@innovatecorp.com", "adam.bailey@innovatecorp.com", "bella.rivera@innovatecorp.com", "charlie.cooper@innovatecorp.com"],
+        "sent_at": "2024-01-17T10:00:00Z",
+        "body": "Dear VP-112 Vanpool Members,\n\nThis is a routine quarterly verification. Please reply to confirm your current address and that you're still actively using the vanpool.\n\nThank you,\nPool Patrol Team",
+        "direction": "outbound",
+        "classification": null,
+        "status": "sent"
+      },
+      {
+        "message_id": "MSG-008-002",
+        "from": "zoe.murphy@innovatecorp.com",
+        "to": ["poolpatrol@innovatecorp.com"],
+        "sent_at": "2024-01-17T14:00:00Z",
+        "body": "Confirmed. Address: 100 Research Way, Cedar Park, TX 78613. Still using VP-112 daily.\n\n-Zoe",
+        "direction": "inbound",
+        "classification": {
+          "bucket": "acknowledgment",
+          "confidence": 0.97
+        },
+        "status": "read"
+      },
+      {
+        "message_id": "MSG-008-003",
+        "from": "adam.bailey@innovatecorp.com",
+        "to": ["poolpatrol@innovatecorp.com"],
+        "sent_at": "2024-01-17T16:30:00Z",
+        "body": "Confirmed. 200 Dev Dr, Leander, TX 78641. Active rider.\n\nAdam",
+        "direction": "inbound",
+        "classification": {
+          "bucket": "acknowledgment",
+          "confidence": 0.96
+        },
+        "status": "read"
+      },
+      {
+        "message_id": "MSG-008-004",
+        "from": "bella.rivera@innovatecorp.com",
+        "to": ["poolpatrol@innovatecorp.com"],
+        "sent_at": "2024-01-18T09:00:00Z",
+        "body": "Hi, confirming: 300 Prototype Pkwy, Austin, TX 78750. Yes, I use the vanpool Mon-Fri.\n\nBella",
+        "direction": "inbound",
+        "classification": {
+          "bucket": "acknowledgment",
+          "confidence": 0.95
+        },
+        "status": "read"
+      },
+      {
+        "message_id": "MSG-008-005",
+        "from": "charlie.cooper@innovatecorp.com",
+        "to": ["poolpatrol@innovatecorp.com"],
+        "sent_at": "2024-01-18T11:15:00Z",
+        "body": "400 Test Terrace, Round Rock, TX 78681. All good here.\n\nCharlie",
+        "direction": "inbound",
+        "classification": {
+          "bucket": "acknowledgment",
+          "confidence": 0.94
+        },
+        "status": "read"
+      },
+      {
+        "message_id": "MSG-008-006",
+        "from": "poolpatrol@innovatecorp.com",
+        "to": ["zoe.murphy@innovatecorp.com", "adam.bailey@innovatecorp.com", "bella.rivera@innovatecorp.com", "charlie.cooper@innovatecorp.com"],
+        "sent_at": "2024-01-20T14:00:00Z",
+        "body": "Dear VP-112 Members,\n\nThank you for your prompt responses. Your vanpool eligibility has been verified for Q1 2024.\n\nNo further action is needed.\n\nBest regards,\nPool Patrol Team",
+        "direction": "outbound",
+        "classification": null,
+        "status": "sent"
+      }
+    ]
+  }
+]
