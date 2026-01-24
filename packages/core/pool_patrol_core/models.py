@@ -165,7 +165,6 @@ class Case(BaseModel):
     created_at: datetime
     updated_at: datetime
     status: CaseStatus
-    flagged_employee_ids: list[str]
     metadata: CaseMetadata
     email_thread_id: str | None = None
     outcome: str | None = None
