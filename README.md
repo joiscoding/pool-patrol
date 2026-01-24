@@ -89,7 +89,7 @@ We use **LangSmith** for:
 ### Prerequisites
 
 - Python 3.11+
-- Node.js 18+
+- Node.js 18+ (or Bun)
 - Poetry
 
 ### Setup
@@ -104,7 +104,8 @@ poetry install
 
 # Install frontend dependencies
 cd apps/web
-npm install
+bun install
+# or with npm: npm install
 
 # Copy environment variables
 cp .env.example .env
@@ -114,16 +115,37 @@ cp .env.example .env
 ### Run the API
 
 ```bash
-cd apps/api
-poetry run uvicorn pool_patrol_api.main:app --reload
+poetry run uvicorn pool_patrol_api.main:app --reload --port 8000
 ```
+
+The API will be available at http://localhost:8000
 
 ### Run the Frontend
 
 ```bash
 cd apps/web
-npm run dev
+bun dev --port 3000
+# or with npm: npm run dev
 ```
+
+The web UI will be available at http://localhost:3000
+
+### Testing the UI
+
+To test the full application, run both servers simultaneously in separate terminals:
+
+**Terminal 1 - API Server:**
+```bash
+poetry run uvicorn pool_patrol_api.main:app --reload --port 8000
+```
+
+**Terminal 2 - Web Dev Server:**
+```bash
+cd apps/web
+bun dev --port 3000
+```
+
+Then open http://localhost:3000 in your browser to view the UI. The web app will communicate with the API at http://localhost:8000.
 
 ### Run the Agent (CLI)
 
