@@ -18,12 +18,23 @@ export const metadata: Metadata = {
   description: "Vanpool misuse detection system",
 };
 
+function TeslaLogo({ className }: { className?: string }) {
+  return (
+    <img
+      src="/tesla-logo.png"
+      alt="Tesla"
+      className={className}
+    />
+  );
+}
+
 function Navigation() {
   return (
     <header className="border-b border-neutral-200">
       <nav className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
-        <Link href="/" className="flex items-center gap-2">
-          <span className="text-sm font-medium tracking-tight">Pool Patrol</span>
+        <Link href="/" className="flex items-center gap-3">
+          <TeslaLogo className="h-6 w-auto" />
+          <span className="text-base font-semibold tracking-tight">Pool Patrol</span>
         </Link>
         <a 
           href="https://joyax.co" 

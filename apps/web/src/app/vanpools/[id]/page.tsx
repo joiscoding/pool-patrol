@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { getVanpool, listEmployees, listCases, getCaseEmails } from '@/lib/api';
 import type { Case, EmailThread } from '@/lib/types';
+import { VanpoolMap } from '@/components/VanpoolMap';
 
 export const dynamic = 'force-dynamic';
 
@@ -90,6 +91,15 @@ export default async function VanpoolDetailPage({ params }: VanpoolDetailPagePro
         </p>
       </div>
 
+      {/* Map */}
+      <div className="mb-8">
+        <VanpoolMap
+          factoryCoords={vanpool.work_site_coords}
+          factoryName={vanpool.work_site}
+          employees={employees}
+        />
+      </div>
+
       {/* Stats */}
       <div className="mb-8 grid grid-cols-3 gap-4">
         <div className="p-4 bg-neutral-50 rounded-lg">
@@ -136,9 +146,9 @@ export default async function VanpoolDetailPage({ params }: VanpoolDetailPagePro
                     {formatDate(caseData.created_at)}
                   </span>
                 </div>
-                {caseData.metadata.additional_info?.distance_miles && (
+                {caseData.metadata.additional_info?.distance_miles != null && (
                   <div className="mt-3 text-xs text-neutral-500">
-                    {caseData.metadata.additional_info.distance_miles} miles from work site
+                    {String(caseData.metadata.additional_info.distance_miles)} miles from work site
                   </div>
                 )}
               </div>
