@@ -10,9 +10,9 @@
     "supervisor": "Lisa Park",
     "time_type": "full_time",
     "date_onboarded": "2021-03-15",
-    "work_site": "Austin Manufacturing Plant",
-    "home_address": "456 Oak St, Round Rock, TX 78664",
-    "home_zip": "78664",
+    "work_site": "Fremont Factory",
+    "home_address": "456 Oak St, Fremont, CA 94536",
+    "home_zip": "94536",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -37,9 +37,9 @@
     "supervisor": "Lisa Park",
     "time_type": "full_time",
     "date_onboarded": "2019-08-22",
-    "work_site": "Austin Manufacturing Plant",
-    "home_address": "789 Elm Ave, Pflugerville, TX 78660",
-    "home_zip": "78660",
+    "work_site": "Fremont Factory",
+    "home_address": "789 Elm Ave, Newark, CA 94560",
+    "home_zip": "94560",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -64,9 +64,9 @@
     "supervisor": "Lisa Park",
     "time_type": "full_time",
     "date_onboarded": "2022-01-10",
-    "work_site": "Austin Manufacturing Plant",
-    "home_address": "2100 Main St, Houston, TX 77002",
-    "home_zip": "77002",
+    "work_site": "Fremont Factory",
+    "home_address": "2100 Sunset Blvd, Los Angeles, CA 90026",
+    "home_zip": "90026",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -91,9 +91,9 @@
     "supervisor": "Lisa Park",
     "time_type": "full_time",
     "date_onboarded": "2020-06-01",
-    "work_site": "Austin Manufacturing Plant",
-    "home_address": "321 Cedar Ln, Georgetown, TX 78626",
-    "home_zip": "78626",
+    "work_site": "Fremont Factory",
+    "home_address": "321 Cedar Ln, Union City, CA 94587",
+    "home_zip": "94587",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -118,9 +118,9 @@
     "supervisor": "Lisa Park",
     "time_type": "full_time",
     "date_onboarded": "2023-02-14",
-    "work_site": "Austin Manufacturing Plant",
-    "home_address": "555 Pine Dr, Austin, TX 78745",
-    "home_zip": "78745",
+    "work_site": "Fremont Factory",
+    "home_address": "555 Pine Dr, Milpitas, CA 95035",
+    "home_zip": "95035",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -145,9 +145,9 @@
     "supervisor": "Marcus Johnson",
     "time_type": "full_time",
     "date_onboarded": "2018-11-05",
-    "work_site": "Austin Manufacturing Plant",
-    "home_address": "888 Maple Way, Austin, TX 78702",
-    "home_zip": "78702",
+    "work_site": "Fremont Factory",
+    "home_address": "888 Maple Way, Hayward, CA 94541",
+    "home_zip": "94541",
     "shifts": {
       "type": "Night Shift",
       "schedule": [
@@ -171,9 +171,9 @@
     "supervisor": "Marcus Johnson",
     "time_type": "full_time",
     "date_onboarded": "2021-07-19",
-    "work_site": "Austin Manufacturing Plant",
-    "home_address": "123 Birch St, Cedar Park, TX 78613",
-    "home_zip": "78613",
+    "work_site": "Fremont Factory",
+    "home_address": "123 Birch St, San Leandro, CA 94577",
+    "home_zip": "94577",
     "shifts": {
       "type": "Night Shift",
       "schedule": [
@@ -197,9 +197,9 @@
     "supervisor": "Marcus Johnson",
     "time_type": "full_time",
     "date_onboarded": "2022-04-25",
-    "work_site": "Austin Manufacturing Plant",
-    "home_address": "999 Walnut Blvd, Dallas, TX 75201",
-    "home_zip": "75201",
+    "work_site": "Fremont Factory",
+    "home_address": "999 Capitol Ave, Sacramento, CA 95814",
+    "home_zip": "95814",
     "shifts": {
       "type": "Night Shift",
       "schedule": [
@@ -223,9 +223,9 @@
     "supervisor": "Marcus Johnson",
     "time_type": "full_time",
     "date_onboarded": "2023-05-08",
-    "work_site": "Austin Manufacturing Plant",
-    "home_address": "444 Spruce Ct, Leander, TX 78641",
-    "home_zip": "78641",
+    "work_site": "Fremont Factory",
+    "home_address": "444 Spruce Ct, Castro Valley, CA 94546",
+    "home_zip": "94546",
     "shifts": {
       "type": "Night Shift",
       "schedule": [
@@ -249,9 +249,9 @@
     "supervisor": "Sandra Williams",
     "time_type": "full_time",
     "date_onboarded": "2017-09-12",
-    "work_site": "Round Rock Assembly Center",
-    "home_address": "200 Tech Rd, Round Rock, TX 78664",
-    "home_zip": "78664",
+    "work_site": "Fremont Factory",
+    "home_address": "200 Tech Rd, Fremont, CA 94538",
+    "home_zip": "94538",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -276,9 +276,9 @@
     "supervisor": "Henry Taylor",
     "time_type": "full_time",
     "date_onboarded": "2020-02-03",
-    "work_site": "Round Rock Assembly Center",
-    "home_address": "350 Assembly Dr, Hutto, TX 78634",
-    "home_zip": "78634",
+    "work_site": "Fremont Factory",
+    "home_address": "350 Assembly Dr, Newark, CA 94560",
+    "home_zip": "94560",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -303,9 +303,9 @@
     "supervisor": "Henry Taylor",
     "time_type": "full_time",
     "date_onboarded": "2021-01-18",
-    "work_site": "Round Rock Assembly Center",
-    "home_address": "777 Circuit Ln, Taylor, TX 76574",
-    "home_zip": "76574",
+    "work_site": "Fremont Factory",
+    "home_address": "777 Circuit Ln, Union City, CA 94587",
+    "home_zip": "94587",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -330,9 +330,9 @@
     "supervisor": "Henry Taylor",
     "time_type": "full_time",
     "date_onboarded": "2019-04-22",
-    "work_site": "Round Rock Assembly Center",
-    "home_address": "600 Processor Pkwy, Pflugerville, TX 78660",
-    "home_zip": "78660",
+    "work_site": "Fremont Factory",
+    "home_address": "600 Processor Pkwy, Milpitas, CA 95035",
+    "home_zip": "95035",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -357,9 +357,9 @@
     "supervisor": "Henry Taylor",
     "time_type": "full_time",
     "date_onboarded": "2023-06-12",
-    "work_site": "Round Rock Assembly Center",
-    "home_address": "150 Memory Ln, Georgetown, TX 78626",
-    "home_zip": "78626",
+    "work_site": "Fremont Factory",
+    "home_address": "150 Memory Ln, San Jose, CA 95112",
+    "home_zip": "95112",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -384,9 +384,9 @@
     "supervisor": "Henry Taylor",
     "time_type": "full_time",
     "date_onboarded": "2020-10-05",
-    "work_site": "Round Rock Assembly Center",
-    "home_address": "900 Chip Ave, Round Rock, TX 78665",
-    "home_zip": "78665",
+    "work_site": "Fremont Factory",
+    "home_address": "900 Chip Ave, Fremont, CA 94539",
+    "home_zip": "94539",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -411,9 +411,9 @@
     "supervisor": "Angela Foster",
     "time_type": "full_time",
     "date_onboarded": "2018-03-20",
-    "work_site": "Round Rock Assembly Center",
-    "home_address": "425 Silicon St, Austin, TX 78758",
-    "home_zip": "78758",
+    "work_site": "Fremont Factory",
+    "home_address": "425 Silicon St, Santa Clara, CA 95051",
+    "home_zip": "95051",
     "shifts": {
       "type": "Swing Shift",
       "schedule": [
@@ -438,9 +438,9 @@
     "supervisor": "Nathan White",
     "time_type": "full_time",
     "date_onboarded": "2021-09-13",
-    "work_site": "Round Rock Assembly Center",
-    "home_address": "333 Data Dr, Cedar Park, TX 78613",
-    "home_zip": "78613",
+    "work_site": "Fremont Factory",
+    "home_address": "333 Data Dr, Sunnyvale, CA 94086",
+    "home_zip": "94086",
     "shifts": {
       "type": "Swing Shift",
       "schedule": [
@@ -465,9 +465,9 @@
     "supervisor": "Nathan White",
     "time_type": "full_time",
     "date_onboarded": "2022-02-07",
-    "work_site": "Round Rock Assembly Center",
-    "home_address": "222 Byte Blvd, Leander, TX 78641",
-    "home_zip": "78641",
+    "work_site": "Fremont Factory",
+    "home_address": "222 Byte Blvd, Mountain View, CA 94043",
+    "home_zip": "94043",
     "shifts": {
       "type": "Swing Shift",
       "schedule": [
@@ -492,9 +492,9 @@
     "supervisor": "Nathan White",
     "time_type": "full_time",
     "date_onboarded": "2023-08-21",
-    "work_site": "Round Rock Assembly Center",
-    "home_address": "111 Logic Loop, Round Rock, TX 78664",
-    "home_zip": "78664",
+    "work_site": "Fremont Factory",
+    "home_address": "111 Logic Loop, Palo Alto, CA 94301",
+    "home_zip": "94301",
     "shifts": {
       "type": "Swing Shift",
       "schedule": [
@@ -519,9 +519,9 @@
     "supervisor": "Michael Torres",
     "time_type": "full_time",
     "date_onboarded": "2017-05-15",
-    "work_site": "San Marcos Distribution Hub",
-    "home_address": "500 Warehouse Way, San Marcos, TX 78666",
-    "home_zip": "78666",
+    "work_site": "Fremont Factory",
+    "home_address": "500 Warehouse Way, Fremont, CA 94536",
+    "home_zip": "94536",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -546,9 +546,9 @@
     "supervisor": "Rachel Clark",
     "time_type": "full_time",
     "date_onboarded": "2019-11-04",
-    "work_site": "San Marcos Distribution Hub",
-    "home_address": "750 Shipping St, Kyle, TX 78640",
-    "home_zip": "78640",
+    "work_site": "Fremont Factory",
+    "home_address": "750 Shipping St, Newark, CA 94560",
+    "home_zip": "94560",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -573,9 +573,9 @@
     "supervisor": "Rachel Clark",
     "time_type": "full_time",
     "date_onboarded": "2021-03-22",
-    "work_site": "San Marcos Distribution Hub",
-    "home_address": "300 Freight Rd, Buda, TX 78610",
-    "home_zip": "78610",
+    "work_site": "Fremont Factory",
+    "home_address": "300 Freight Rd, Union City, CA 94587",
+    "home_zip": "94587",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -600,9 +600,9 @@
     "supervisor": "Rachel Clark",
     "time_type": "full_time",
     "date_onboarded": "2020-08-17",
-    "work_site": "San Marcos Distribution Hub",
-    "home_address": "600 Pallet Pkwy, New Braunfels, TX 78130",
-    "home_zip": "78130",
+    "work_site": "Fremont Factory",
+    "home_address": "600 Pallet Pkwy, Hayward, CA 94544",
+    "home_zip": "94544",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -627,9 +627,9 @@
     "supervisor": "Rachel Clark",
     "time_type": "full_time",
     "date_onboarded": "2023-01-09",
-    "work_site": "San Marcos Distribution Hub",
-    "home_address": "125 Cargo Ct, Wimberley, TX 78676",
-    "home_zip": "78676",
+    "work_site": "Fremont Factory",
+    "home_address": "125 Cargo Ct, San Leandro, CA 94578",
+    "home_zip": "94578",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -654,9 +654,9 @@
     "supervisor": "Derek Simmons",
     "time_type": "full_time",
     "date_onboarded": "2018-07-30",
-    "work_site": "San Marcos Distribution Hub",
-    "home_address": "450 Loading Ln, San Antonio, TX 78201",
-    "home_zip": "78201",
+    "work_site": "Fremont Factory",
+    "home_address": "450 Harbor Blvd, San Diego, CA 92101",
+    "home_zip": "92101",
     "shifts": {
       "type": "Night Shift",
       "schedule": [
@@ -680,9 +680,9 @@
     "supervisor": "Xavier Young",
     "time_type": "full_time",
     "date_onboarded": "2021-06-14",
-    "work_site": "San Marcos Distribution Hub",
-    "home_address": "275 Dock Dr, Lockhart, TX 78644",
-    "home_zip": "78644",
+    "work_site": "Fremont Factory",
+    "home_address": "275 Dock Dr, Milpitas, CA 95035",
+    "home_zip": "95035",
     "shifts": {
       "type": "Night Shift",
       "schedule": [
@@ -706,9 +706,9 @@
     "supervisor": "Xavier Young",
     "time_type": "full_time",
     "date_onboarded": "2022-09-05",
-    "work_site": "San Marcos Distribution Hub",
-    "home_address": "888 Inventory Blvd, Seguin, TX 78155",
-    "home_zip": "78155",
+    "work_site": "Fremont Factory",
+    "home_address": "888 Inventory Blvd, San Jose, CA 95113",
+    "home_zip": "95113",
     "shifts": {
       "type": "Night Shift",
       "schedule": [
@@ -732,9 +732,9 @@
     "supervisor": "Xavier Young",
     "time_type": "full_time",
     "date_onboarded": "2023-04-17",
-    "work_site": "San Marcos Distribution Hub",
-    "home_address": "999 Supply St, San Marcos, TX 78666",
-    "home_zip": "78666",
+    "work_site": "Fremont Factory",
+    "home_address": "999 Supply St, Fremont, CA 94538",
+    "home_zip": "94538",
     "shifts": {
       "type": "Night Shift",
       "schedule": [
@@ -758,9 +758,9 @@
     "supervisor": "Patricia Moore",
     "time_type": "full_time",
     "date_onboarded": "2019-02-11",
-    "work_site": "Georgetown Tech Campus",
-    "home_address": "100 Innovation Way, Georgetown, TX 78626",
-    "home_zip": "78626",
+    "work_site": "Fremont Factory",
+    "home_address": "100 Innovation Way, Fremont, CA 94536",
+    "home_zip": "94536",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -785,9 +785,9 @@
     "supervisor": "Patricia Moore",
     "time_type": "full_time",
     "date_onboarded": "2017-08-28",
-    "work_site": "Georgetown Tech Campus",
-    "home_address": "250 Research Rd, Round Rock, TX 78664",
-    "home_zip": "78664",
+    "work_site": "Fremont Factory",
+    "home_address": "250 Research Rd, Newark, CA 94560",
+    "home_zip": "94560",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -812,9 +812,9 @@
     "supervisor": "Patricia Moore",
     "time_type": "full_time",
     "date_onboarded": "2021-05-03",
-    "work_site": "Georgetown Tech Campus",
-    "home_address": "375 Science St, Hutto, TX 78634",
-    "home_zip": "78634",
+    "work_site": "Fremont Factory",
+    "home_address": "375 Science St, Union City, CA 94587",
+    "home_zip": "94587",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -839,9 +839,9 @@
     "supervisor": "Patricia Moore",
     "time_type": "full_time",
     "date_onboarded": "2022-01-24",
-    "work_site": "Georgetown Tech Campus",
-    "home_address": "450 Lab Ln, Taylor, TX 76574",
-    "home_zip": "76574",
+    "work_site": "Fremont Factory",
+    "home_address": "450 Lab Ln, Hayward, CA 94541",
+    "home_zip": "94541",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -866,9 +866,9 @@
     "supervisor": "Patricia Moore",
     "time_type": "full_time",
     "date_onboarded": "2023-03-06",
-    "work_site": "Georgetown Tech Campus",
-    "home_address": "525 Tech Terrace, Georgetown, TX 78628",
-    "home_zip": "78628",
+    "work_site": "Fremont Factory",
+    "home_address": "525 Tech Terrace, San Leandro, CA 94577",
+    "home_zip": "94577",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -893,9 +893,9 @@
     "supervisor": "Thomas Reed",
     "time_type": "full_time",
     "date_onboarded": "2018-10-15",
-    "work_site": "Georgetown Tech Campus",
-    "home_address": "600 Campus Cir, Pflugerville, TX 78660",
-    "home_zip": "78660",
+    "work_site": "Fremont Factory",
+    "home_address": "600 Campus Cir, Castro Valley, CA 94546",
+    "home_zip": "94546",
     "shifts": {
       "type": "Swing Shift",
       "schedule": [
@@ -919,9 +919,9 @@
     "supervisor": "Gina Carter",
     "time_type": "full_time",
     "date_onboarded": "2020-04-20",
-    "work_site": "Georgetown Tech Campus",
-    "home_address": "700 Discovery Dr, Austin, TX 78759",
-    "home_zip": "78759",
+    "work_site": "Fremont Factory",
+    "home_address": "700 Discovery Dr, Milpitas, CA 95035",
+    "home_zip": "95035",
     "shifts": {
       "type": "Swing Shift",
       "schedule": [
@@ -945,9 +945,9 @@
     "supervisor": "Gina Carter",
     "time_type": "full_time",
     "date_onboarded": "2022-06-13",
-    "work_site": "Georgetown Tech Campus",
-    "home_address": "800 Quantum Ct, Cedar Park, TX 78613",
-    "home_zip": "78613",
+    "work_site": "Fremont Factory",
+    "home_address": "800 Quantum Ct, Santa Clara, CA 95054",
+    "home_zip": "95054",
     "shifts": {
       "type": "Swing Shift",
       "schedule": [
@@ -971,9 +971,9 @@
     "supervisor": "Gina Carter",
     "time_type": "full_time",
     "date_onboarded": "2023-07-10",
-    "work_site": "Georgetown Tech Campus",
-    "home_address": "900 Nucleus Blvd, Leander, TX 78641",
-    "home_zip": "78641",
+    "work_site": "Fremont Factory",
+    "home_address": "900 Nucleus Blvd, Sunnyvale, CA 94085",
+    "home_zip": "94085",
     "shifts": {
       "type": "Swing Shift",
       "schedule": [
@@ -997,9 +997,9 @@
     "supervisor": "David Hernandez",
     "time_type": "full_time",
     "date_onboarded": "2016-12-05",
-    "work_site": "Pflugerville Operations Center",
-    "home_address": "100 Operations Ave, Pflugerville, TX 78660",
-    "home_zip": "78660",
+    "work_site": "Fremont Factory",
+    "home_address": "100 Operations Ave, Fremont, CA 94538",
+    "home_zip": "94538",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -1024,9 +1024,9 @@
     "supervisor": "Kim Turner",
     "time_type": "full_time",
     "date_onboarded": "2019-06-17",
-    "work_site": "Pflugerville Operations Center",
-    "home_address": "200 Service Rd, Manor, TX 78653",
-    "home_zip": "78653",
+    "work_site": "Fremont Factory",
+    "home_address": "200 Service Rd, Newark, CA 94560",
+    "home_zip": "94560",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -1051,9 +1051,9 @@
     "supervisor": "Kim Turner",
     "time_type": "full_time",
     "date_onboarded": "2021-02-08",
-    "work_site": "Pflugerville Operations Center",
-    "home_address": "300 Support St, Austin, TX 78753",
-    "home_zip": "78753",
+    "work_site": "Fremont Factory",
+    "home_address": "300 Support St, Union City, CA 94587",
+    "home_zip": "94587",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -1078,9 +1078,9 @@
     "supervisor": "Kim Turner",
     "time_type": "full_time",
     "date_onboarded": "2020-09-21",
-    "work_site": "Pflugerville Operations Center",
-    "home_address": "400 Admin Blvd, Round Rock, TX 78665",
-    "home_zip": "78665",
+    "work_site": "Fremont Factory",
+    "home_address": "400 Admin Blvd, Hayward, CA 94545",
+    "home_zip": "94545",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -1105,9 +1105,9 @@
     "supervisor": "Kim Turner",
     "time_type": "full_time",
     "date_onboarded": "2023-05-22",
-    "work_site": "Pflugerville Operations Center",
-    "home_address": "500 Control Ct, Hutto, TX 78634",
-    "home_zip": "78634",
+    "work_site": "Fremont Factory",
+    "home_address": "500 Control Ct, San Leandro, CA 94579",
+    "home_zip": "94579",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -1132,9 +1132,9 @@
     "supervisor": "Rebecca Stone",
     "time_type": "full_time",
     "date_onboarded": "2018-04-09",
-    "work_site": "Pflugerville Operations Center",
-    "home_address": "600 Monitor Way, Taylor, TX 76574",
-    "home_zip": "76574",
+    "work_site": "Fremont Factory",
+    "home_address": "600 Monitor Way, Milpitas, CA 95035",
+    "home_zip": "95035",
     "shifts": {
       "type": "Night Shift",
       "schedule": [
@@ -1158,9 +1158,9 @@
     "supervisor": "Paul Edwards",
     "time_type": "full_time",
     "date_onboarded": "2021-08-16",
-    "work_site": "Pflugerville Operations Center",
-    "home_address": "700 Dashboard Dr, Georgetown, TX 78626",
-    "home_zip": "78626",
+    "work_site": "Fremont Factory",
+    "home_address": "700 Dashboard Dr, San Jose, CA 95110",
+    "home_zip": "95110",
     "shifts": {
       "type": "Night Shift",
       "schedule": [
@@ -1184,9 +1184,9 @@
     "supervisor": "Paul Edwards",
     "time_type": "full_time",
     "date_onboarded": "2022-03-14",
-    "work_site": "Pflugerville Operations Center",
-    "home_address": "800 Alert Ave, Austin, TX 78754",
-    "home_zip": "78754",
+    "work_site": "Fremont Factory",
+    "home_address": "800 Alert Ave, Mountain View, CA 94040",
+    "home_zip": "94040",
     "shifts": {
       "type": "Night Shift",
       "schedule": [
@@ -1210,9 +1210,9 @@
     "supervisor": "Paul Edwards",
     "time_type": "full_time",
     "date_onboarded": "2023-09-11",
-    "work_site": "Pflugerville Operations Center",
-    "home_address": "900 System St, Pflugerville, TX 78660",
-    "home_zip": "78660",
+    "work_site": "Fremont Factory",
+    "home_address": "900 System St, Fremont, CA 94536",
+    "home_zip": "94536",
     "shifts": {
       "type": "Night Shift",
       "schedule": [
@@ -1236,9 +1236,9 @@
     "supervisor": "Robert Chen",
     "time_type": "full_time",
     "date_onboarded": "2017-04-03",
-    "work_site": "Austin Manufacturing Plant",
-    "home_address": "111 Production Pkwy, Austin, TX 78744",
-    "home_zip": "78744",
+    "work_site": "Fremont Factory",
+    "home_address": "111 Production Pkwy, Newark, CA 94560",
+    "home_zip": "94560",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -1263,9 +1263,9 @@
     "supervisor": "Tom Morris",
     "time_type": "full_time",
     "date_onboarded": "2020-11-16",
-    "work_site": "Austin Manufacturing Plant",
-    "home_address": "222 Assembly Rd, Del Valle, TX 78617",
-    "home_zip": "78617",
+    "work_site": "Fremont Factory",
+    "home_address": "222 Assembly Rd, Union City, CA 94587",
+    "home_zip": "94587",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -1290,9 +1290,9 @@
     "supervisor": "Tom Morris",
     "time_type": "full_time",
     "date_onboarded": "2021-07-26",
-    "work_site": "Austin Manufacturing Plant",
-    "home_address": "333 Factory Ln, Bastrop, TX 78602",
-    "home_zip": "78602",
+    "work_site": "Fremont Factory",
+    "home_address": "333 Central Valley Rd, Fresno, CA 93721",
+    "home_zip": "93721",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -1317,9 +1317,9 @@
     "supervisor": "Tom Morris",
     "time_type": "full_time",
     "date_onboarded": "2022-05-09",
-    "work_site": "Austin Manufacturing Plant",
-    "home_address": "444 Plant Pl, Elgin, TX 78621",
-    "home_zip": "78621",
+    "work_site": "Fremont Factory",
+    "home_address": "444 Plant Pl, Hayward, CA 94542",
+    "home_zip": "94542",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -1344,9 +1344,9 @@
     "supervisor": "Tom Morris",
     "time_type": "full_time",
     "date_onboarded": "2023-02-27",
-    "work_site": "Austin Manufacturing Plant",
-    "home_address": "555 Build Blvd, Manor, TX 78653",
-    "home_zip": "78653",
+    "work_site": "Fremont Factory",
+    "home_address": "555 Build Blvd, San Leandro, CA 94577",
+    "home_zip": "94577",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -1371,9 +1371,9 @@
     "supervisor": "Tom Morris",
     "time_type": "full_time",
     "date_onboarded": "2021-04-12",
-    "work_site": "Austin Manufacturing Plant",
-    "home_address": "666 Craft Ct, Austin, TX 78741",
-    "home_zip": "78741",
+    "work_site": "Fremont Factory",
+    "home_address": "666 Craft Ct, Castro Valley, CA 94546",
+    "home_zip": "94546",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -1398,9 +1398,9 @@
     "supervisor": "Christine Lee",
     "time_type": "full_time",
     "date_onboarded": "2016-08-22",
-    "work_site": "Cedar Park R&D Facility",
-    "home_address": "100 Research Way, Cedar Park, TX 78613",
-    "home_zip": "78613",
+    "work_site": "Fremont Factory",
+    "home_address": "100 Research Way, Sunnyvale, CA 94087",
+    "home_zip": "94087",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -1425,9 +1425,9 @@
     "supervisor": "Zoe Murphy",
     "time_type": "full_time",
     "date_onboarded": "2018-01-15",
-    "work_site": "Cedar Park R&D Facility",
-    "home_address": "200 Dev Dr, Leander, TX 78641",
-    "home_zip": "78641",
+    "work_site": "Fremont Factory",
+    "home_address": "200 Dev Dr, Mountain View, CA 94041",
+    "home_zip": "94041",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -1452,9 +1452,9 @@
     "supervisor": "Zoe Murphy",
     "time_type": "full_time",
     "date_onboarded": "2020-03-02",
-    "work_site": "Cedar Park R&D Facility",
-    "home_address": "300 Prototype Pkwy, Austin, TX 78750",
-    "home_zip": "78750",
+    "work_site": "Fremont Factory",
+    "home_address": "300 Prototype Pkwy, Palo Alto, CA 94306",
+    "home_zip": "94306",
     "shifts": {
       "type": "Day Shift",
       "schedule": [
@@ -1479,9 +1479,9 @@
     "supervisor": "Zoe Murphy",
     "time_type": "full_time",
     "date_onboarded": "2022-07-18",
-    "work_site": "Cedar Park R&D Facility",
-    "home_address": "400 Test Terrace, Round Rock, TX 78681",
-    "home_zip": "78681",
+    "work_site": "Fremont Factory",
+    "home_address": "400 Test Terrace, Santa Clara, CA 95050",
+    "home_zip": "95050",
     "shifts": {
       "type": "Day Shift",
       "schedule": [

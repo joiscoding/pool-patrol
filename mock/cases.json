@@ -5,14 +5,13 @@
     "created_at": "2024-01-15T09:00:00Z",
     "updated_at": "2024-01-16T15:30:00Z",
     "status": "pending_reply",
-    "flagged_employee_ids": ["EMP-1003"],
     "metadata": {
       "reason": "location_mismatch",
-      "details": "Employee home address is significantly far from work site",
+      "details": "Employee home address is in Los Angeles, significantly far from Fremont Factory",
       "additional_info": {
-        "distance_miles": 165,
-        "employee_zip": "77002",
-        "work_site_zip": "78701"
+        "distance_miles": 350,
+        "employee_zip": "90026",
+        "work_site_zip": "94538"
       }
     },
     "email_thread_id": "THREAD-001",
@@ -25,14 +24,13 @@
     "created_at": "2024-01-10T11:00:00Z",
     "updated_at": "2024-01-18T09:15:00Z",
     "status": "resolved",
-    "flagged_employee_ids": ["EMP-1008"],
     "metadata": {
       "reason": "location_mismatch",
-      "details": "Employee home address is in Dallas, far from Austin work site",
+      "details": "Employee home address is in Sacramento, far from Fremont Factory",
       "additional_info": {
-        "distance_miles": 195,
-        "employee_zip": "75201",
-        "work_site_zip": "78701"
+        "distance_miles": 120,
+        "employee_zip": "95814",
+        "work_site_zip": "94538"
       }
     },
     "email_thread_id": "THREAD-002",
@@ -45,14 +43,13 @@
     "created_at": "2024-01-20T08:30:00Z",
     "updated_at": "2024-01-22T14:00:00Z",
     "status": "under_review",
-    "flagged_employee_ids": ["EMP-1025"],
     "metadata": {
       "reason": "location_mismatch",
-      "details": "Employee lives in San Antonio, commute to San Marcos seems excessive",
+      "details": "Employee lives in San Diego, commute to Fremont Factory is not feasible",
       "additional_info": {
-        "distance_miles": 52,
-        "employee_zip": "78201",
-        "work_site_zip": "78666"
+        "distance_miles": 480,
+        "employee_zip": "92101",
+        "work_site_zip": "94538"
       }
     },
     "email_thread_id": "THREAD-003",
@@ -65,7 +62,6 @@
     "created_at": "2024-01-08T10:00:00Z",
     "updated_at": "2024-01-12T16:45:00Z",
     "status": "resolved",
-    "flagged_employee_ids": ["EMP-1010", "EMP-1011", "EMP-1012", "EMP-1013", "EMP-1014", "EMP-1015"],
     "metadata": {
       "reason": "shift_mismatch",
       "details": "Vanpool schedule does not align with reported employee shift times",
@@ -85,7 +81,6 @@
     "created_at": "2024-01-22T09:00:00Z",
     "updated_at": "2024-01-22T09:00:00Z",
     "status": "open",
-    "flagged_employee_ids": ["EMP-1016", "EMP-1017", "EMP-1018", "EMP-1019"],
     "metadata": {
       "reason": "shift_mismatch",
       "details": "Employees on swing shift (14:00-22:00) but vanpool runs standard day schedule",
@@ -104,10 +99,9 @@
     "created_at": "2024-01-05T14:00:00Z",
     "updated_at": "2024-01-15T11:30:00Z",
     "status": "cancelled",
-    "flagged_employee_ids": ["EMP-1029"],
     "metadata": {
       "reason": "location_mismatch",
-      "details": "Initial flag for distance, but employee lives in Georgetown near work site",
+      "details": "Initial flag for distance, but employee lives in Fremont near work site",
       "additional_info": {
         "distance_miles": 3,
         "false_positive": true
@@ -123,7 +117,6 @@
     "created_at": "2024-01-18T08:00:00Z",
     "updated_at": "2024-01-23T10:00:00Z",
     "status": "pending_reply",
-    "flagged_employee_ids": ["EMP-1034", "EMP-1035", "EMP-1036", "EMP-1037"],
     "metadata": {
       "reason": "shift_mismatch",
       "details": "Swing shift employees (Wed-Sat) using vanpool that runs Mon-Fri",
@@ -142,7 +135,6 @@
     "created_at": "2024-01-19T13:00:00Z",
     "updated_at": "2024-01-19T13:00:00Z",
     "status": "open",
-    "flagged_employee_ids": ["EMP-1038", "EMP-1039", "EMP-1040", "EMP-1041", "EMP-1042"],
     "metadata": {
       "reason": "capacity_review",
       "details": "Vanpool has 5 riders but capacity is 8, reviewing for consolidation",
@@ -162,14 +154,13 @@
     "created_at": "2024-01-21T10:30:00Z",
     "updated_at": "2024-01-23T08:45:00Z",
     "status": "under_review",
-    "flagged_employee_ids": ["EMP-1049"],
     "metadata": {
       "reason": "location_mismatch",
-      "details": "Employee in Bastrop, 35 miles from Austin Manufacturing Plant",
+      "details": "Employee in Fresno, 160 miles from Fremont Factory",
       "additional_info": {
-        "distance_miles": 35,
-        "employee_zip": "78602",
-        "work_site_zip": "78701"
+        "distance_miles": 160,
+        "employee_zip": "93721",
+        "work_site_zip": "94538"
       }
     },
     "email_thread_id": "THREAD-007",
@@ -182,10 +173,9 @@
     "created_at": "2024-01-17T09:00:00Z",
     "updated_at": "2024-01-20T14:20:00Z",
     "status": "resolved",
-    "flagged_employee_ids": ["EMP-1053", "EMP-1054", "EMP-1055", "EMP-1056"],
     "metadata": {
       "reason": "verification_complete",
-      "details": "Routine quarterly verification of Cedar Park R&D vanpool",
+      "details": "Routine quarterly verification of Fremont Factory R&D vanpool",
       "additional_info": {
         "verification_type": "quarterly",
         "all_clear": true
