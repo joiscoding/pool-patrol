@@ -1,0 +1,48 @@
+[tool.poetry]
+name = "pool-patrol"
+version = "0.1.0"
+description = "Multi-agent vanpool misuse detection system using LangChain/LangGraph"
+authors = ["InnovateCorp"]
+readme = "README.md"
+packages = [
+    { include = "pool_patrol_api", from = "apps/api" },
+    { include = "pool_patrol_graph", from = "packages/graph" },
+    { include = "pool_patrol_core", from = "packages/core" },
+    { include = "pool_patrol_tools", from = "packages/tools" },
+    { include = "pool_patrol_eval", from = "packages/eval" },
+]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.115.0"
+uvicorn = { extras = ["standard"], version = "^0.34.0" }
+pydantic = "^2.10.0"
+pydantic-settings = "^2.7.0"
+langchain = "^0.3.0"
+langchain-anthropic = "^0.3.0"
+langchain-openai = "^0.3.0"
+langgraph = "^0.2.0"
+langsmith = "^0.2.0"
+httpx = "^0.28.0"
+python-dotenv = "^1.0.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+pytest-asyncio = "^0.24.0"
+ruff = "^0.8.0"
+mypy = "^1.13.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
