@@ -131,6 +131,12 @@ class Employee(BaseModel):
     first_name: str
     last_name: str
     email: EmailStr
+    business_title: str
+    level: str  # P5, P6, M3, M6, etc.
+    manager: str  # Full name
+    supervisor: str  # Full name
+    time_type: str  # full_time, part_time, contract
+    date_onboarded: str  # YYYY-MM-DD format
     work_site: str
     home_address: str
     home_zip: str
