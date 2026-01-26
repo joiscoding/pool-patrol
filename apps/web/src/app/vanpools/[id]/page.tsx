@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { getVanpool, listEmployees, listCases, getCaseEmails } from '@/lib/api';
-import type { Case, EmailThread } from '@/lib/types';
+import prisma from '@/database/db';
 import { VanpoolMap } from '@/components/VanpoolMap';
+import type { Case, Employee, Shift, EmailThread, Message } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -10,22 +10,25 @@ interface VanpoolDetailPageProps {
   params: Promise<{ id: string }>;
 }
 
+type EmployeeWithShift = Employee & { shift: Shift };
+type EmailThreadWithMessages = EmailThread & { messages: Message[] };
+
 function formatReason(reason: string): string {
   return reason.split('_').map(word => 
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ');
 }
 
-function formatDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-US', {
+function formatDate(date: Date): string {
+  return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric'
   });
 }
 
-function formatDateTime(dateStr: string): string {
-  return new Date(dateStr).toLocaleString('en-US', {
+function formatDateTime(date: Date): string {
+  return date.toLocaleString('en-US', {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',
@@ -33,36 +36,64 @@ function formatDateTime(dateStr: string): string {
   });
 }
 
+function parseMetadata(metadata: string): { reason: string; details: string; additional_info?: Record<string, unknown> } {
+  try {
+    return JSON.parse(metadata);
+  } catch {
+    return { reason: 'unknown', details: '' };
+  }
+}
+
+function parseCoords(coords: string): { lat: number; lng: number } {
+  try {
+    return JSON.parse(coords);
+  } catch {
+    return { lat: 0, lng: 0 };
+  }
+}
+
 export default async function VanpoolDetailPage({ params }: VanpoolDetailPageProps) {
   const { id } = await params;
   
-  let vanpool;
-  let employees;
-  let cases: Case[];
-  let emailThreads: EmailThread[] = [];
-  
-  try {
-    [vanpool, employees, cases] = await Promise.all([
-      getVanpool(id),
-      listEmployees({ vanpool_id: id }),
-      listCases({ vanpool_id: id }),
-    ]);
-    
-    // Fetch email threads for cases that have them
-    const caseWithThreads = cases.filter(c => c.email_thread_id);
-    if (caseWithThreads.length > 0) {
-      const threads = await Promise.all(
-        caseWithThreads.map(c => getCaseEmails(c.case_id).catch(() => []))
-      );
-      emailThreads = threads.flat();
+  // Fetch vanpool with riders and their employees
+  const vanpool = await prisma.vanpool.findUnique({
+    where: { vanpoolId: id },
+    include: {
+      riders: {
+        include: {
+          employee: {
+            include: { shift: true }
+          }
+        }
+      },
+      cases: true,
+      emailThreads: {
+        include: {
+          messages: {
+            orderBy: { sentAt: 'asc' }
+          }
+        }
+      }
     }
-  } catch {
+  });
+
+  if (!vanpool) {
     notFound();
   }
+
+  // Extract employees from riders
+  const employees: EmployeeWithShift[] = vanpool.riders
+    .map(r => r.employee)
+    .filter((e): e is EmployeeWithShift => e !== null);
+
+  const cases: Case[] = vanpool.cases;
+  const emailThreads: EmailThreadWithMessages[] = vanpool.emailThreads;
 
   const openCases = cases.filter(c => 
     ['open', 'pending_reply', 'under_review'].includes(c.status)
   );
+
+  const coords = parseCoords(vanpool.workSiteCoords);
 
   return (
     <div className="mx-auto max-w-5xl px-6 py-10">
@@ -78,7 +109,7 @@ export default async function VanpoolDetailPage({ params }: VanpoolDetailPagePro
       <div className="mb-8">
         <div className="flex items-center gap-3">
           <h1 className="text-2xl font-semibold text-neutral-900">
-            {vanpool.vanpool_id}
+            {vanpool.vanpoolId}
           </h1>
           {openCases.length > 0 && (
             <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-amber-100 text-amber-800 text-xs rounded">
@@ -87,15 +118,15 @@ export default async function VanpoolDetailPage({ params }: VanpoolDetailPagePro
           )}
         </div>
         <p className="mt-1 text-sm text-neutral-500">
-          {vanpool.work_site} · {vanpool.work_site_address}
+          {vanpool.workSite} · {vanpool.workSiteAddress}
         </p>
       </div>
 
       {/* Map */}
       <div className="mb-8">
         <VanpoolMap
-          factoryCoords={vanpool.work_site_coords}
-          factoryName={vanpool.work_site}
+          factoryCoords={coords}
+          factoryName={vanpool.workSite}
           employees={employees}
         />
       </div>
@@ -127,32 +158,35 @@ export default async function VanpoolDetailPage({ params }: VanpoolDetailPagePro
         <div className="mb-8">
           <h2 className="text-sm font-medium text-neutral-900 mb-4">Open Cases</h2>
           <div className="space-y-3">
-            {openCases.map((caseData) => (
-              <div 
-                key={caseData.case_id}
-                className="p-4 bg-amber-50 border border-amber-200 rounded-lg"
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <span className="text-xs font-mono text-amber-700">{caseData.case_id}</span>
-                    <p className="font-medium text-neutral-900 mt-1">
-                      {formatReason(caseData.metadata.reason)}
-                    </p>
-                    <p className="text-sm text-neutral-600 mt-1">
-                      {caseData.metadata.details}
-                    </p>
+            {openCases.map((caseData) => {
+              const metadata = parseMetadata(caseData.metadata);
+              return (
+                <div 
+                  key={caseData.caseId}
+                  className="p-4 bg-amber-50 border border-amber-200 rounded-lg"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <span className="text-xs font-mono text-amber-700">{caseData.caseId}</span>
+                      <p className="font-medium text-neutral-900 mt-1">
+                        {formatReason(metadata.reason)}
+                      </p>
+                      <p className="text-sm text-neutral-600 mt-1">
+                        {metadata.details}
+                      </p>
+                    </div>
+                    <span className="text-xs text-amber-600">
+                      {formatDate(caseData.createdAt)}
+                    </span>
                   </div>
-                  <span className="text-xs text-amber-600">
-                    {formatDate(caseData.created_at)}
-                  </span>
+                  {metadata.additional_info?.distance_miles != null && (
+                    <div className="mt-3 text-xs text-neutral-500">
+                      {String(metadata.additional_info.distance_miles)} miles from work site
+                    </div>
+                  )}
                 </div>
-                {caseData.metadata.additional_info?.distance_miles != null && (
-                  <div className="mt-3 text-xs text-neutral-500">
-                    {String(caseData.metadata.additional_info.distance_miles)} miles from work site
-                  </div>
-                )}
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -175,21 +209,21 @@ export default async function VanpoolDetailPage({ params }: VanpoolDetailPagePro
           <div className="divide-y divide-neutral-100">
             {employees.map((employee) => (
               <Link
-                key={employee.employee_id}
-                href={`/employees/${employee.employee_id}`}
+                key={employee.employeeId}
+                href={`/employees/${employee.employeeId}`}
                 className="grid grid-cols-[1fr_1fr_120px] text-sm bg-white hover:bg-neutral-50 cursor-pointer transition-colors"
               >
                 <div className="px-4 py-3">
                   <div className="font-medium text-neutral-900">
-                    {employee.first_name} {employee.last_name}
+                    {employee.firstName} {employee.lastName}
                   </div>
                   <div className="text-xs text-neutral-500">{employee.email}</div>
                 </div>
                 <div className="px-4 py-3 text-neutral-600">
-                  {employee.business_title} <span className="text-neutral-400">({employee.level})</span>
+                  {employee.businessTitle} <span className="text-neutral-400">({employee.level})</span>
                 </div>
                 <div className="px-4 py-3 text-neutral-600">
-                  {employee.shifts.type}
+                  {employee.shift.name}
                 </div>
               </Link>
             ))}
@@ -207,7 +241,7 @@ export default async function VanpoolDetailPage({ params }: VanpoolDetailPagePro
           <div className="space-y-4">
             {emailThreads.map((thread) => (
               <div 
-                key={thread.thread_id}
+                key={thread.threadId}
                 className="border border-neutral-200 rounded-lg overflow-hidden"
               >
                 <div className="px-4 py-3 bg-neutral-50 border-b border-neutral-200">
@@ -216,7 +250,7 @@ export default async function VanpoolDetailPage({ params }: VanpoolDetailPagePro
                       <p className="font-medium text-neutral-900">{thread.subject}</p>
                       <p className="text-xs text-neutral-500 mt-1">
                         {thread.messages.length} message{thread.messages.length !== 1 ? 's' : ''} · 
-                        Started {formatDate(thread.created_at)}
+                        Started {formatDate(thread.createdAt)}
                       </p>
                     </div>
                     <span className={`text-xs px-2 py-0.5 rounded ${
@@ -231,7 +265,7 @@ export default async function VanpoolDetailPage({ params }: VanpoolDetailPagePro
                 
                 <div className="divide-y divide-neutral-100">
                   {thread.messages.map((message) => (
-                    <div key={message.message_id} className="px-4 py-3">
+                    <div key={message.messageId} className="px-4 py-3">
                       <div className="flex items-start justify-between mb-2">
                         <div className="text-sm">
                           <span className={`font-medium ${
@@ -239,24 +273,24 @@ export default async function VanpoolDetailPage({ params }: VanpoolDetailPagePro
                               ? 'text-blue-700' 
                               : 'text-neutral-900'
                           }`}>
-                            {message.from.split('@')[0]}
+                            {message.fromEmail.split('@')[0]}
                           </span>
                           {message.direction === 'outbound' && (
                             <span className="text-xs text-neutral-400 ml-2">(Pool Patrol)</span>
                           )}
                         </div>
                         <span className="text-xs text-neutral-400">
-                          {formatDateTime(message.sent_at)}
+                          {formatDateTime(message.sentAt)}
                         </span>
                       </div>
                       <p className="text-sm text-neutral-600 whitespace-pre-line">
                         {message.body}
                       </p>
-                      {message.classification && (
+                      {message.classificationBucket && (
                         <div className="mt-2">
                           <span className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded">
-                            {message.classification.bucket.replace('_', ' ')} 
-                            ({Math.round(message.classification.confidence * 100)}%)
+                            {message.classificationBucket.replace('_', ' ')} 
+                            {message.classificationConfidence && ` (${message.classificationConfidence}/5)`}
                           </span>
                         </div>
                       )}

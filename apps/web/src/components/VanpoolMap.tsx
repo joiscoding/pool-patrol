@@ -1,7 +1,7 @@
 'use client';
 
 import dynamic from 'next/dynamic';
-import type { Employee } from '@/lib/types';
+import type { Employee } from '@prisma/client';
 
 export interface VanpoolMapProps {
   factoryCoords: { lat: number; lng: number };

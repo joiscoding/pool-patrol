@@ -1,4 +1,4 @@
-import type { CaseStatus, EmployeeStatus, VanpoolStatus } from '@/lib/types';
+import type { CaseStatus, EmployeeStatus, VanpoolStatus } from '@prisma/client';
 
 type StatusType = CaseStatus | EmployeeStatus | VanpoolStatus;
 

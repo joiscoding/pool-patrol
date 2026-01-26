@@ -1,4 +1,14 @@
-import type { Shifts } from '@/lib/types';
+interface DaySchedule {
+  day: string;
+  start_time: string;
+  end_time: string;
+}
+
+interface Shifts {
+  type: string;
+  schedule: DaySchedule[];
+  pto_dates: string[];
+}
 
 interface ShiftTableProps {
   shifts: Shifts;

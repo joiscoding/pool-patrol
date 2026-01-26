@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import type { Case } from '@/lib/types';
+import type { Case } from '@prisma/client';
 import { StatusBadge } from './StatusBadge';
 
 interface CaseCardProps {
@@ -8,8 +8,8 @@ interface CaseCardProps {
   index?: number;
 }
 
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString('en-US', {
+function formatDate(date: Date): string {
+  return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
   });
@@ -22,7 +22,17 @@ function formatReason(reason: string): string {
     .join(' ');
 }
 
+function parseMetadata(metadata: string): { reason: string; details: string } {
+  try {
+    return JSON.parse(metadata);
+  } catch {
+    return { reason: 'unknown', details: '' };
+  }
+}
+
 export function CaseCard({ caseData, showVanpool = true, index }: CaseCardProps) {
+  const metadata = parseMetadata(caseData.metadata);
+  
   return (
     <div className="border-l border-neutral-200 pl-6 py-4">
       {index !== undefined && (
@@ -32,29 +42,29 @@ export function CaseCard({ caseData, showVanpool = true, index }: CaseCardProps)
       )}
       <div className="mt-2 flex items-center gap-2">
         <h3 className="font-medium text-neutral-900">
-          {caseData.case_id}
+          {caseData.caseId}
         </h3>
         <StatusBadge status={caseData.status} />
       </div>
       
       {showVanpool && (
         <Link 
-          href={`/vanpools/${caseData.vanpool_id}`}
+          href={`/vanpools/${caseData.vanpoolId}`}
           className="text-sm text-neutral-500 hover:text-neutral-900 hover:underline"
         >
-          {caseData.vanpool_id}
+          {caseData.vanpoolId}
         </Link>
       )}
       
       <p className="mt-2 text-sm text-neutral-600">
-        {formatReason(caseData.metadata.reason)}
+        {formatReason(metadata.reason)}
       </p>
       <p className="text-sm text-neutral-500">
-        {caseData.metadata.details}
+        {metadata.details}
       </p>
       
       <div className="mt-3 flex items-center gap-4 text-xs text-neutral-400">
-        <span>{formatDate(caseData.created_at)}</span>
+        <span>{formatDate(caseData.createdAt)}</span>
         {caseData.outcome && (
           <span>{formatReason(caseData.outcome)}</span>
         )}

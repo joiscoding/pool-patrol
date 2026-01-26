@@ -1,12 +1,14 @@
 import Link from 'next/link';
-import { listVanpools, listCases } from '@/lib/api';
-import type { Vanpool, Case } from '@/lib/types';
+import prisma from '@/database/db';
+import type { Vanpool, Case, Rider } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
+type VanpoolWithRiders = Vanpool & { riders: Rider[] };
+
 function getOpenCaseForVanpool(vanpoolId: string, cases: Case[]): Case | undefined {
   return cases.find(c => 
-    c.vanpool_id === vanpoolId && 
+    c.vanpoolId === vanpoolId && 
     ['open', 'pending_reply', 'under_review'].includes(c.status)
   );
 }
@@ -17,15 +19,26 @@ function formatReason(reason: string): string {
   ).join(' ');
 }
 
+function parseMetadata(metadata: string): { reason: string; details: string } {
+  try {
+    return JSON.parse(metadata);
+  } catch {
+    return { reason: 'unknown', details: '' };
+  }
+}
+
 export default async function HomePage() {
-  let vanpools: Vanpool[] = [];
+  let vanpools: VanpoolWithRiders[] = [];
   let cases: Case[] = [];
   let error: string | null = null;
 
   try {
     [vanpools, cases] = await Promise.all([
-      listVanpools(),
-      listCases(),
+      prisma.vanpool.findMany({
+        include: { riders: true },
+        orderBy: { vanpoolId: 'asc' },
+      }),
+      prisma.case.findMany(),
     ]);
   } catch (e) {
     error = e instanceof Error ? e.message : 'Failed to load data';
@@ -41,11 +54,11 @@ export default async function HomePage() {
 
   // Sort vanpools: flagged ones first, then by ID
   const sortedVanpools = [...vanpools].sort((a, b) => {
-    const aCase = getOpenCaseForVanpool(a.vanpool_id, cases);
-    const bCase = getOpenCaseForVanpool(b.vanpool_id, cases);
+    const aCase = getOpenCaseForVanpool(a.vanpoolId, cases);
+    const bCase = getOpenCaseForVanpool(b.vanpoolId, cases);
     if (aCase && !bCase) return -1;
     if (!aCase && bCase) return 1;
-    return a.vanpool_id.localeCompare(b.vanpool_id);
+    return a.vanpoolId.localeCompare(b.vanpoolId);
   });
 
   return (
@@ -62,7 +75,7 @@ export default async function HomePage() {
 
       {error && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-800">Unable to connect to API server</p>
+          <p className="text-sm text-red-800">Unable to connect to database</p>
           <p className="text-xs text-red-600 mt-1">{error}</p>
         </div>
       )}
@@ -109,13 +122,14 @@ export default async function HomePage() {
           {/* Rows */}
           <div className="divide-y divide-neutral-100">
             {sortedVanpools.map((vanpool) => {
-              const openCase = getOpenCaseForVanpool(vanpool.vanpool_id, cases);
+              const openCase = getOpenCaseForVanpool(vanpool.vanpoolId, cases);
               const isFlagged = !!openCase;
+              const metadata = openCase ? parseMetadata(openCase.metadata) : null;
               
               return (
                 <Link
-                  key={vanpool.vanpool_id}
-                  href={`/vanpools/${vanpool.vanpool_id}`}
+                  key={vanpool.vanpoolId}
+                  href={`/vanpools/${vanpool.vanpoolId}`}
                   className={`grid grid-cols-[120px_1fr_80px_180px] text-sm cursor-pointer transition-colors ${
                     isFlagged 
                       ? 'bg-amber-50 hover:bg-amber-100' 
@@ -123,19 +137,19 @@ export default async function HomePage() {
                   }`}
                 >
                   <div className="px-4 py-3 font-mono font-medium text-neutral-900">
-                    {vanpool.vanpool_id}
+                    {vanpool.vanpoolId}
                   </div>
                   <div className="px-4 py-3 text-neutral-600">
-                    {vanpool.work_site}
+                    {vanpool.workSite}
                   </div>
                   <div className="px-4 py-3 text-center text-neutral-600">
                     {vanpool.riders.length}
                   </div>
                   <div className="px-4 py-3">
-                    {isFlagged ? (
+                    {isFlagged && metadata ? (
                       <span className="inline-flex items-center gap-1.5 text-amber-700">
                         <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                        {formatReason(openCase.metadata.reason)}
+                        {formatReason(metadata.reason)}
                       </span>
                     ) : (
                       <span className="inline-flex items-center gap-1.5 text-emerald-700">

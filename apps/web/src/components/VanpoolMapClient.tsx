@@ -3,7 +3,7 @@
 import { useMemo, useEffect } from 'react';
 import { MapContainer, TileLayer, CircleMarker, Popup, Tooltip, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-import type { Employee } from '@/lib/types';
+import type { Employee } from '@prisma/client';
 
 // Component to set the map view on mount
 function SetViewOnMount({ center, zoom }: { center: [number, number]; zoom: number }) {
@@ -89,7 +89,7 @@ export default function VanpoolMapClient({ factoryCoords, factoryName, employees
   const zipCodeData = useMemo(() => {
     const counts = new Map<string, number>();
     employees.forEach((emp) => {
-      const zip = emp.home_zip;
+      const zip = emp.homeZip;
       counts.set(zip, (counts.get(zip) || 0) + 1);
     });
 
