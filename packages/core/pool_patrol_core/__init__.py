@@ -1,5 +1,6 @@
 """Pool Patrol Core - Shared models, config, and utilities."""
 
+# Pydantic models (for API request/response validation)
 from pool_patrol_core.models import (
     Case,
     CaseMetadata,
@@ -21,6 +22,26 @@ from pool_patrol_core.models import (
     VanpoolStatus,
 )
 
+# Database utilities
+from pool_patrol_core.database import (
+    get_session,
+    get_engine,
+    init_db,
+    reset_engine,
+    Base,
+)
+
+# SQLAlchemy models (for database queries)
+# Import with DB prefix to distinguish from Pydantic models
+from pool_patrol_core.db_models import (
+    Vanpool as DBVanpool,
+    Employee as DBEmployee,
+    Rider as DBRider,
+    Case as DBCase,
+    EmailThread as DBEmailThread,
+    Message as DBMessage,
+)
+
 __all__ = [
     # Enums
     "VanpoolStatus",
@@ -30,19 +51,29 @@ __all__ = [
     "MessageDirection",
     "MessageStatus",
     "ClassificationBucket",
-    # Vanpool models
+    # Pydantic models (API)
     "Coordinates",
     "Rider",
     "Vanpool",
-    # Employee models
     "DaySchedule",
     "Shifts",
     "Employee",
-    # Case models
     "CaseMetadata",
     "Case",
-    # Email models
     "Classification",
     "Message",
     "EmailThread",
+    # Database utilities
+    "get_session",
+    "get_engine",
+    "init_db",
+    "reset_engine",
+    "Base",
+    # SQLAlchemy models (Database)
+    "DBVanpool",
+    "DBEmployee",
+    "DBRider",
+    "DBCase",
+    "DBEmailThread",
+    "DBMessage",
 ]

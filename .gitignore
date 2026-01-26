@@ -90,3 +90,8 @@ build/
 # Temporary files
 tmp/
 temp/
+
+# Database
+data/
+*.db
+*.db-journal

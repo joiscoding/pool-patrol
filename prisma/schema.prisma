@@ -1,0 +1,205 @@
+// Pool Patrol - Prisma Schema
+// This is the single source of truth for the database schema.
+// 
+// Usage:
+//   - prisma migrate dev    → Create/update database tables
+//   - prisma generate       → Generate TypeScript types + Prisma Client
+//   - sqlacodegen           → Generate SQLAlchemy models from DB (for Python)
+
+generator client {
+  provider = "prisma-client-js"
+  // Client will be generated to node_modules/.prisma/client by default
+  // when running from apps/web
+}
+
+datasource db {
+  // SQLite for development, PostgreSQL for production
+  // To switch to PostgreSQL, change provider and DATABASE_URL
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Note: Set DATABASE_URL in your .env file:
+//   SQLite:     DATABASE_URL="file:./dev.db"
+//   PostgreSQL: DATABASE_URL="postgresql://user:pass@localhost:5432/pool_patrol"
+
+// =============================================================================
+// Enums
+// =============================================================================
+
+enum VanpoolStatus {
+  active
+  inactive
+  suspended
+}
+
+enum EmployeeStatus {
+  active
+  inactive
+  on_leave
+}
+
+enum CaseStatus {
+  open
+  pending_reply
+  under_review
+  resolved
+  cancelled
+}
+
+enum ThreadStatus {
+  active
+  closed
+  archived
+}
+
+enum MessageDirection {
+  inbound
+  outbound
+}
+
+enum MessageStatus {
+  draft
+  sent
+  read
+  archived
+}
+
+enum ClassificationBucket {
+  address_change
+  shift_change
+  dispute
+  acknowledgment
+  unknown
+}
+
+// =============================================================================
+// Vanpool Models
+// =============================================================================
+
+model Vanpool {
+  id              String        @id @default(cuid())
+  vanpoolId       String        @unique @map("vanpool_id")
+  workSite        String        @map("work_site")
+  workSiteAddress String        @map("work_site_address")
+  workSiteCoords  String        @map("work_site_coords") // JSON: { lat: number, lng: number }
+  capacity        Int
+  status          VanpoolStatus @default(active)
+  createdAt       DateTime      @default(now()) @map("created_at")
+  updatedAt       DateTime      @updatedAt @map("updated_at")
+
+  // Relations
+  riders       Rider[]
+  cases        Case[]
+  emailThreads EmailThread[]
+
+  @@map("vanpools")
+}
+
+// =============================================================================
+// Employee Models
+// =============================================================================
+
+model Employee {
+  id            String         @id @default(cuid())
+  employeeId    String         @unique @map("employee_id")
+  firstName     String         @map("first_name")
+  lastName      String         @map("last_name")
+  email         String         @unique
+  businessTitle String         @map("business_title")
+  level         String // P3, P4, P5, P6, M3, M4, etc.
+  manager       String
+  supervisor    String
+  timeType      String         @map("time_type") // full_time, part_time, contract
+  dateOnboarded DateTime       @map("date_onboarded")
+  workSite      String         @map("work_site")
+  homeAddress   String         @map("home_address")
+  homeZip       String         @map("home_zip")
+  shifts        String // JSON: { type: string, schedule: DaySchedule[], pto_dates: string[] }
+  status        EmployeeStatus @default(active)
+  createdAt     DateTime       @default(now()) @map("created_at")
+  updatedAt     DateTime       @updatedAt @map("updated_at")
+
+  // Relations
+  vanpoolRiders Rider[]
+
+  @@map("employees")
+}
+
+// Junction table for Vanpool <-> Employee (riders)
+model Rider {
+  id            String   @id @default(cuid())
+  participantId String   @map("participant_id")
+  vanpoolId     String   @map("vanpool_id")
+  employeeId    String   @map("employee_id")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  // Relations
+  vanpool  Vanpool  @relation(fields: [vanpoolId], references: [vanpoolId], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [email], onDelete: Cascade)
+
+  @@unique([vanpoolId, employeeId])
+  @@map("riders")
+}
+
+// =============================================================================
+// Case Models
+// =============================================================================
+
+model Case {
+  id         String     @id @default(cuid())
+  caseId     String     @unique @map("case_id")
+  vanpoolId  String     @map("vanpool_id")
+  createdAt  DateTime   @default(now()) @map("created_at")
+  updatedAt  DateTime   @updatedAt @map("updated_at")
+  status     CaseStatus @default(open)
+  metadata   String // JSON: { reason: string, details: string, additional_info: object }
+  outcome    String?
+  resolvedAt DateTime?  @map("resolved_at")
+
+  // Relations
+  vanpool     Vanpool      @relation(fields: [vanpoolId], references: [vanpoolId])
+  emailThread EmailThread?
+
+  @@map("cases")
+}
+
+// =============================================================================
+// Email Thread Models
+// =============================================================================
+
+model EmailThread {
+  id        String       @id @default(cuid())
+  threadId  String       @unique @map("thread_id")
+  caseId    String       @unique @map("case_id")
+  vanpoolId String       @map("vanpool_id")
+  subject   String
+  createdAt DateTime     @default(now()) @map("created_at")
+  status    ThreadStatus @default(active)
+
+  // Relations
+  case     Case      @relation(fields: [caseId], references: [caseId])
+  vanpool  Vanpool   @relation(fields: [vanpoolId], references: [vanpoolId])
+  messages Message[]
+
+  @@map("email_threads")
+}
+
+model Message {
+  id             String           @id @default(cuid())
+  messageId      String           @unique @map("message_id")
+  threadId       String           @map("thread_id")
+  fromEmail      String           @map("from_email")
+  toEmails       String           @map("to_emails") // JSON array of emails
+  sentAt         DateTime         @map("sent_at")
+  body           String
+  direction      MessageDirection
+  classification String? // JSON: { bucket: ClassificationBucket, confidence: number } or null
+  status         MessageStatus    @default(draft)
+  createdAt      DateTime         @default(now()) @map("created_at")
+
+  // Relations
+  thread EmailThread @relation(fields: [threadId], references: [threadId], onDelete: Cascade)
+
+  @@map("messages")
+}

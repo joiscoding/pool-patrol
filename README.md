@@ -23,6 +23,8 @@ A two-part project: (1) Self-hosted LangSmith platform architecture on AWS EKS, 
 |-----------|------------|
 | Backend API | FastAPI (Python) |
 | Frontend | Next.js (TypeScript) |
+| Database | SQLite (dev) / PostgreSQL (prod) |
+| ORM | Prisma (schema) + SQLAlchemy (Python) |
 | Agent Framework | LangGraph |
 | Tools | LangChain |
 | Observability | LangSmith |
@@ -39,17 +41,28 @@ pool_patrol/
 ├── docs/
 │   └── TECHNICAL_DESIGN.md
 │
+├── prisma/
+│   ├── schema.prisma           # Database schema (source of truth)
+│   └── seed.ts                 # TypeScript seed script
+│
 ├── apps/
 │   ├── api/                    # FastAPI backend
-│   └── web/                    # Next.js frontend
+│   └── web/                    # Next.js frontend + Prisma client
 │
 ├── packages/
-│   ├── core/                   # Shared models, config
+│   ├── core/                   # Shared models, config, database utilities
+│   │   └── pool_patrol_core/
+│   │       ├── models.py       # Pydantic models (API)
+│   │       ├── db_models.py    # SQLAlchemy models (Database)
+│   │       └── database.py     # Database connection utilities
 │   ├── tools/                  # LangChain tool wrappers
 │   ├── graph/                  # LangGraph multi-agent workflow
 │   └── eval/                   # LangSmith evaluation
 │
-├── mock/                       # Mock data for POC
+├── mock/                       # Mock data (JSON) for seeding
+│
+├── scripts/
+│   └── seed_database.py        # Python seed script
 │
 └── tests/
 ```
@@ -113,6 +126,41 @@ cp .env.example .env
 # Edit .env with your API keys (OPENAI_API_KEY, LANGSMITH_API_KEY, etc.)
 ```
 
+### Database Setup
+
+The project uses **Prisma** as the schema source of truth, with **SQLAlchemy** for Python queries.
+
+```bash
+# Set DATABASE_URL in your .env file
+# SQLite (development):
+DATABASE_URL="file:./dev.db"
+
+# PostgreSQL (production):
+# DATABASE_URL="postgresql://user:pass@localhost:5432/pool_patrol"
+```
+
+**Option A: Using Prisma (recommended for TypeScript + schema migrations)**
+
+```bash
+cd apps/web
+
+# Generate Prisma client + create database
+bun run db:push
+
+# Seed database from mock data
+bun run db:seed
+
+# (Optional) View data in Prisma Studio
+bun run db:studio
+```
+
+**Option B: Using Python directly (simpler for Python-only work)**
+
+```bash
+# Seed database from mock JSON files
+poetry run python scripts/seed_database.py
+```
+
 ### Run the API
 
 ```bash
@@ -157,6 +205,7 @@ poetry run python scripts/run_case.py --vanpool-id VP-101
 ## Documentation
 
 - [Technical Design](docs/TECHNICAL_DESIGN.md) - Architecture, trade-offs, agent design
+- [Database](docs/DATABASE.md) - Database setup, schema changes, SQLAlchemy usage
 
 ## License
 
