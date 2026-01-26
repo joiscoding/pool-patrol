@@ -97,6 +97,7 @@ class Rider(BaseModel):
 
     participant_id: str
     employee_id: str  # References Employee.employee_id
+    email: str | None = None  # Employee email for convenience (populated from join)
 
 
 class Vanpool(BaseModel):
@@ -133,6 +134,19 @@ class Shift(BaseModel):
     schedule: list[DaySchedule]
 
 
+class Shifts(BaseModel):
+    """Combined shift and PTO information for an employee.
+    
+    This is a "view model" that combines:
+    - The shift template (name/type and schedule)
+    - The employee's specific PTO dates
+    """
+
+    type: str  # Shift name (e.g., "Day Shift")
+    schedule: list[DaySchedule]
+    pto_dates: list[str] = Field(default_factory=list)  # YYYY-MM-DD format
+
+
 class Employee(BaseModel):
     """Employee data model."""
 
@@ -149,8 +163,7 @@ class Employee(BaseModel):
     work_site: str
     home_address: str
     home_zip: str
-    shift_id: str  # References Shift.id
-    pto_dates: list[str] = Field(default_factory=list)  # YYYY-MM-DD format
+    shifts: Shifts  # Combined shift schedule and employee PTO dates
     status: EmployeeStatus
 
 

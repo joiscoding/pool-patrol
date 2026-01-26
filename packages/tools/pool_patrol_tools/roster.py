@@ -49,7 +49,7 @@ def get_vanpool_roster(vanpool_id: str) -> dict:
         # Get riders with their employee info via join
         riders_with_employees = (
             session.query(Rider, Employee)
-            .join(Employee, Rider.employee_id == Employee.email)
+            .join(Employee, Rider.employee_id == Employee.employee_id)
             .filter(Rider.vanpool_id == vanpool_id)
             .all()
         )

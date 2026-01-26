@@ -16,8 +16,10 @@ from pool_patrol_core.models import (
     MessageDirection,
     MessageStatus,
     Rider,
+    Shift,
     Shifts,
     ThreadStatus,
+    TimeType,
     Vanpool,
     VanpoolStatus,
 )
@@ -34,6 +36,7 @@ from pool_patrol_core.database import (
 # SQLAlchemy models (for database queries)
 # Import with DB prefix to distinguish from Pydantic models
 from pool_patrol_core.db_models import (
+    Shift as DBShift,
     Vanpool as DBVanpool,
     Employee as DBEmployee,
     Rider as DBRider,
@@ -46,6 +49,7 @@ __all__ = [
     # Enums
     "VanpoolStatus",
     "EmployeeStatus",
+    "TimeType",
     "CaseStatus",
     "ThreadStatus",
     "MessageDirection",
@@ -56,6 +60,7 @@ __all__ = [
     "Rider",
     "Vanpool",
     "DaySchedule",
+    "Shift",
     "Shifts",
     "Employee",
     "CaseMetadata",
@@ -70,6 +75,7 @@ __all__ = [
     "reset_engine",
     "Base",
     # SQLAlchemy models (Database)
+    "DBShift",
     "DBVanpool",
     "DBEmployee",
     "DBRider",
