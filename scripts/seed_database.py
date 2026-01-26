@@ -21,7 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from pool_patrol_core.database import get_session, get_engine, Base
 from pool_patrol_core.db_models import (
-    Vanpool, Employee, Rider, Case, EmailThread, Message
+    Shift, Vanpool, Employee, Rider, Case, EmailThread, Message
 )
 
 
@@ -58,6 +58,7 @@ def seed_database():
     employees_data = load_json("employees.json")
     cases_data = load_json("cases.json")
     email_threads_data = load_json("email_threads.json")
+    shifts_data = load_json("shifts.json")
 
     with get_session() as session:
         # Clear existing data
@@ -67,13 +68,35 @@ def seed_database():
         session.query(Case).delete()
         session.query(Rider).delete()
         session.query(Employee).delete()
+        session.query(Shift).delete()
         session.query(Vanpool).delete()
+        session.commit()
+        print("   Done.\n")
+
+        # Seed Shifts
+        print(f"🕒 Seeding {len(shifts_data)} shifts...")
+        shift_id_map = {}
+        for shift_data in shifts_data:
+            shift = Shift(
+                name=shift_data["name"],
+                schedule=json.dumps(shift_data["schedule"]),
+            )
+            session.add(shift)
+            session.flush()
+            shift_id_map[shift_data["id"]] = shift.id
         session.commit()
         print("   Done.\n")
 
         # Seed Employees
         print(f"👤 Seeding {len(employees_data)} employees...")
         for emp in employees_data:
+            shift_id = shift_id_map.get(emp["shift_id"])
+            if not shift_id:
+                print(
+                    f"   ⚠️  Shift not found for {emp['employee_id']}: {emp['shift_id']}"
+                )
+                continue
+
             employee = Employee(
                 id=str(uuid.uuid4()),
                 employee_id=emp["employee_id"],
@@ -89,7 +112,8 @@ def seed_database():
                 work_site=emp["work_site"],
                 home_address=emp["home_address"],
                 home_zip=emp["home_zip"],
-                shifts=json.dumps(emp["shifts"]),
+                shift_id=shift_id,
+                pto_dates=json.dumps(emp["pto_dates"]),
                 status=emp["status"],
             )
             session.add(employee)
@@ -107,6 +131,7 @@ def seed_database():
                 work_site_coords=json.dumps(vp["work_site_coords"]),
                 capacity=vp["capacity"],
                 status=vp["status"],
+                coordinator_id=vp.get("coordinator_id"),
             )
             session.add(vanpool)
         session.commit()
@@ -119,7 +144,7 @@ def seed_database():
             for rider_data in vp["riders"]:
                 # Check if employee exists
                 employee = session.query(Employee).filter(
-                    Employee.email == rider_data["email"]
+                    Employee.employee_id == rider_data["employee_id"]
                 ).first()
                 
                 if employee:
@@ -127,12 +152,14 @@ def seed_database():
                         id=str(uuid.uuid4()),
                         participant_id=rider_data["participant_id"],
                         vanpool_id=vp["vanpool_id"],
-                        employee_id=rider_data["email"],
+                        employee_id=rider_data["employee_id"],
                     )
                     session.add(rider)
                     rider_count += 1
                 else:
-                    print(f"   ⚠️  Skipping rider {rider_data['email']} - employee not found")
+                    print(
+                        f"   ⚠️  Skipping rider {rider_data['employee_id']} - employee not found"
+                    )
         session.commit()
         print(f"   Created {rider_count} rider records.\n")
 
@@ -180,7 +207,8 @@ def seed_database():
                     sent_at=parse_date(msg_data["sent_at"]),
                     body=msg_data["body"],
                     direction=msg_data["direction"],
-                    classification=json.dumps(msg_data["classification"]) if msg_data["classification"] else None,
+                    classification_bucket=msg_data.get("classification_bucket"),
+                    classification_confidence=msg_data.get("classification_confidence"),
                     status=msg_data["status"],
                 )
                 session.add(message)

@@ -5,11 +5,33 @@
  * Run with: npx prisma db seed
  */
 
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient, TimeType, ClassificationBucket } from '@prisma/client';
 import * as fs from 'fs';
 import * as path from 'path';
 
 const prisma = new PrismaClient();
+
+// Map string to TimeType enum
+function toTimeType(value: string): TimeType {
+  const mapping: Record<string, TimeType> = {
+    'full_time': 'full_time',
+    'part_time': 'part_time',
+    'contract': 'contract',
+  };
+  return mapping[value] ?? 'full_time';
+}
+
+// Map string to ClassificationBucket enum
+function toClassificationBucket(value: string): ClassificationBucket {
+  const mapping: Record<string, ClassificationBucket> = {
+    'address_change': 'address_change',
+    'shift_change': 'shift_change',
+    'dispute': 'dispute',
+    'acknowledgment': 'acknowledgment',
+    'unknown': 'unknown',
+  };
+  return mapping[value] ?? 'unknown';
+}
 
 // Path to mock data
 const MOCK_DIR = path.join(__dirname, '..', 'mock');
@@ -21,7 +43,7 @@ interface Coordinates {
 
 interface MockRider {
   participant_id: string;
-  email: string;
+  employee_id: string;
 }
 
 interface MockVanpool {
@@ -32,6 +54,7 @@ interface MockVanpool {
   riders: MockRider[];
   capacity: number;
   status: 'active' | 'inactive' | 'suspended';
+  coordinator_id?: string | null;
 }
 
 interface DaySchedule {
@@ -40,10 +63,10 @@ interface DaySchedule {
   end_time: string;
 }
 
-interface Shifts {
-  type: string;
+interface MockShift {
+  id: string;
+  name: string;
   schedule: DaySchedule[];
-  pto_dates: string[];
 }
 
 interface MockEmployee {
@@ -60,7 +83,8 @@ interface MockEmployee {
   work_site: string;
   home_address: string;
   home_zip: string;
-  shifts: Shifts;
+  shift_id: string;
+  pto_dates: string[];
   status: 'active' | 'inactive' | 'on_leave';
 }
 
@@ -82,11 +106,6 @@ interface MockCase {
   resolved_at: string | null;
 }
 
-interface Classification {
-  bucket: string;
-  confidence: number;
-}
-
 interface MockMessage {
   message_id: string;
   from: string;
@@ -94,7 +113,8 @@ interface MockMessage {
   sent_at: string;
   body: string;
   direction: 'inbound' | 'outbound';
-  classification: Classification | null;
+  classification_bucket: string | null;
+  classification_confidence: number | null;
   status: 'draft' | 'sent' | 'read' | 'archived';
 }
 
@@ -124,6 +144,7 @@ async function main() {
   await prisma.case.deleteMany();
   await prisma.rider.deleteMany();
   await prisma.employee.deleteMany();
+  await prisma.shift.deleteMany();
   await prisma.vanpool.deleteMany();
   console.log('   Done.\n');
 
@@ -132,10 +153,33 @@ async function main() {
   const employees = loadJson<MockEmployee[]>('employees.json');
   const cases = loadJson<MockCase[]>('cases.json');
   const emailThreads = loadJson<MockEmailThread[]>('email_threads.json');
+  const shifts = loadJson<MockShift[]>('shifts.json');
+
+  // Seed shifts from mock data
+  console.log('📅 Creating shift types...');
+  const shiftIdMap = new Map<string, string>(); // mock shift id -> db shift id
+  for (const shift of shifts) {
+    const created = await prisma.shift.create({
+      data: {
+        name: shift.name,
+        schedule: JSON.stringify(shift.schedule),
+      },
+    });
+    shiftIdMap.set(shift.id, created.id);
+  }
+  console.log(`   Created ${shifts.length} shift types.\n`);
 
   // Seed Employees
   console.log(`👤 Seeding ${employees.length} employees...`);
+  const employeeIdSet = new Set<string>();
+  
   for (const emp of employees) {
+    const shiftId = shiftIdMap.get(emp.shift_id);
+    if (!shiftId) {
+      console.warn(`   ⚠️  Shift not found for ${emp.employee_id}: ${emp.shift_id}`);
+      continue;
+    }
+
     await prisma.employee.create({
       data: {
         employeeId: emp.employee_id,
@@ -146,15 +190,17 @@ async function main() {
         level: emp.level,
         manager: emp.manager,
         supervisor: emp.supervisor,
-        timeType: emp.time_type,
+        timeType: toTimeType(emp.time_type),
         dateOnboarded: new Date(emp.date_onboarded),
         workSite: emp.work_site,
         homeAddress: emp.home_address,
         homeZip: emp.home_zip,
-        shifts: JSON.stringify(emp.shifts),
+        shiftId: shiftId,
+        ptoDates: JSON.stringify(emp.pto_dates),
         status: emp.status,
       },
     });
+    employeeIdSet.add(emp.employee_id);
   }
   console.log('   Done.\n');
 
@@ -168,6 +214,7 @@ async function main() {
         workSiteAddress: vp.work_site_address,
         workSiteCoords: JSON.stringify(vp.work_site_coords),
         capacity: vp.capacity,
+        coordinatorId: vp.coordinator_id ?? null,
         status: vp.status,
       },
     });
@@ -179,17 +226,22 @@ async function main() {
   let riderCount = 0;
   for (const vp of vanpools) {
     for (const rider of vp.riders) {
+      const employeeId = rider.employee_id;
+      if (!employeeIdSet.has(employeeId)) {
+        console.warn(`   ⚠️  Skipping rider ${employeeId} - employee not found`);
+        continue;
+      }
       try {
         await prisma.rider.create({
           data: {
             participantId: rider.participant_id,
             vanpoolId: vp.vanpool_id,
-            employeeId: rider.email,
+            employeeId,
           },
         });
         riderCount++;
       } catch (e) {
-        console.warn(`   ⚠️  Skipping rider ${rider.email} - employee not found`);
+        console.warn(`   ⚠️  Skipping rider ${employeeId} - ${e}`);
       }
     }
   }
@@ -239,7 +291,10 @@ async function main() {
           sentAt: new Date(msg.sent_at),
           body: msg.body,
           direction: msg.direction,
-          classification: msg.classification ? JSON.stringify(msg.classification) : null,
+          classificationBucket: msg.classification_bucket
+            ? toClassificationBucket(msg.classification_bucket)
+            : null,
+          classificationConfidence: msg.classification_confidence,
           status: msg.status,
         },
       });

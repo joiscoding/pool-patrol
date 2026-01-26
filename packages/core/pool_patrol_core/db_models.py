@@ -7,6 +7,7 @@ Note: JSON fields are stored as TEXT in SQLite and used with json.loads/dumps.
 """
 
 import json
+import uuid
 from datetime import datetime
 from typing import Any, Optional
 
@@ -108,7 +109,7 @@ class Shift(Base):
     
     __tablename__ = "shifts"
 
-    id = Column(String, primary_key=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String, unique=True, nullable=False)  # "Day Shift", "Night Shift", etc.
     schedule = Column(Text, nullable=False)  # JSON: [{ day, start_time, end_time }, ...]
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
@@ -136,19 +137,19 @@ class Vanpool(Base):
     
     __tablename__ = "vanpools"
 
-    id = Column(String, primary_key=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     vanpool_id = Column(String, unique=True, nullable=False)
     work_site = Column(String, nullable=False)
     work_site_address = Column(String, nullable=False)
     work_site_coords = Column(Text, nullable=False)  # JSON: { lat, lng }
     capacity = Column(Integer, nullable=False)
-    coordinator_id = Column(String, ForeignKey("employees.employee_id"), nullable=True)
+    coordinator_id = Column(String, ForeignKey("employees.employee_id"), unique=True, nullable=True)
     status = Column(String, default=VanpoolStatus.ACTIVE, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     # Relationships
-    coordinator = relationship("Employee", back_populates="coordinated_vanpools", foreign_keys=[coordinator_id])
+    coordinator = relationship("Employee", back_populates="coordinated_vanpool", foreign_keys=[coordinator_id])
     riders = relationship("Rider", back_populates="vanpool", cascade="all, delete-orphan")
     cases = relationship("Case", back_populates="vanpool")
     email_threads = relationship("EmailThread", back_populates="vanpool")
@@ -177,7 +178,7 @@ class Employee(Base):
     
     __tablename__ = "employees"
 
-    id = Column(String, primary_key=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     employee_id = Column(String, unique=True, nullable=False)
     first_name = Column(String, nullable=False)
     last_name = Column(String, nullable=False)
@@ -200,7 +201,7 @@ class Employee(Base):
     # Relationships
     shift = relationship("Shift", back_populates="employees")
     vanpool_riders = relationship("Rider", back_populates="employee", cascade="all, delete-orphan")
-    coordinated_vanpools = relationship("Vanpool", back_populates="coordinator", foreign_keys="Vanpool.coordinator_id")
+    coordinated_vanpool = relationship("Vanpool", back_populates="coordinator", foreign_keys="Vanpool.coordinator_id", uselist=False)
 
     @property
     def pto_dates_list(self) -> list[str]:
@@ -239,7 +240,7 @@ class Rider(Base):
     
     __tablename__ = "riders"
 
-    id = Column(String, primary_key=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     participant_id = Column(String, nullable=False)  # External ID from source system
     vanpool_id = Column(String, ForeignKey("vanpools.vanpool_id", ondelete="CASCADE"), nullable=False)
     employee_id = Column(String, ForeignKey("employees.employee_id", ondelete="CASCADE"), nullable=False)
@@ -259,7 +260,7 @@ class Case(Base):
     
     __tablename__ = "cases"
 
-    id = Column(String, primary_key=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     case_id = Column(String, unique=True, nullable=False)
     vanpool_id = Column(String, ForeignKey("vanpools.vanpool_id"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
@@ -299,7 +300,7 @@ class EmailThread(Base):
     
     __tablename__ = "email_threads"
 
-    id = Column(String, primary_key=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     thread_id = Column(String, unique=True, nullable=False)
     case_id = Column(String, ForeignKey("cases.case_id"), unique=True, nullable=False)
     vanpool_id = Column(String, ForeignKey("vanpools.vanpool_id"), nullable=False)
@@ -332,7 +333,7 @@ class Message(Base):
     
     __tablename__ = "messages"
 
-    id = Column(String, primary_key=True)
+    id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     message_id = Column(String, unique=True, nullable=False)
     thread_id = Column(String, ForeignKey("email_threads.thread_id", ondelete="CASCADE"), nullable=False)
     from_email = Column(String, nullable=False)
