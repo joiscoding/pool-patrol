@@ -25,11 +25,15 @@ Pool Patrol uses a **Prisma-first** approach where the Prisma schema is the sing
           │               │                  │
           ▼               ▼                  ▼
    ┌─────────────┐ ┌─────────────┐ ┌─────────────────┐
-   │  DATABASE   │ │ TypeScript  │ │   Python API    │
-   │   SQLite/   │ │   Types +   │ │   & Tools       │
-   │ PostgreSQL  │ │   Client    │ │                 │
+   │  DATABASE   │ │ Next.js     │ │   Python API    │
+   │   SQLite/   │ │ Frontend    │ │   & Agent Tools │
+   │ PostgreSQL  │ │ (reads)     │ │                 │
    └─────────────┘ └─────────────┘ └─────────────────┘
 ```
+
+**Data Access Pattern:**
+- **Frontend (Next.js)**: Uses Prisma Client directly in Server Components to read from database
+- **Backend (FastAPI)**: Uses SQLAlchemy for agent operations and writes
 
 ## File Locations
 
@@ -37,6 +41,7 @@ Pool Patrol uses a **Prisma-first** approach where the Prisma schema is the sing
 |------|---------|
 | `prisma/schema.prisma` | Database schema definition (source of truth) |
 | `prisma/seed.ts` | TypeScript seed script for populating database |
+| `apps/web/src/database/db.ts` | Prisma Client singleton for frontend queries |
 | `packages/core/pool_patrol_core/database.py` | SQLAlchemy engine and session management |
 | `packages/core/pool_patrol_core/db_models.py` | SQLAlchemy ORM models |
 | `packages/core/pool_patrol_core/models.py` | Pydantic models for API validation |

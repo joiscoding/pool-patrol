@@ -339,15 +339,16 @@ pool_patrol/
 │   └── TECHNICAL_DESIGN.md
 │
 ├── apps/
-│   ├── api/                          # FastAPI backend
+│   ├── api/                          # FastAPI backend (agent operations)
 │   │   └── pool_patrol_api/
 │   │       ├── main.py
 │   │       └── routers/
 │   │
-│   └── web/                          # Next.js frontend
+│   └── web/                          # Next.js frontend (reads from DB via Prisma)
 │       └── src/
 │           ├── app/
-│           └── components/
+│           ├── components/
+│           └── database/             # Prisma Client singleton
 │
 ├── packages/
 │   ├── core/                         # Shared models, config

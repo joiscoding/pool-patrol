@@ -161,15 +161,9 @@ bun run db:studio
 poetry run python scripts/seed_database.py
 ```
 
-### Run the API
-
-```bash
-poetry run uvicorn pool_patrol_api.main:app --reload --port 8000
-```
-
-The API will be available at http://localhost:8000
-
 ### Run the Frontend
+
+The frontend reads directly from the SQLite database via Prisma Client.
 
 ```bash
 cd apps/web
@@ -179,22 +173,15 @@ bun dev --port 3000
 
 The web UI will be available at http://localhost:3000
 
-### Testing the UI
+### Run the API (for agent operations)
 
-To test the full application, run both servers simultaneously in separate terminals:
+The FastAPI backend is used for agent operations (audit, outreach). For basic frontend viewing, only the web server is needed.
 
-**Terminal 1 - API Server:**
 ```bash
 poetry run uvicorn pool_patrol_api.main:app --reload --port 8000
 ```
 
-**Terminal 2 - Web Dev Server:**
-```bash
-cd apps/web
-bun dev --port 3000
-```
-
-Then open http://localhost:3000 in your browser to view the UI. The web app will communicate with the API at http://localhost:8000.
+The API will be available at http://localhost:8000 with docs at `/docs`.
 
 ### Run the Agent (CLI)
 
