@@ -108,101 +108,157 @@ Automate vanpool misuse detection (location/shift mismatches). Target: reduce ~2
 
 ### Multi-Agent Architecture
 
-**Approach:** 2 specialized agents with inter-agent communication. No supervisor/orchestrator.
+**Approach:** 4 agents in a hierarchical structure with Case Manager as orchestrator.
 
-| Agent | Responsibility | Tools |
-|-------|----------------|-------|
-| **Audit Agent** | Validates employee location and shift data against vanpool requirements. Reasons about dynamic shift types (which have varying structures) and edge cases. Always runs both location and shift checks for thoroughness. | `get_employee_profile`, `check_commute_distance`, `get_employee_shifts`, `get_vanpool_roster` |
-| **Outreach Agent** | Sends investigation emails, monitors for replies, classifies responses into action buckets. Can request re-audit from the Audit Agent. | `send_email`, `get_replies`, `classify_reply` |
+| Agent | Responsibility | Tools / Capabilities |
+|-------|----------------|---------------------|
+| **Case Manager** | Orchestrates verification (parallel or selective), synthesizes specialist results, owns case lifecycle (timeouts, re-audit), routes to Outreach on failures, answers "why did this fail?" | Delegates to specialists - no direct tools |
+| **Location Specialist** | Validates employee home location against vanpool pickup. Returns verdict + reasoning + evidence with citations. | `get_employee_profile`, `check_commute_distance` |
+| **Shift Specialist** | Validates employee shift schedule against vanpool hours. Reasons about dynamic shift types. Returns verdict + reasoning + evidence with citations. | `get_employee_shifts`, `get_vanpool_roster` |
+| **Outreach Agent** | Sends investigation emails, monitors replies, classifies responses into buckets. Returns classification to Case Manager. | `send_email`, `get_replies`, `classify_reply` |
 
-**Why 2 agents instead of 3?**
-- Location and shift validation are conceptually related (both answer: "Does this employee's situation match their vanpool enrollment?")
-- Combining them into one Audit Agent allows reasoning across both signals
-- Extensible: future audit criteria (badge swipes, parking data) can be added as tools to the same agent
+**Why this architecture?**
 
-### Architecture Trade-off: Deterministic Graph vs Supervisor
+1. **One agent, one decision** - Each specialist makes a single, focused decision in their domain. This improves reasoning quality and makes outputs more predictable.
 
-| Aspect | Deterministic Graph (current) | Supervisor/Orchestrator |
-|--------|------------------------------|------------------------|
-| **Flexibility** | Low - routing hardcoded in edges | High - LLM decides dynamically |
-| **Latency** | Lower - no routing LLM calls | Higher - extra LLM call per decision |
-| **Cost** | Lower - fewer LLM tokens | Higher - more LLM calls |
-| **Complexity** | Simpler - easier to trace/debug | More complex - harder to debug |
-| **When to use** | Predictable workflows, few nodes | Unpredictable, many possible paths |
+2. **Agent-as-tool over sequential chains** - The Case Manager invokes specialists as tools rather than chaining them sequentially. This enables parallel execution, selective re-verification ("just re-check location"), and cleaner error handling.
 
-**Current decision:** Deterministic graph with inter-agent communication because:
-- Only 2 agents with clear responsibilities
-- Workflow is predictable (verify → communicate → re-verify loop → decide)
-- Agents communicate via explicit requests (e.g., "re-verify this employee")
+3. **Hierarchical over flat** - Hierarchical agent systems (orchestrator + specialists) outperform flat multi-agent systems. The Case Manager provides synthesis and lifecycle management that would be lost in peer-to-peer communication.
 
-**Future evolution:** If the graph grows to 10+ nodes with complex branching, migrate to a supervisor pattern where an LLM orchestrates which agent to call next.
+4. **Scalability** - Adding new verification types (badge swipes, parking, expenses) is trivial: implement a new specialist with the same interface (verdict + reasoning + evidence).
 
-### Workflow State Machine
+5. **Structured evidence for humans** - Each specialist returns citations and reasoning that the Case Manager aggregates for the dashboard. Users can ask "Why did case 123 fail?" and get specific evidence.
+
+### Specialist Output Contract
+
+Each verification specialist returns a structured result:
+
+```python
+{
+    "verdict": "pass" | "fail",
+    "confidence": 0.0 - 1.0,
+    "reasoning": "Human-readable explanation of the decision",
+    "evidence": [
+        {"type": "employee_profile", "field": "home_zip", "value": "85001"},
+        {"type": "distance_check", "miles": 380, "threshold": 50}
+    ]
+}
+```
+
+This enables:
+- Case Manager to synthesize across specialists
+- Dashboard to display evidence with citations
+- Selective re-verification without re-running all checks
+
+### Verification Workflow (Sequence Diagram)
 
 ```
-┌─────────────────────────────────────────────────────────────────────────┐
-│                            AUDIT AGENT                                  │
-│                                                                         │
-│            [Check Location] [Check Shift]                               │
-│                         │                                               │
-│              ┌──────────┴──────────┐                                    │
-│              ▼                     ▼                                    │
-│           ✓ PASS              ✗ FAIL ─────────────────────────────┐     │
-│              │                                                    │     │
-│              ▼                                                    │     │
-│         CASE CLOSED                                               │     │
-│                                                                   │     │
-│   ▲ (re-audit request)                                            │     │
-│   │                                                               │     │
-└───┼───────────────────────────────────────────────────────────────┼─────┘
-    │                                                               │
-    │                                                               ▼
-    │  ┌──────────────────────────────────────────────────────────────────┐
-    │  │                       OUTREACH AGENT                             │
-    │  │                                                                  │
-    │  │   Send investigation email ──► Wait for replies ──► Classify     │
-    │  │                                                         │        │
-    │  │                    ┌──────────────┬─────────────────────┴──┐     │
-    │  │                    ▼              ▼                        ▼     │
-    │  │             "data_updated"    "unknown"               timeout    │
-    │  │                    │              │                        │     │
-    └──┼────────────────────┘              ▼                        │     │
-       │                              HITL label                    │     │
-       │                                                            │     │
-       └────────────────────────────────────────────────────────────┘     │
-                                                                          │
-         (re-audit before pre-cancel in case of silent fix)               │
-                                                                          │
-                                          │                               │
-                                          ▼                               │
-                               ┌──────────┴──────────┐                    │
-                               ▼                     ▼                    │
-                            ✓ PASS              ✗ FAIL                    │
-                               │                     │                    │
-                               ▼                     ▼                    │
-                          CASE CLOSED         Pre-Cancel ──► HITL         │
-                        (silent fix)                                      │
-                                                                          │
-       └──────────────────────────────────────────────────────────────────┘
+                        Pool Patrol Case Verification Workflow
+
+┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
+│ Case Manager │   │   Location   │   │    Shift     │   │   Outreach   │
+│              │   │  Specialist  │   │  Specialist  │   │    Agent     │
+└──────┬───────┘   └──────┬───────┘   └──────┬───────┘   └──────┬───────┘
+       │                  │                  │                  │
+       │  ╔═══════════════════════════════════════════╗        │
+       │  ║         Parallel Verification             ║        │
+       │  ╚═══════════════════════════════════════════╝        │
+  par  │                  │                  │                  │
+┌──────┼──────────────────┼──────────────────┼──────────────────┤
+│      │ Request Location │                  │                  │
+│      │─────────────────>│                  │                  │
+│      │                  │                  │                  │
+│      │    Request Shift │                  │                  │
+│      │─────────────────────────────────────>                  │
+└──────┼──────────────────┼──────────────────┼──────────────────┤
+       │                  │                  │                  │
+       │  Location Result │                  │                  │
+       │<─────────────────│                  │                  │
+       │                  │                  │                  │
+       │     Shift Result │                  │                  │
+       │<─────────────────────────────────────                  │
+       │                  │                  │                  │
+       │  ╔═══════════════════════════════════════════╗        │
+       │  ║  Synthesize: if ANY FAIL → Outreach       ║        │
+       │  ╚═══════════════════════════════════════════╝        │
+       │                  │                  │                  │
+       │          Send Investigation (failures + evidence)     │
+       │───────────────────────────────────────────────────────>│
+       │                  │                  │                  │
+       │                  │                  │  Reply or Timeout│
+       │<───────────────────────────────────────────────────────│
+       │                  │                  │                  │
+       │  ╔═══════════════════════════════════════════╗        │
+       │  ║  Decide: re-audit / escalate / close      ║        │
+       │  ╚═══════════════════════════════════════════╝        │
+       │                  │                  │                  │
+       ▼                  ▼                  ▼                  ▼
+┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
+│ Case Manager │   │   Location   │   │    Shift     │   │   Outreach   │
+│              │   │  Specialist  │   │  Specialist  │   │    Agent     │
+└──────────────┘   └──────────────┘   └──────────────┘   └──────────────┘
+
+    Case Manager orchestrates specialists and manages case lifecycle.
+```
+
+### Case Lifecycle (Owned by Case Manager)
+
+```
+                    ┌─────────────┐
+                    │   CREATED   │
+                    └──────┬──────┘
+                           │
+                           ▼
+            ┌──────────────────────────────┐
+            │     VERIFICATION (parallel)   │
+            │  Location ──┬── Shift         │
+            └─────────────┴─────────────────┘
+                          │
+            ┌─────────────┴─────────────┐
+            ▼                           ▼
+       ALL PASS                    ANY FAIL
+            │                           │
+            ▼                           ▼
+    ┌──────────────┐           ┌──────────────┐
+    │ CASE CLOSED  │           │   OUTREACH   │
+    │  (verified)  │           │   PENDING    │
+    └──────────────┘           └──────┬───────┘
+                                      │
+                    ┌─────────────────┼─────────────────┐
+                    ▼                 ▼                 ▼
+             "data_updated"      "unknown"         TIMEOUT
+                    │                 │                 │
+                    ▼                 ▼                 ▼
+              RE-AUDIT           HITL LABEL      RE-AUDIT
+                    │                              (silent fix check)
+                    │                                   │
+            ┌───────┴───────┐                   ┌───────┴───────┐
+            ▼               ▼                   ▼               ▼
+          PASS            FAIL               PASS            FAIL
+            │               │                   │               │
+            ▼               ▼                   ▼               ▼
+       CASE CLOSED    back to            CASE CLOSED     PRE-CANCEL
+       (data fixed)   OUTREACH           (silent fix)    → HITL APPROVE
 ```
 
 **Key flows:**
-1. **Initial audit fails** → Outreach Agent sends investigation email
-2. **Employee replies "data_updated"** → Request Audit Agent to re-check
-3. **Timeout (no reply)** → Re-audit first (employee may have silently fixed), then escalate if still failing
-4. **Re-audit passes** → Case closed (either explicit or silent fix)
-5. **Re-audit fails after timeout** → Pre-cancel with HITL approval
+1. **Initial verification** → Case Manager calls Location + Shift specialists in parallel
+2. **Any fail** → Case Manager routes to Outreach Agent with failure evidence
+3. **Employee replies "data_updated"** → Case Manager triggers re-audit (can be selective or full)
+4. **Timeout (no reply)** → Case Manager triggers re-audit to catch silent fixes, then escalates if still failing
+5. **Re-audit passes** → Case closed (data was fixed)
+6. **Re-audit fails after timeout** → Pre-cancel with HITL approval
 
 **Reply Buckets:**
 
-| Bucket | Action |
-|--------|--------|
-| `data_updated` | Request Audit Agent to re-check |
+| Bucket | Case Manager Action |
+|--------|---------------------|
+| `data_updated` | Re-call specialists (parallel or selective based on claim) |
 | `valid_explanation` | Human review (may close case) |
-| `unknown` | HITL to label |
-| `timeout` | Re-audit, then escalate to pre-cancel if still failing |
+| `unknown` | HITL to label the reply |
+| `timeout` | Re-audit first, then escalate to pre-cancel if still failing |
 
-**Loop Termination:** Max 3 re-audit attempts to prevent infinite back-and-forth. After 3 failures → automatic escalation to pre-cancel + HITL.
+**Loop Termination:** Max 3 re-audit attempts. After 3 failures → automatic escalation to pre-cancel + HITL.
 
 ### Human-in-the-Loop (2 Points)
 
@@ -238,14 +294,19 @@ One case per vanpool (multiple employees):
 
 ### LangChain Tools
 
-**Audit Agent Tools:**
+**Location Specialist Tools:**
 
 | Tool | Data Source | Purpose |
 |------|-------------|---------|
-| `get_vanpool_roster` | Mock/Internal DB | Fetch van → employees mapping |
-| `get_employee_profile` | Mock/Internal DB | Fetch home ZIP, site assignment |
+| `get_employee_profile` | Mock/Internal DB | Fetch home ZIP, home coordinates, site assignment |
+| `check_commute_distance` | Google Maps API | Calculate distance from home to vanpool pickup |
+
+**Shift Specialist Tools:**
+
+| Tool | Data Source | Purpose |
+|------|-------------|---------|
 | `get_employee_shifts` | Mock/Internal DB | Fetch shift schedule + PTO (dynamic structures) |
-| `check_commute_distance` | Google Maps API | Validate address plausibility |
+| `get_vanpool_roster` | Mock/Internal DB | Fetch vanpool schedule and requirements |
 
 **Outreach Agent Tools:**
 
@@ -254,6 +315,15 @@ One case per vanpool (multiple employees):
 | `send_investigation_email` | Email system | Send inquiry to all vanpool riders |
 | `get_email_replies` | Email system | Fetch threaded replies |
 | `classify_reply` | LLM | Classify reply into bucket |
+
+**Case Manager Capabilities:**
+
+The Case Manager does not have direct tools. Instead, it:
+- Invokes Location Specialist and Shift Specialist (parallel or selective)
+- Invokes Outreach Agent when verification fails
+- Synthesizes specialist results and evidence
+- Manages case state transitions and lifecycle
+- Answers human queries ("Why did this case fail?")
 
 ### UI Pages
 
@@ -356,8 +426,10 @@ pool_patrol/
 │   ├── graph/                        # LangGraph multi-agent workflow
 │   │   └── pool_patrol_graph/
 │   │       └── agents/
-│   │           ├── audit.py          # Location + shift validation
-│   │           └── outreach.py       # Email outreach + reply handling
+│   │           ├── case_manager.py       # Orchestrator, lifecycle, synthesis
+│   │           ├── location_specialist.py # Location verification
+│   │           ├── shift_specialist.py    # Shift verification
+│   │           └── outreach.py            # Email outreach + reply handling
 │   └── eval/                         # LangSmith evaluation
 │
 ├── mock/                             # Mock data for POC
