@@ -108,13 +108,17 @@ Automate vanpool misuse detection (location/shift mismatches). Target: reduce ~2
 
 ### Multi-Agent Architecture
 
-**Approach:** Deterministic graph with 3 specialized agents. No supervisor/orchestrator.
+**Approach:** 2 specialized agents with inter-agent communication. No supervisor/orchestrator.
 
 | Agent | Responsibility | Tools |
 |-------|----------------|-------|
-| **Location Validator** | Checks employee addresses vs factory location | `get_employee_profile`, `check_commute_distance` |
-| **Shift Validator** | Checks employee shifts vs vanpool schedule | `get_employee_shifts`, `get_vanpool_roster` |
-| **Communications** | Sends emails, fetches replies, classifies them | `send_email`, `get_replies`, `classify_reply` |
+| **Audit Agent** | Validates employee location and shift data against vanpool requirements. Reasons about dynamic shift types (which have varying structures) and edge cases. Always runs both location and shift checks for thoroughness. | `get_employee_profile`, `check_commute_distance`, `get_employee_shifts`, `get_vanpool_roster` |
+| **Outreach Agent** | Sends investigation emails, monitors for replies, classifies responses into action buckets. Can request re-audit from the Audit Agent. | `send_email`, `get_replies`, `classify_reply` |
+
+**Why 2 agents instead of 3?**
+- Location and shift validation are conceptually related (both answer: "Does this employee's situation match their vanpool enrollment?")
+- Combining them into one Audit Agent allows reasoning across both signals
+- Extensible: future audit criteria (badge swipes, parking data) can be added as tools to the same agent
 
 ### Architecture Trade-off: Deterministic Graph vs Supervisor
 
@@ -126,26 +130,79 @@ Automate vanpool misuse detection (location/shift mismatches). Target: reduce ~2
 | **Complexity** | Simpler - easier to trace/debug | More complex - harder to debug |
 | **When to use** | Predictable workflows, few nodes | Unpredictable, many possible paths |
 
-**Current decision:** Deterministic graph because:
-- Only 3 agents with clear sequential flow
-- Validation stage calls 2 agents, email stage calls 1 agent
-- Workflow is predictable (check → email → classify → decide)
+**Current decision:** Deterministic graph with inter-agent communication because:
+- Only 2 agents with clear responsibilities
+- Workflow is predictable (verify → communicate → re-verify loop → decide)
+- Agents communicate via explicit requests (e.g., "re-verify this employee")
 
 **Future evolution:** If the graph grows to 10+ nodes with complex branching, migrate to a supervisor pattern where an LLM orchestrates which agent to call next.
 
 ### Workflow State Machine
 
 ```
-New Case → Location Agent → Pass? → Shift Agent → Pass? → Close
-              ↓ (fail)                  ↓ (fail)
-              └────────► Communications ◄──────┘
-                              ↓
-                      Classify reply bucket
-                         ↓      ↓      ↓
-            address_change  shift_change  unknown/timeout
-                 ↓              ↓              ↓
-            (loop back)    (loop back)    HITL → Pre-Cancel → Cancel/Close
+┌─────────────────────────────────────────────────────────────────────────┐
+│                            AUDIT AGENT                                  │
+│                                                                         │
+│            [Check Location] [Check Shift]                               │
+│                         │                                               │
+│              ┌──────────┴──────────┐                                    │
+│              ▼                     ▼                                    │
+│           ✓ PASS              ✗ FAIL ─────────────────────────────┐     │
+│              │                                                    │     │
+│              ▼                                                    │     │
+│         CASE CLOSED                                               │     │
+│                                                                   │     │
+│   ▲ (re-audit request)                                            │     │
+│   │                                                               │     │
+└───┼───────────────────────────────────────────────────────────────┼─────┘
+    │                                                               │
+    │                                                               ▼
+    │  ┌──────────────────────────────────────────────────────────────────┐
+    │  │                       OUTREACH AGENT                             │
+    │  │                                                                  │
+    │  │   Send investigation email ──► Wait for replies ──► Classify     │
+    │  │                                                         │        │
+    │  │                    ┌──────────────┬─────────────────────┴──┐     │
+    │  │                    ▼              ▼                        ▼     │
+    │  │             "data_updated"    "unknown"               timeout    │
+    │  │                    │              │                        │     │
+    └──┼────────────────────┘              ▼                        │     │
+       │                              HITL label                    │     │
+       │                                                            │     │
+       └────────────────────────────────────────────────────────────┘     │
+                                                                          │
+         (re-audit before pre-cancel in case of silent fix)               │
+                                                                          │
+                                          │                               │
+                                          ▼                               │
+                               ┌──────────┴──────────┐                    │
+                               ▼                     ▼                    │
+                            ✓ PASS              ✗ FAIL                    │
+                               │                     │                    │
+                               ▼                     ▼                    │
+                          CASE CLOSED         Pre-Cancel ──► HITL         │
+                        (silent fix)                                      │
+                                                                          │
+       └──────────────────────────────────────────────────────────────────┘
 ```
+
+**Key flows:**
+1. **Initial audit fails** → Outreach Agent sends investigation email
+2. **Employee replies "data_updated"** → Request Audit Agent to re-check
+3. **Timeout (no reply)** → Re-audit first (employee may have silently fixed), then escalate if still failing
+4. **Re-audit passes** → Case closed (either explicit or silent fix)
+5. **Re-audit fails after timeout** → Pre-cancel with HITL approval
+
+**Reply Buckets:**
+
+| Bucket | Action |
+|--------|--------|
+| `data_updated` | Request Audit Agent to re-check |
+| `valid_explanation` | Human review (may close case) |
+| `unknown` | HITL to label |
+| `timeout` | Re-audit, then escalate to pre-cancel if still failing |
+
+**Loop Termination:** Max 3 re-audit attempts to prevent infinite back-and-forth. After 3 failures → automatic escalation to pre-cancel + HITL.
 
 ### Human-in-the-Loop (2 Points)
 
@@ -181,12 +238,19 @@ One case per vanpool (multiple employees):
 
 ### LangChain Tools
 
+**Audit Agent Tools:**
+
 | Tool | Data Source | Purpose |
 |------|-------------|---------|
 | `get_vanpool_roster` | Mock/Internal DB | Fetch van → employees mapping |
 | `get_employee_profile` | Mock/Internal DB | Fetch home ZIP, site assignment |
-| `get_employee_shifts` | Mock/Internal DB | Fetch shift schedule + PTO |
+| `get_employee_shifts` | Mock/Internal DB | Fetch shift schedule + PTO (dynamic structures) |
 | `check_commute_distance` | Google Maps API | Validate address plausibility |
+
+**Outreach Agent Tools:**
+
+| Tool | Data Source | Purpose |
+|------|-------------|---------|
 | `send_investigation_email` | Email system | Send inquiry to all vanpool riders |
 | `get_email_replies` | Email system | Fetch threaded replies |
 | `classify_reply` | LLM | Classify reply into bucket |
@@ -245,12 +309,13 @@ FastAPI backend with auto-generated documentation at `/docs` (Swagger UI) and `/
 ### LangSmith Evaluation
 
 **Test Dataset:** 40+ scenarios covering:
-- Valid cases (should pass)
-- True misuse (should escalate)
+- Valid cases (should pass initial verification)
+- True misuse (should escalate to pre-cancel)
 - Ambiguous replies (should route to human)
-- Address change replies
-- Shift change replies
-- No-response cases
+- Data updated replies (should trigger re-verification)
+- Silent fixes (employee fixes data but doesn't reply - caught on timeout re-verify)
+- No-response cases (should re-verify then escalate)
+- Novel shift types (agent must reason about unfamiliar shift structures)
 
 **Custom Metrics:**
 
@@ -290,9 +355,8 @@ pool_patrol/
 │   ├── graph/                        # LangGraph multi-agent workflow
 │   │   └── pool_patrol_graph/
 │   │       └── agents/
-│   │           ├── location_validator.py
-│   │           ├── shift_validator.py
-│   │           └── communications.py
+│   │           ├── audit.py          # Location + shift validation
+│   │           └── outreach.py       # Email outreach + reply handling
 │   └── eval/                         # LangSmith evaluation
 │
 ├── mock/                             # Mock data for POC

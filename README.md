@@ -11,7 +11,7 @@ A two-part project: (1) Self-hosted LangSmith platform architecture on AWS EKS, 
 
 **Part 2: Pool Patrol Agent**
 - Automates detection and resolution of vanpool program misuse (location/shift mismatches)
-- Multi-agent architecture with 3 specialized agents
+- Multi-agent architecture with 2 specialized agents
 - Human-in-the-loop at critical decision points
 - LangSmith for tracing, evaluation, and observability
 
@@ -56,13 +56,14 @@ pool_patrol/
 
 ## Multi-Agent Architecture
 
-The system uses a **multi-agent architecture** with 3 specialized agents orchestrated via LangGraph in a deterministic graph:
+The system uses a **multi-agent architecture** with 2 specialized agents orchestrated via LangGraph:
 
 | Agent | Responsibility | Tools |
 |-------|----------------|-------|
-| **Location Validator** | Checks employee addresses vs factory location | `get_employee_profile`, `check_commute_distance` |
-| **Shift Validator** | Checks employee shifts vs vanpool schedule | `get_employee_shifts`, `get_vanpool_roster` |
-| **Communications** | Sends emails, waits for replies, classifies responses | `send_email`, `get_replies`, `classify_reply` |
+| **Audit Agent** | Validates employee location and shift data against vanpool requirements. Reasons about dynamic shift types and edge cases. | `get_employee_profile`, `check_commute_distance`, `get_employee_shifts`, `get_vanpool_roster` |
+| **Outreach Agent** | Sends investigation emails, monitors replies, classifies responses into action buckets | `send_email`, `get_replies`, `classify_reply` |
+
+**Inter-agent communication:** The Outreach Agent can request the Audit Agent to re-verify when employees claim they've updated their data, or before escalating to pre-cancel (to catch silent fixes).
 
 **Human-in-the-loop (HITL)** interrupts at:
 1. Unknown reply bucket labeling
