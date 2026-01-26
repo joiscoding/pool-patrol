@@ -13,18 +13,12 @@
     "work_site": "Fremont Factory",
     "home_address": "456 Oak St, Fremont, CA 94536",
     "home_zip": "94536",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
-      ],
-      "pto_dates": ["2024-12-25", "2024-12-26"]
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": [
+      "2024-12-25",
+      "2024-12-26"
+    ]
   },
   {
     "employee_id": "EMP-1002",
@@ -40,18 +34,9 @@
     "work_site": "Fremont Factory",
     "home_address": "789 Elm Ave, Newark, CA 94560",
     "home_zip": "94560",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1003",
@@ -67,18 +52,9 @@
     "work_site": "Fremont Factory",
     "home_address": "2100 Sunset Blvd, Los Angeles, CA 90026",
     "home_zip": "90026",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1004",
@@ -94,18 +70,12 @@
     "work_site": "Fremont Factory",
     "home_address": "321 Cedar Ln, Union City, CA 94587",
     "home_zip": "94587",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
-      ],
-      "pto_dates": ["2024-11-28", "2024-11-29"]
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": [
+      "2024-11-28",
+      "2024-11-29"
+    ]
   },
   {
     "employee_id": "EMP-1005",
@@ -121,18 +91,9 @@
     "work_site": "Fremont Factory",
     "home_address": "555 Pine Dr, Milpitas, CA 95035",
     "home_zip": "95035",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1006",
@@ -148,17 +109,9 @@
     "work_site": "Fremont Factory",
     "home_address": "888 Maple Way, Hayward, CA 94541",
     "home_zip": "94541",
-    "shifts": {
-      "type": "Night Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Tue", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Wed", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Thu", "start_time": "22:00", "end_time": "06:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_NIGHT",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1007",
@@ -174,17 +127,9 @@
     "work_site": "Fremont Factory",
     "home_address": "123 Birch St, San Leandro, CA 94577",
     "home_zip": "94577",
-    "shifts": {
-      "type": "Night Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Tue", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Wed", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Thu", "start_time": "22:00", "end_time": "06:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_NIGHT",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1008",
@@ -200,17 +145,9 @@
     "work_site": "Fremont Factory",
     "home_address": "999 Capitol Ave, Sacramento, CA 95814",
     "home_zip": "95814",
-    "shifts": {
-      "type": "Night Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Tue", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Wed", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Thu", "start_time": "22:00", "end_time": "06:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_NIGHT",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1009",
@@ -226,17 +163,11 @@
     "work_site": "Fremont Factory",
     "home_address": "444 Spruce Ct, Castro Valley, CA 94546",
     "home_zip": "94546",
-    "shifts": {
-      "type": "Night Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Tue", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Wed", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Thu", "start_time": "22:00", "end_time": "06:00" }
-      ],
-      "pto_dates": ["2024-12-31"]
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_NIGHT",
+    "pto_dates": [
+      "2024-12-31"
+    ]
   },
   {
     "employee_id": "EMP-1010",
@@ -252,18 +183,9 @@
     "work_site": "Fremont Factory",
     "home_address": "200 Tech Rd, Fremont, CA 94538",
     "home_zip": "94538",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Tue", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Wed", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Thu", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Fri", "start_time": "08:00", "end_time": "16:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1011",
@@ -279,18 +201,9 @@
     "work_site": "Fremont Factory",
     "home_address": "350 Assembly Dr, Newark, CA 94560",
     "home_zip": "94560",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Tue", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Wed", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Thu", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Fri", "start_time": "08:00", "end_time": "16:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1012",
@@ -306,18 +219,9 @@
     "work_site": "Fremont Factory",
     "home_address": "777 Circuit Ln, Union City, CA 94587",
     "home_zip": "94587",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Tue", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Wed", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Thu", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Fri", "start_time": "08:00", "end_time": "16:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1013",
@@ -333,18 +237,9 @@
     "work_site": "Fremont Factory",
     "home_address": "600 Processor Pkwy, Milpitas, CA 95035",
     "home_zip": "95035",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Tue", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Wed", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Thu", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Fri", "start_time": "08:00", "end_time": "16:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1014",
@@ -360,18 +255,9 @@
     "work_site": "Fremont Factory",
     "home_address": "150 Memory Ln, San Jose, CA 95112",
     "home_zip": "95112",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Tue", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Wed", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Thu", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Fri", "start_time": "08:00", "end_time": "16:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1015",
@@ -387,18 +273,9 @@
     "work_site": "Fremont Factory",
     "home_address": "900 Chip Ave, Fremont, CA 94539",
     "home_zip": "94539",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Tue", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Wed", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Thu", "start_time": "08:00", "end_time": "17:00" },
-        { "day": "Fri", "start_time": "08:00", "end_time": "16:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1016",
@@ -414,18 +291,9 @@
     "work_site": "Fremont Factory",
     "home_address": "425 Silicon St, Santa Clara, CA 95051",
     "home_zip": "95051",
-    "shifts": {
-      "type": "Swing Shift",
-      "schedule": [
-        { "day": "Tue", "start_time": "14:00", "end_time": "22:00" },
-        { "day": "Wed", "start_time": "14:00", "end_time": "22:00" },
-        { "day": "Thu", "start_time": "14:00", "end_time": "22:00" },
-        { "day": "Fri", "start_time": "14:00", "end_time": "22:00" },
-        { "day": "Sat", "start_time": "14:00", "end_time": "22:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_SWING",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1017",
@@ -441,18 +309,9 @@
     "work_site": "Fremont Factory",
     "home_address": "333 Data Dr, Sunnyvale, CA 94086",
     "home_zip": "94086",
-    "shifts": {
-      "type": "Swing Shift",
-      "schedule": [
-        { "day": "Tue", "start_time": "14:00", "end_time": "22:00" },
-        { "day": "Wed", "start_time": "14:00", "end_time": "22:00" },
-        { "day": "Thu", "start_time": "14:00", "end_time": "22:00" },
-        { "day": "Fri", "start_time": "14:00", "end_time": "22:00" },
-        { "day": "Sat", "start_time": "14:00", "end_time": "22:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_SWING",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1018",
@@ -468,18 +327,9 @@
     "work_site": "Fremont Factory",
     "home_address": "222 Byte Blvd, Mountain View, CA 94043",
     "home_zip": "94043",
-    "shifts": {
-      "type": "Swing Shift",
-      "schedule": [
-        { "day": "Tue", "start_time": "14:00", "end_time": "22:00" },
-        { "day": "Wed", "start_time": "14:00", "end_time": "22:00" },
-        { "day": "Thu", "start_time": "14:00", "end_time": "22:00" },
-        { "day": "Fri", "start_time": "14:00", "end_time": "22:00" },
-        { "day": "Sat", "start_time": "14:00", "end_time": "22:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_SWING",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1019",
@@ -495,18 +345,9 @@
     "work_site": "Fremont Factory",
     "home_address": "111 Logic Loop, Palo Alto, CA 94301",
     "home_zip": "94301",
-    "shifts": {
-      "type": "Swing Shift",
-      "schedule": [
-        { "day": "Tue", "start_time": "14:00", "end_time": "22:00" },
-        { "day": "Wed", "start_time": "14:00", "end_time": "22:00" },
-        { "day": "Thu", "start_time": "14:00", "end_time": "22:00" },
-        { "day": "Fri", "start_time": "14:00", "end_time": "22:00" },
-        { "day": "Sat", "start_time": "14:00", "end_time": "22:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_SWING",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1020",
@@ -522,18 +363,9 @@
     "work_site": "Fremont Factory",
     "home_address": "500 Warehouse Way, Fremont, CA 94536",
     "home_zip": "94536",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "06:00", "end_time": "14:00" },
-        { "day": "Tue", "start_time": "06:00", "end_time": "14:00" },
-        { "day": "Wed", "start_time": "06:00", "end_time": "14:00" },
-        { "day": "Thu", "start_time": "06:00", "end_time": "14:00" },
-        { "day": "Fri", "start_time": "06:00", "end_time": "14:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1021",
@@ -549,18 +381,9 @@
     "work_site": "Fremont Factory",
     "home_address": "750 Shipping St, Newark, CA 94560",
     "home_zip": "94560",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "06:00", "end_time": "14:00" },
-        { "day": "Tue", "start_time": "06:00", "end_time": "14:00" },
-        { "day": "Wed", "start_time": "06:00", "end_time": "14:00" },
-        { "day": "Thu", "start_time": "06:00", "end_time": "14:00" },
-        { "day": "Fri", "start_time": "06:00", "end_time": "14:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1022",
@@ -576,18 +399,9 @@
     "work_site": "Fremont Factory",
     "home_address": "300 Freight Rd, Union City, CA 94587",
     "home_zip": "94587",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "06:00", "end_time": "14:00" },
-        { "day": "Tue", "start_time": "06:00", "end_time": "14:00" },
-        { "day": "Wed", "start_time": "06:00", "end_time": "14:00" },
-        { "day": "Thu", "start_time": "06:00", "end_time": "14:00" },
-        { "day": "Fri", "start_time": "06:00", "end_time": "14:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1023",
@@ -603,18 +417,9 @@
     "work_site": "Fremont Factory",
     "home_address": "600 Pallet Pkwy, Hayward, CA 94544",
     "home_zip": "94544",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "06:00", "end_time": "14:00" },
-        { "day": "Tue", "start_time": "06:00", "end_time": "14:00" },
-        { "day": "Wed", "start_time": "06:00", "end_time": "14:00" },
-        { "day": "Thu", "start_time": "06:00", "end_time": "14:00" },
-        { "day": "Fri", "start_time": "06:00", "end_time": "14:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1024",
@@ -630,18 +435,9 @@
     "work_site": "Fremont Factory",
     "home_address": "125 Cargo Ct, San Leandro, CA 94578",
     "home_zip": "94578",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "06:00", "end_time": "14:00" },
-        { "day": "Tue", "start_time": "06:00", "end_time": "14:00" },
-        { "day": "Wed", "start_time": "06:00", "end_time": "14:00" },
-        { "day": "Thu", "start_time": "06:00", "end_time": "14:00" },
-        { "day": "Fri", "start_time": "06:00", "end_time": "14:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1025",
@@ -657,17 +453,9 @@
     "work_site": "Fremont Factory",
     "home_address": "450 Harbor Blvd, San Diego, CA 92101",
     "home_zip": "92101",
-    "shifts": {
-      "type": "Night Shift",
-      "schedule": [
-        { "day": "Sun", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Mon", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Tue", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Wed", "start_time": "22:00", "end_time": "06:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_NIGHT",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1026",
@@ -683,17 +471,9 @@
     "work_site": "Fremont Factory",
     "home_address": "275 Dock Dr, Milpitas, CA 95035",
     "home_zip": "95035",
-    "shifts": {
-      "type": "Night Shift",
-      "schedule": [
-        { "day": "Sun", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Mon", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Tue", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Wed", "start_time": "22:00", "end_time": "06:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_NIGHT",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1027",
@@ -709,17 +489,9 @@
     "work_site": "Fremont Factory",
     "home_address": "888 Inventory Blvd, San Jose, CA 95113",
     "home_zip": "95113",
-    "shifts": {
-      "type": "Night Shift",
-      "schedule": [
-        { "day": "Sun", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Mon", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Tue", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Wed", "start_time": "22:00", "end_time": "06:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_NIGHT",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1028",
@@ -735,17 +507,9 @@
     "work_site": "Fremont Factory",
     "home_address": "999 Supply St, Fremont, CA 94538",
     "home_zip": "94538",
-    "shifts": {
-      "type": "Night Shift",
-      "schedule": [
-        { "day": "Sun", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Mon", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Tue", "start_time": "22:00", "end_time": "06:00" },
-        { "day": "Wed", "start_time": "22:00", "end_time": "06:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_NIGHT",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1029",
@@ -761,18 +525,9 @@
     "work_site": "Fremont Factory",
     "home_address": "100 Innovation Way, Fremont, CA 94536",
     "home_zip": "94536",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Tue", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Wed", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Thu", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Fri", "start_time": "09:00", "end_time": "17:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1030",
@@ -788,18 +543,9 @@
     "work_site": "Fremont Factory",
     "home_address": "250 Research Rd, Newark, CA 94560",
     "home_zip": "94560",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Tue", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Wed", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Thu", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Fri", "start_time": "09:00", "end_time": "17:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1031",
@@ -815,18 +561,9 @@
     "work_site": "Fremont Factory",
     "home_address": "375 Science St, Union City, CA 94587",
     "home_zip": "94587",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Tue", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Wed", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Thu", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Fri", "start_time": "09:00", "end_time": "17:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1032",
@@ -842,18 +579,9 @@
     "work_site": "Fremont Factory",
     "home_address": "450 Lab Ln, Hayward, CA 94541",
     "home_zip": "94541",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Tue", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Wed", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Thu", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Fri", "start_time": "09:00", "end_time": "17:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1033",
@@ -869,18 +597,9 @@
     "work_site": "Fremont Factory",
     "home_address": "525 Tech Terrace, San Leandro, CA 94577",
     "home_zip": "94577",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Tue", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Wed", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Thu", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Fri", "start_time": "09:00", "end_time": "17:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1034",
@@ -896,17 +615,9 @@
     "work_site": "Fremont Factory",
     "home_address": "600 Campus Cir, Castro Valley, CA 94546",
     "home_zip": "94546",
-    "shifts": {
-      "type": "Swing Shift",
-      "schedule": [
-        { "day": "Wed", "start_time": "12:00", "end_time": "20:00" },
-        { "day": "Thu", "start_time": "12:00", "end_time": "20:00" },
-        { "day": "Fri", "start_time": "12:00", "end_time": "20:00" },
-        { "day": "Sat", "start_time": "12:00", "end_time": "20:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_SWING",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1035",
@@ -922,17 +633,9 @@
     "work_site": "Fremont Factory",
     "home_address": "700 Discovery Dr, Milpitas, CA 95035",
     "home_zip": "95035",
-    "shifts": {
-      "type": "Swing Shift",
-      "schedule": [
-        { "day": "Wed", "start_time": "12:00", "end_time": "20:00" },
-        { "day": "Thu", "start_time": "12:00", "end_time": "20:00" },
-        { "day": "Fri", "start_time": "12:00", "end_time": "20:00" },
-        { "day": "Sat", "start_time": "12:00", "end_time": "20:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_SWING",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1036",
@@ -948,17 +651,9 @@
     "work_site": "Fremont Factory",
     "home_address": "800 Quantum Ct, Santa Clara, CA 95054",
     "home_zip": "95054",
-    "shifts": {
-      "type": "Swing Shift",
-      "schedule": [
-        { "day": "Wed", "start_time": "12:00", "end_time": "20:00" },
-        { "day": "Thu", "start_time": "12:00", "end_time": "20:00" },
-        { "day": "Fri", "start_time": "12:00", "end_time": "20:00" },
-        { "day": "Sat", "start_time": "12:00", "end_time": "20:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_SWING",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1037",
@@ -974,17 +669,9 @@
     "work_site": "Fremont Factory",
     "home_address": "900 Nucleus Blvd, Sunnyvale, CA 94085",
     "home_zip": "94085",
-    "shifts": {
-      "type": "Swing Shift",
-      "schedule": [
-        { "day": "Wed", "start_time": "12:00", "end_time": "20:00" },
-        { "day": "Thu", "start_time": "12:00", "end_time": "20:00" },
-        { "day": "Fri", "start_time": "12:00", "end_time": "20:00" },
-        { "day": "Sat", "start_time": "12:00", "end_time": "20:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_SWING",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1038",
@@ -1000,18 +687,9 @@
     "work_site": "Fremont Factory",
     "home_address": "100 Operations Ave, Fremont, CA 94538",
     "home_zip": "94538",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "07:30", "end_time": "16:30" },
-        { "day": "Tue", "start_time": "07:30", "end_time": "16:30" },
-        { "day": "Wed", "start_time": "07:30", "end_time": "16:30" },
-        { "day": "Thu", "start_time": "07:30", "end_time": "16:30" },
-        { "day": "Fri", "start_time": "07:30", "end_time": "15:30" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1039",
@@ -1027,18 +705,9 @@
     "work_site": "Fremont Factory",
     "home_address": "200 Service Rd, Newark, CA 94560",
     "home_zip": "94560",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "07:30", "end_time": "16:30" },
-        { "day": "Tue", "start_time": "07:30", "end_time": "16:30" },
-        { "day": "Wed", "start_time": "07:30", "end_time": "16:30" },
-        { "day": "Thu", "start_time": "07:30", "end_time": "16:30" },
-        { "day": "Fri", "start_time": "07:30", "end_time": "15:30" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1040",
@@ -1054,18 +723,9 @@
     "work_site": "Fremont Factory",
     "home_address": "300 Support St, Union City, CA 94587",
     "home_zip": "94587",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "07:30", "end_time": "16:30" },
-        { "day": "Tue", "start_time": "07:30", "end_time": "16:30" },
-        { "day": "Wed", "start_time": "07:30", "end_time": "16:30" },
-        { "day": "Thu", "start_time": "07:30", "end_time": "16:30" },
-        { "day": "Fri", "start_time": "07:30", "end_time": "15:30" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1041",
@@ -1081,18 +741,9 @@
     "work_site": "Fremont Factory",
     "home_address": "400 Admin Blvd, Hayward, CA 94545",
     "home_zip": "94545",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "07:30", "end_time": "16:30" },
-        { "day": "Tue", "start_time": "07:30", "end_time": "16:30" },
-        { "day": "Wed", "start_time": "07:30", "end_time": "16:30" },
-        { "day": "Thu", "start_time": "07:30", "end_time": "16:30" },
-        { "day": "Fri", "start_time": "07:30", "end_time": "15:30" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1042",
@@ -1108,18 +759,9 @@
     "work_site": "Fremont Factory",
     "home_address": "500 Control Ct, San Leandro, CA 94579",
     "home_zip": "94579",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "07:30", "end_time": "16:30" },
-        { "day": "Tue", "start_time": "07:30", "end_time": "16:30" },
-        { "day": "Wed", "start_time": "07:30", "end_time": "16:30" },
-        { "day": "Thu", "start_time": "07:30", "end_time": "16:30" },
-        { "day": "Fri", "start_time": "07:30", "end_time": "15:30" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1043",
@@ -1135,17 +777,9 @@
     "work_site": "Fremont Factory",
     "home_address": "600 Monitor Way, Milpitas, CA 95035",
     "home_zip": "95035",
-    "shifts": {
-      "type": "Night Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "23:00", "end_time": "07:00" },
-        { "day": "Tue", "start_time": "23:00", "end_time": "07:00" },
-        { "day": "Wed", "start_time": "23:00", "end_time": "07:00" },
-        { "day": "Thu", "start_time": "23:00", "end_time": "07:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_NIGHT",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1044",
@@ -1161,17 +795,9 @@
     "work_site": "Fremont Factory",
     "home_address": "700 Dashboard Dr, San Jose, CA 95110",
     "home_zip": "95110",
-    "shifts": {
-      "type": "Night Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "23:00", "end_time": "07:00" },
-        { "day": "Tue", "start_time": "23:00", "end_time": "07:00" },
-        { "day": "Wed", "start_time": "23:00", "end_time": "07:00" },
-        { "day": "Thu", "start_time": "23:00", "end_time": "07:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_NIGHT",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1045",
@@ -1187,17 +813,9 @@
     "work_site": "Fremont Factory",
     "home_address": "800 Alert Ave, Mountain View, CA 94040",
     "home_zip": "94040",
-    "shifts": {
-      "type": "Night Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "23:00", "end_time": "07:00" },
-        { "day": "Tue", "start_time": "23:00", "end_time": "07:00" },
-        { "day": "Wed", "start_time": "23:00", "end_time": "07:00" },
-        { "day": "Thu", "start_time": "23:00", "end_time": "07:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_NIGHT",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1046",
@@ -1213,17 +831,9 @@
     "work_site": "Fremont Factory",
     "home_address": "900 System St, Fremont, CA 94536",
     "home_zip": "94536",
-    "shifts": {
-      "type": "Night Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "23:00", "end_time": "07:00" },
-        { "day": "Tue", "start_time": "23:00", "end_time": "07:00" },
-        { "day": "Wed", "start_time": "23:00", "end_time": "07:00" },
-        { "day": "Thu", "start_time": "23:00", "end_time": "07:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_NIGHT",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1047",
@@ -1239,18 +849,9 @@
     "work_site": "Fremont Factory",
     "home_address": "111 Production Pkwy, Newark, CA 94560",
     "home_zip": "94560",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1048",
@@ -1266,18 +867,9 @@
     "work_site": "Fremont Factory",
     "home_address": "222 Assembly Rd, Union City, CA 94587",
     "home_zip": "94587",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1049",
@@ -1293,18 +885,9 @@
     "work_site": "Fremont Factory",
     "home_address": "333 Central Valley Rd, Fresno, CA 93721",
     "home_zip": "93721",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1050",
@@ -1320,18 +903,9 @@
     "work_site": "Fremont Factory",
     "home_address": "444 Plant Pl, Hayward, CA 94542",
     "home_zip": "94542",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1051",
@@ -1347,18 +921,9 @@
     "work_site": "Fremont Factory",
     "home_address": "555 Build Blvd, San Leandro, CA 94577",
     "home_zip": "94577",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1052",
@@ -1374,18 +939,9 @@
     "work_site": "Fremont Factory",
     "home_address": "666 Craft Ct, Castro Valley, CA 94546",
     "home_zip": "94546",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Tue", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Wed", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Thu", "start_time": "07:00", "end_time": "16:00" },
-        { "day": "Fri", "start_time": "07:00", "end_time": "15:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1053",
@@ -1401,18 +957,9 @@
     "work_site": "Fremont Factory",
     "home_address": "100 Research Way, Sunnyvale, CA 94087",
     "home_zip": "94087",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Tue", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Wed", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Thu", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Fri", "start_time": "09:00", "end_time": "17:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1054",
@@ -1428,18 +975,9 @@
     "work_site": "Fremont Factory",
     "home_address": "200 Dev Dr, Mountain View, CA 94041",
     "home_zip": "94041",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Tue", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Wed", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Thu", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Fri", "start_time": "09:00", "end_time": "17:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1055",
@@ -1455,18 +993,9 @@
     "work_site": "Fremont Factory",
     "home_address": "300 Prototype Pkwy, Palo Alto, CA 94306",
     "home_zip": "94306",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Tue", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Wed", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Thu", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Fri", "start_time": "09:00", "end_time": "17:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   },
   {
     "employee_id": "EMP-1056",
@@ -1482,17 +1011,8 @@
     "work_site": "Fremont Factory",
     "home_address": "400 Test Terrace, Santa Clara, CA 95050",
     "home_zip": "95050",
-    "shifts": {
-      "type": "Day Shift",
-      "schedule": [
-        { "day": "Mon", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Tue", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Wed", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Thu", "start_time": "09:00", "end_time": "18:00" },
-        { "day": "Fri", "start_time": "09:00", "end_time": "17:00" }
-      ],
-      "pto_dates": []
-    },
-    "status": "active"
+    "status": "active",
+    "shift_id": "SHIFT_DAY",
+    "pto_dates": []
   }
 ]

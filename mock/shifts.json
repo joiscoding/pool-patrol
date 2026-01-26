@@ -1,0 +1,90 @@
+[
+  {
+    "id": "SHIFT_DAY",
+    "name": "Day Shift",
+    "schedule": [
+      {
+        "day": "Mon",
+        "start_time": "07:00",
+        "end_time": "16:00"
+      },
+      {
+        "day": "Tue",
+        "start_time": "07:00",
+        "end_time": "16:00"
+      },
+      {
+        "day": "Wed",
+        "start_time": "07:00",
+        "end_time": "16:00"
+      },
+      {
+        "day": "Thu",
+        "start_time": "07:00",
+        "end_time": "16:00"
+      },
+      {
+        "day": "Fri",
+        "start_time": "07:00",
+        "end_time": "15:00"
+      }
+    ]
+  },
+  {
+    "id": "SHIFT_NIGHT",
+    "name": "Night Shift",
+    "schedule": [
+      {
+        "day": "Mon",
+        "start_time": "22:00",
+        "end_time": "06:00"
+      },
+      {
+        "day": "Tue",
+        "start_time": "22:00",
+        "end_time": "06:00"
+      },
+      {
+        "day": "Wed",
+        "start_time": "22:00",
+        "end_time": "06:00"
+      },
+      {
+        "day": "Thu",
+        "start_time": "22:00",
+        "end_time": "06:00"
+      }
+    ]
+  },
+  {
+    "id": "SHIFT_SWING",
+    "name": "Swing Shift",
+    "schedule": [
+      {
+        "day": "Tue",
+        "start_time": "14:00",
+        "end_time": "22:00"
+      },
+      {
+        "day": "Wed",
+        "start_time": "14:00",
+        "end_time": "22:00"
+      },
+      {
+        "day": "Thu",
+        "start_time": "14:00",
+        "end_time": "22:00"
+      },
+      {
+        "day": "Fri",
+        "start_time": "14:00",
+        "end_time": "22:00"
+      },
+      {
+        "day": "Sat",
+        "start_time": "14:00",
+        "end_time": "22:00"
+      }
+    ]
+  }
+]
