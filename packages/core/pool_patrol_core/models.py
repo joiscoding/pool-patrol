@@ -72,6 +72,14 @@ class ClassificationBucket(str, Enum):
     UNKNOWN = "unknown"
 
 
+class TimeType(str, Enum):
+    """Employee time type options."""
+
+    FULL_TIME = "full_time"
+    PART_TIME = "part_time"
+    CONTRACT = "contract"
+
+
 # =============================================================================
 # Vanpool Models
 # =============================================================================
@@ -88,7 +96,7 @@ class Rider(BaseModel):
     """A rider in a vanpool."""
 
     participant_id: str
-    email: EmailStr
+    employee_id: str  # References Employee.employee_id
 
 
 class Vanpool(BaseModel):
@@ -100,6 +108,7 @@ class Vanpool(BaseModel):
     work_site_coords: Coordinates
     riders: list[Rider]
     capacity: int
+    coordinator_id: str | None = None  # Employee ID of the vanpool coordinator
     status: VanpoolStatus
 
 
@@ -116,12 +125,12 @@ class DaySchedule(BaseModel):
     end_time: str  # HH:MM format
 
 
-class Shifts(BaseModel):
-    """Employee shift information."""
+class Shift(BaseModel):
+    """Shift template with schedule."""
 
-    type: str  # e.g., "Day Shift", "Night Shift", "Swing Shift"
+    id: str
+    name: str  # e.g., "Day Shift", "Night Shift", "Swing Shift"
     schedule: list[DaySchedule]
-    pto_dates: list[str] = Field(default_factory=list)  # YYYY-MM-DD format
 
 
 class Employee(BaseModel):
@@ -133,14 +142,15 @@ class Employee(BaseModel):
     email: EmailStr
     business_title: str
     level: str  # P5, P6, M3, M6, etc.
-    manager: str  # Full name
-    supervisor: str  # Full name
-    time_type: str  # full_time, part_time, contract
+    manager: str  # Full name (may not be in employee database)
+    supervisor: str  # Full name (may not be in employee database)
+    time_type: TimeType
     date_onboarded: str  # YYYY-MM-DD format
     work_site: str
     home_address: str
     home_zip: str
-    shifts: Shifts
+    shift_id: str  # References Shift.id
+    pto_dates: list[str] = Field(default_factory=list)  # YYYY-MM-DD format
     status: EmployeeStatus
 
 
@@ -180,7 +190,7 @@ class Classification(BaseModel):
     """Reply classification result."""
 
     bucket: ClassificationBucket
-    confidence: float = Field(ge=0.0, le=1.0)
+    confidence: int = Field(ge=1, le=5)
 
 
 class Message(BaseModel):

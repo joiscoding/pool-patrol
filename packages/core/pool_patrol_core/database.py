@@ -110,7 +110,7 @@ def init_db():
     """
     # Import models to register them with Base
     from pool_patrol_core.db_models import (
-        Vanpool, Employee, Rider, Case, EmailThread, Message
+        Shift, Vanpool, Employee, Rider, Case, EmailThread, Message
     )
     Base.metadata.create_all(bind=get_engine())
 

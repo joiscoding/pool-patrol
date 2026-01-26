@@ -73,6 +73,12 @@ enum ClassificationBucket {
   unknown
 }
 
+enum TimeType {
+  full_time
+  part_time
+  contract
+}
+
 // =============================================================================
 // Vanpool Models
 // =============================================================================
@@ -84,16 +90,35 @@ model Vanpool {
   workSiteAddress String        @map("work_site_address")
   workSiteCoords  String        @map("work_site_coords") // JSON: { lat: number, lng: number }
   capacity        Int
+  coordinatorId   String?       @unique @map("coordinator_id") // Employee who coordinates this vanpool
   status          VanpoolStatus @default(active)
   createdAt       DateTime      @default(now()) @map("created_at")
   updatedAt       DateTime      @updatedAt @map("updated_at")
 
   // Relations
+  coordinator  Employee?     @relation("VanpoolCoordinator", fields: [coordinatorId], references: [employeeId])
   riders       Rider[]
   cases        Case[]
   emailThreads EmailThread[]
 
   @@map("vanpools")
+}
+
+// =============================================================================
+// Shift Models
+// =============================================================================
+
+model Shift {
+  id        String   @id @default(cuid())
+  name      String   @unique // "Day Shift", "Night Shift", "Swing Shift"
+  schedule  String   // JSON: [{ day: string, start_time: string, end_time: string }, ...]
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  employees Employee[]
+
+  @@map("shifts")
 }
 
 // =============================================================================
@@ -107,21 +132,24 @@ model Employee {
   lastName      String         @map("last_name")
   email         String         @unique
   businessTitle String         @map("business_title")
-  level         String // P3, P4, P5, P6, M3, M4, etc.
-  manager       String
-  supervisor    String
-  timeType      String         @map("time_type") // full_time, part_time, contract
+  level         String         // P3, P4, P5, P6, M3, M4, etc.
+  manager       String         // Manager name (may not be in employee database)
+  supervisor    String         // Supervisor name (may not be in employee database)
+  timeType      TimeType       @map("time_type")
   dateOnboarded DateTime       @map("date_onboarded")
   workSite      String         @map("work_site")
   homeAddress   String         @map("home_address")
   homeZip       String         @map("home_zip")
-  shifts        String // JSON: { type: string, schedule: DaySchedule[], pto_dates: string[] }
+  shiftId       String         @map("shift_id")
+  ptoDates      String         @map("pto_dates") // JSON: ["2024-12-25", "2024-12-26"]
   status        EmployeeStatus @default(active)
   createdAt     DateTime       @default(now()) @map("created_at")
   updatedAt     DateTime       @updatedAt @map("updated_at")
 
   // Relations
-  vanpoolRiders Rider[]
+  shift              Shift     @relation(fields: [shiftId], references: [id])
+  vanpoolRiders      Rider[]
+  coordinatedVanpool Vanpool[] @relation("VanpoolCoordinator")
 
   @@map("employees")
 }
@@ -129,14 +157,14 @@ model Employee {
 // Junction table for Vanpool <-> Employee (riders)
 model Rider {
   id            String   @id @default(cuid())
-  participantId String   @map("participant_id")
+  participantId String   @map("participant_id") // External ID from source system
   vanpoolId     String   @map("vanpool_id")
   employeeId    String   @map("employee_id")
   createdAt     DateTime @default(now()) @map("created_at")
 
   // Relations
   vanpool  Vanpool  @relation(fields: [vanpoolId], references: [vanpoolId], onDelete: Cascade)
-  employee Employee @relation(fields: [employeeId], references: [email], onDelete: Cascade)
+  employee Employee @relation(fields: [employeeId], references: [employeeId], onDelete: Cascade)
 
   @@unique([vanpoolId, employeeId])
   @@map("riders")
@@ -186,17 +214,18 @@ model EmailThread {
 }
 
 model Message {
-  id             String           @id @default(cuid())
-  messageId      String           @unique @map("message_id")
-  threadId       String           @map("thread_id")
-  fromEmail      String           @map("from_email")
-  toEmails       String           @map("to_emails") // JSON array of emails
-  sentAt         DateTime         @map("sent_at")
-  body           String
-  direction      MessageDirection
-  classification String? // JSON: { bucket: ClassificationBucket, confidence: number } or null
-  status         MessageStatus    @default(draft)
-  createdAt      DateTime         @default(now()) @map("created_at")
+  id                       String                @id @default(cuid())
+  messageId                String                @unique @map("message_id")
+  threadId                 String                @map("thread_id")
+  fromEmail                String                @map("from_email")
+  toEmails                 String                @map("to_emails") // JSON array of emails
+  sentAt                   DateTime              @map("sent_at")
+  body                     String
+  direction                MessageDirection
+  classificationBucket     ClassificationBucket? @map("classification_bucket")
+  classificationConfidence Int?                  @map("classification_confidence") // 1-5 scale
+  status                   MessageStatus         @default(draft)
+  createdAt                DateTime              @default(now()) @map("created_at")
 
   // Relations
   thread EmailThread @relation(fields: [threadId], references: [threadId], onDelete: Cascade)

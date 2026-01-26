@@ -75,6 +75,12 @@ class ClassificationBucket:
     UNKNOWN = "unknown"
 
 
+class TimeType:
+    FULL_TIME = "full_time"
+    PART_TIME = "part_time"
+    CONTRACT = "contract"
+
+
 # =============================================================================
 # Helper for JSON fields
 # =============================================================================
@@ -97,6 +103,34 @@ def to_json(value: Any) -> str | None:
 # Models
 # =============================================================================
 
+class Shift(Base):
+    """Shift model - represents a work shift schedule template."""
+    
+    __tablename__ = "shifts"
+
+    id = Column(String, primary_key=True)
+    name = Column(String, unique=True, nullable=False)  # "Day Shift", "Night Shift", etc.
+    schedule = Column(Text, nullable=False)  # JSON: [{ day, start_time, end_time }, ...]
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+
+    # Relationships
+    employees = relationship("Employee", back_populates="shift")
+
+    @property
+    def schedule_info(self) -> list:
+        """Get schedule as list of dicts."""
+        return parse_json(self.schedule) or []
+
+    def to_dict(self) -> dict:
+        """Convert to dictionary."""
+        return {
+            "id": self.id,
+            "name": self.name,
+            "schedule": self.schedule_info,
+        }
+
+
 class Vanpool(Base):
     """Vanpool model - represents a vanpool route."""
     
@@ -108,11 +142,13 @@ class Vanpool(Base):
     work_site_address = Column(String, nullable=False)
     work_site_coords = Column(Text, nullable=False)  # JSON: { lat, lng }
     capacity = Column(Integer, nullable=False)
+    coordinator_id = Column(String, ForeignKey("employees.employee_id"), nullable=True)
     status = Column(String, default=VanpoolStatus.ACTIVE, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     # Relationships
+    coordinator = relationship("Employee", back_populates="coordinated_vanpools", foreign_keys=[coordinator_id])
     riders = relationship("Rider", back_populates="vanpool", cascade="all, delete-orphan")
     cases = relationship("Case", back_populates="vanpool")
     email_threads = relationship("EmailThread", back_populates="vanpool")
@@ -130,6 +166,7 @@ class Vanpool(Base):
             "work_site_address": self.work_site_address,
             "work_site_coords": self.coords,
             "capacity": self.capacity,
+            "coordinator_id": self.coordinator_id,
             "status": self.status,
             "rider_count": len(self.riders) if self.riders else 0,
         }
@@ -147,25 +184,28 @@ class Employee(Base):
     email = Column(String, unique=True, nullable=False)
     business_title = Column(String, nullable=False)
     level = Column(String, nullable=False)
-    manager = Column(String, nullable=False)
-    supervisor = Column(String, nullable=False)
-    time_type = Column(String, nullable=False)
+    manager = Column(String, nullable=False)  # Manager name (may not be in employee database)
+    supervisor = Column(String, nullable=False)  # Supervisor name (may not be in employee database)
+    time_type = Column(String, nullable=False)  # TimeType enum value
     date_onboarded = Column(DateTime, nullable=False)
     work_site = Column(String, nullable=False)
     home_address = Column(String, nullable=False)
     home_zip = Column(String, nullable=False)
-    shifts = Column(Text, nullable=False)  # JSON: { type, schedule, pto_dates }
+    shift_id = Column(String, ForeignKey("shifts.id"), nullable=False)
+    pto_dates = Column(Text, nullable=False)  # JSON: ["2024-12-25", "2024-12-26"]
     status = Column(String, default=EmployeeStatus.ACTIVE, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     # Relationships
+    shift = relationship("Shift", back_populates="employees")
     vanpool_riders = relationship("Rider", back_populates="employee", cascade="all, delete-orphan")
+    coordinated_vanpools = relationship("Vanpool", back_populates="coordinator", foreign_keys="Vanpool.coordinator_id")
 
     @property
-    def shift_info(self) -> dict:
-        """Get shifts as dict."""
-        return parse_json(self.shifts)
+    def pto_dates_list(self) -> list[str]:
+        """Get PTO dates as list."""
+        return parse_json(self.pto_dates) or []
 
     @property
     def full_name(self) -> str:
@@ -188,7 +228,8 @@ class Employee(Base):
             "work_site": self.work_site,
             "home_address": self.home_address,
             "home_zip": self.home_zip,
-            "shifts": self.shift_info,
+            "shift_id": self.shift_id,
+            "pto_dates": self.pto_dates_list,
             "status": self.status,
         }
 
@@ -199,9 +240,9 @@ class Rider(Base):
     __tablename__ = "riders"
 
     id = Column(String, primary_key=True)
-    participant_id = Column(String, nullable=False)
+    participant_id = Column(String, nullable=False)  # External ID from source system
     vanpool_id = Column(String, ForeignKey("vanpools.vanpool_id", ondelete="CASCADE"), nullable=False)
-    employee_id = Column(String, ForeignKey("employees.email", ondelete="CASCADE"), nullable=False)
+    employee_id = Column(String, ForeignKey("employees.employee_id", ondelete="CASCADE"), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     # Relationships
@@ -299,7 +340,8 @@ class Message(Base):
     sent_at = Column(DateTime, nullable=False)
     body = Column(Text, nullable=False)
     direction = Column(String, nullable=False)
-    classification = Column(Text, nullable=True)  # JSON: { bucket, confidence }
+    classification_bucket = Column(String, nullable=True)  # ClassificationBucket enum value
+    classification_confidence = Column(Integer, nullable=True)  # 1-5 scale
     status = Column(String, default=MessageStatusEnum.DRAFT, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
@@ -312,9 +354,14 @@ class Message(Base):
         return parse_json(self.to_emails) or []
 
     @property
-    def classification_info(self) -> Optional[dict]:
-        """Get classification as dict."""
-        return parse_json(self.classification)
+    def classification(self) -> Optional[dict]:
+        """Get classification as dict (for backward compatibility)."""
+        if self.classification_bucket is None:
+            return None
+        return {
+            "bucket": self.classification_bucket,
+            "confidence": self.classification_confidence,
+        }
 
     def to_dict(self) -> dict:
         """Convert to dictionary."""
@@ -325,6 +372,6 @@ class Message(Base):
             "sent_at": self.sent_at.isoformat() if self.sent_at else None,
             "body": self.body,
             "direction": self.direction,
-            "classification": self.classification_info,
+            "classification": self.classification,
             "status": self.status,
         }

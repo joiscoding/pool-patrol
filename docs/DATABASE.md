@@ -69,8 +69,9 @@ The database contains the following tables:
 
 | Table | Description |
 |-------|-------------|
+| `shifts` | Shift templates with schedules (Day Shift, Night Shift, etc.) |
 | `vanpools` | Vanpool routes with work site info |
-| `employees` | Employee records with address and shift data |
+| `employees` | Employee records with address and shift reference |
 | `riders` | Junction table linking employees to vanpools |
 | `cases` | Investigation cases for potential misuse |
 | `email_threads` | Email conversations related to cases |
@@ -79,7 +80,9 @@ The database contains the following tables:
 ### Relationships
 
 ```
-Vanpool ←──┬── Rider ──→ Employee
+Shift ←── Employee
+              │
+Vanpool ←──┬── Rider ──→ Employee (via employee_id)
            │
            ├── Case ←── EmailThread ←── Message
            │
@@ -196,6 +199,21 @@ If the new field should be populated from mock data:
 2. Update `prisma/seed.ts` to include the field
 3. Update `scripts/seed_database.py` to include the field
 
+## Enums
+
+The following enums are defined in the schema:
+
+| Enum | Values | Used By |
+|------|--------|---------|
+| `VanpoolStatus` | active, inactive, suspended | Vanpool.status |
+| `EmployeeStatus` | active, inactive, on_leave | Employee.status |
+| `TimeType` | full_time, part_time, contract | Employee.time_type |
+| `CaseStatus` | open, pending_reply, under_review, resolved, cancelled | Case.status |
+| `ThreadStatus` | active, closed, archived | EmailThread.status |
+| `MessageDirection` | inbound, outbound | Message.direction |
+| `MessageStatus` | draft, sent, read, archived | Message.status |
+| `ClassificationBucket` | address_change, shift_change, dispute, acknowledgment, unknown | Message.classification_bucket |
+
 ## Quick Reference: What to Update
 
 | Change Type | Files to Update |
@@ -227,21 +245,26 @@ Some fields store JSON data as TEXT (for SQLite compatibility):
 | Model | Field | JSON Structure |
 |-------|-------|----------------|
 | `Vanpool` | `work_site_coords` | `{ "lat": number, "lng": number }` |
-| `Employee` | `shifts` | `{ "type": string, "schedule": [...], "pto_dates": [...] }` |
+| `Shift` | `schedule` | `[{ "day": string, "start_time": string, "end_time": string }, ...]` |
+| `Employee` | `pto_dates` | `["2024-12-25", "2024-12-26"]` |
 | `Case` | `metadata` | `{ "reason": string, "details": string, "additional_info": {...} }` |
 | `Message` | `to_emails` | `["email1@...", "email2@..."]` |
-| `Message` | `classification` | `{ "bucket": string, "confidence": number }` |
+
+Note: `Message.classification` is now stored as two separate fields:
+- `classification_bucket`: enum value (address_change, shift_change, dispute, acknowledgment, unknown)
+- `classification_confidence`: integer value (1-5 scale)
 
 In Python, use the helper methods:
 
 ```python
 # Reading JSON
-employee.shift_info  # Returns parsed dict
-vanpool.coords       # Returns { lat, lng }
+shift.schedule_info      # Returns list of day schedules
+employee.pto_dates_list  # Returns list of PTO date strings
+vanpool.coords           # Returns { lat, lng }
 
 # Writing JSON
 from pool_patrol_core.db_models import to_json
-employee.shifts = to_json({"type": "Day Shift", ...})
+shift.schedule = to_json([{"day": "Mon", "start_time": "07:00", "end_time": "16:00"}])
 ```
 
 ## Migrating to PostgreSQL
