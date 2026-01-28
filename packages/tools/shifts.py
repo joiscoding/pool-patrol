@@ -8,25 +8,22 @@ from core.db_models import Employee, Shift
 
 @tool
 def get_employee_shifts(employee_id: str) -> dict:
-    """Get shift schedule and PTO dates for an employee.
+    """Return an employee's shift assignment, schedule, and PTO dates.
 
-    Use this tool when you need to:
-    - Check what shift an employee is assigned to (Day, Night, Swing)
-    - Get the detailed schedule (which days, start/end times)
-    - Check if an employee has upcoming PTO dates
+    Use when you need the shift details for a specific employee.
 
     Args:
-        employee_id: The employee ID (e.g., "EMP-1001")
+        employee_id: The employee ID (e.g., "EMP-1001").
 
     Returns:
-        A dictionary containing:
-        - employee_id: The employee ID
-        - employee_name: Full name of the employee
-        - shift_id: The shift template ID
-        - shift_name: Human-readable shift name (e.g., "Day Shift")
-        - schedule: List of day schedules [{day, start_time, end_time}, ...]
-        - pto_dates: List of PTO dates in YYYY-MM-DD format
-        - error: Error message if employee not found
+        A dictionary with:
+        - employee_id: The employee ID.
+        - employee_name: Full name of the employee.
+        - shift_id: The shift template ID.
+        - shift_name: Human-readable shift name (e.g., "Day Shift").
+        - schedule: List of day schedules [{day, start_time, end_time}, ...].
+        - pto_dates: List of PTO dates in YYYY-MM-DD format.
+        - error: Error message if employee not found.
     """
     with get_session() as session:
         # Query employee with shift join

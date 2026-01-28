@@ -49,3 +49,6 @@ select = ["E", "F", "I", "UP"]
 [tool.mypy]
 python_version = "3.11"
 strict = true
+
+[tool.pyright]
+extraPaths = ["packages"]

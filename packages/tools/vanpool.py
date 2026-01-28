@@ -1,4 +1,4 @@
-"""Tool for retrieving vanpool roster information."""
+"""Tools for retrieving vanpool membership information."""
 
 from langchain_core.tools import tool
 from pydantic import BaseModel
@@ -7,8 +7,8 @@ from core.database import get_session
 from core.db_models import Vanpool, Rider, Employee
 
 
-class RosterResult(BaseModel):
-    """Result of a vanpool roster lookup."""
+class VanpoolRosterResult(BaseModel):
+    """Result of a vanpool membership lookup."""
 
     vanpool_id: str
     work_site: str
@@ -18,22 +18,20 @@ class RosterResult(BaseModel):
 
 @tool
 def get_vanpool_roster(vanpool_id: str) -> dict:
-    """Get the list of employees who are riders in a specific vanpool.
+    """Return a vanpool's full roster and rider profiles.
 
-    Use this tool when you need to:
-    - See who is assigned to a vanpool
-    - Get employee details for all riders in a vanpool
-    - Audit a vanpool's membership
+    Use when you need the complete list of riders for a vanpool.
 
     Args:
-        vanpool_id: The vanpool ID (e.g., "VP-101")
+        vanpool_id: The vanpool ID (e.g., "VP-101").
 
     Returns:
-        A dictionary containing:
-        - vanpool_id: The vanpool ID
-        - work_site: The work site location
-        - rider_count: Number of riders
-        - riders: List of employee profiles for each rider
+        A dictionary with:
+        - vanpool_id: The vanpool ID.
+        - work_site: The work site location.
+        - rider_count: Number of riders.
+        - riders: List of employee profiles (id, name, shift_id, home_zip, etc.).
+        - error: Error message if the vanpool is not found.
     """
     with get_session() as session:
         # Find the vanpool
@@ -56,7 +54,7 @@ def get_vanpool_roster(vanpool_id: str) -> dict:
 
         # Build rider list
         riders = []
-        for rider, employee in riders_with_employees:
+        for _, employee in riders_with_employees:
             riders.append(employee.to_dict())
 
         return {
@@ -113,10 +111,10 @@ def list_vanpools(status: str | None = None) -> dict:
     """
     with get_session() as session:
         query = session.query(Vanpool)
-        
+
         if status:
             query = query.filter(Vanpool.status == status)
-        
+
         vanpools = query.all()
 
         return {

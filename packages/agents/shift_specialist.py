@@ -15,12 +15,14 @@ import os
 from typing import Any
 
 from langchain_core.messages import HumanMessage
+from langchain_core.output_parsers import PydanticOutputParser
 from langchain_openai import ChatOpenAI
 from langgraph.prebuilt import create_react_agent
 
 from agents.state import ShiftVerificationResult
-from prompts.shift_specialist import SHIFT_SPECIALIST_PROMPT
-from tools.roster import get_vanpool_roster
+from agents.utils import parse_legacy_verification_result
+from prompts.shift_specialist import SHIFT_SPECIALIST_PROMPT, SHIFT_SPECIALIST_PROMPT_VERSION
+from tools.vanpool import get_vanpool_roster
 from tools.shifts import get_employee_shifts
 
 
@@ -29,13 +31,6 @@ from tools.shifts import get_employee_shifts
 # =============================================================================
 
 def configure_langsmith():
-    """Configure LangSmith tracing if API key is available.
-    
-    Set these environment variables to enable tracing:
-        LANGSMITH_TRACING=true
-        LANGSMITH_API_KEY=your-api-key
-        LANGSMITH_PROJECT=pool-patrol
-    """
     if os.environ.get("LANGSMITH_API_KEY"):
         os.environ.setdefault("LANGSMITH_TRACING", "true")
         os.environ.setdefault("LANGSMITH_PROJECT", "pool-patrol")
@@ -53,6 +48,7 @@ _langsmith_enabled = configure_langsmith()
 
 # Tools available to the agent
 TOOLS = [get_vanpool_roster, get_employee_shifts]
+OUTPUT_PARSER = PydanticOutputParser(pydantic_object=ShiftVerificationResult)
 
 
 def get_model():
@@ -71,11 +67,18 @@ def create_shift_specialist():
     """
     model = get_model()
     
+    # Inject structured output instructions into the prompt
+    structured_prompt = (
+        SHIFT_SPECIALIST_PROMPT
+        + "\n\n"
+        + OUTPUT_PARSER.get_format_instructions()
+    )
+
     # Create the agent with tools and system prompt
     agent = create_react_agent(
         model=model,
         tools=TOOLS,
-        prompt=SHIFT_SPECIALIST_PROMPT,
+        prompt=structured_prompt,
     )
     
     return agent
@@ -87,73 +90,26 @@ def create_shift_specialist():
 
 
 def parse_verification_result(content: str) -> ShiftVerificationResult:
-    """Parse the agent's text response into a structured result.
-    
-    Expected format:
-        VERDICT: pass/fail
-        CONFIDENCE: 1-5
-        REASONING: ...
-        EVIDENCE:
-        - item 1
-        - item 2
-    """
-    lines = content.strip().split("\n")
-    
-    verdict = "pass"
-    confidence = 3
-    reasoning = ""
-    evidence = []
-    
-    current_section = None
-    reasoning_lines = []
-    evidence_lines = []
-    
-    for line in lines:
-        line_stripped = line.strip()
-        line_upper = line_stripped.upper()
-        
-        if line_upper.startswith("VERDICT:"):
-            verdict_text = line_stripped.split(":", 1)[1].strip().lower()
-            verdict = "fail" if "fail" in verdict_text else "pass"
-            current_section = "verdict"
-        elif line_upper.startswith("CONFIDENCE:"):
-            try:
-                conf_text = line_stripped.split(":", 1)[1].strip()
-                # Handle "4/5" or "4" formats
-                conf_num = conf_text.split("/")[0].strip()
-                confidence = int(conf_num)
-                confidence = max(1, min(5, confidence))
-            except (ValueError, IndexError):
-                confidence = 3
-            current_section = "confidence"
-        elif line_upper.startswith("REASONING:"):
-            reasoning_text = line_stripped.split(":", 1)[1].strip()
-            if reasoning_text:
-                reasoning_lines.append(reasoning_text)
-            current_section = "reasoning"
-        elif line_upper.startswith("EVIDENCE:"):
-            current_section = "evidence"
-        elif current_section == "reasoning" and line_stripped:
-            reasoning_lines.append(line_stripped)
-        elif current_section == "evidence" and line_stripped:
-            # Parse evidence items (starting with - or *)
-            if line_stripped.startswith(("-", "*", "•")):
-                evidence_text = line_stripped[1:].strip()
-                evidence_lines.append(evidence_text)
-            elif evidence_lines:  # Continuation of previous item
-                evidence_lines[-1] += " " + line_stripped
-    
-    reasoning = " ".join(reasoning_lines)
-    
-    # Convert evidence lines to structured format
-    evidence = [{"type": "observation", "data": {"description": e}} for e in evidence_lines]
-    
-    return ShiftVerificationResult(
-        verdict=verdict,
-        confidence=confidence,
-        reasoning=reasoning,
-        evidence=evidence,
-    )
+    """Parse the agent's response into a structured result."""
+    try:
+        return OUTPUT_PARSER.parse(content)
+    except Exception:
+        return parse_legacy_verification_result(content, ShiftVerificationResult)
+
+
+def _build_trace_config(vanpool_id: str) -> dict[str, Any]:
+    """Build LangSmith trace metadata and tags for this run."""
+    model_name = os.environ.get("OPENAI_MODEL", "gpt-4.1-mini")
+    return {
+        "run_name": "shift_specialist",
+        "tags": ["agent:shift_specialist", "component:verification"],
+        "metadata": {
+            "agent": "shift_specialist",
+            "vanpool_id": vanpool_id,
+            "prompt_version": SHIFT_SPECIALIST_PROMPT_VERSION,
+            "model": model_name,
+        },
+    }
 
 
 # =============================================================================
@@ -176,11 +132,14 @@ async def verify_vanpool_shifts(vanpool_id: str) -> ShiftVerificationResult:
     agent = create_shift_specialist()
     
     # Run the agent
-    result = await agent.ainvoke({
-        "messages": [
-            HumanMessage(content=f"Verify shift compatibility for vanpool {vanpool_id}")
-        ]
-    })
+    result = await agent.ainvoke(
+        {
+            "messages": [
+                HumanMessage(content=f"Verify shift compatibility for vanpool {vanpool_id}")
+            ]
+        },
+        config=_build_trace_config(vanpool_id),
+    )
     
     # Parse the final message into structured result
     final_message = result["messages"][-1]
@@ -195,11 +154,14 @@ def verify_vanpool_shifts_sync(vanpool_id: str) -> ShiftVerificationResult:
     agent = create_shift_specialist()
     
     # Run the agent
-    result = agent.invoke({
-        "messages": [
-            HumanMessage(content=f"Verify shift compatibility for vanpool {vanpool_id}")
-        ]
-    })
+    result = agent.invoke(
+        {
+            "messages": [
+                HumanMessage(content=f"Verify shift compatibility for vanpool {vanpool_id}")
+            ]
+        },
+        config=_build_trace_config(vanpool_id),
+    )
     
     # Parse the final message into structured result
     final_message = result["messages"][-1]

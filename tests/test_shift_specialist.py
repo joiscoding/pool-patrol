@@ -15,6 +15,7 @@ For LangSmith tracing, also set:
     LANGSMITH_PROJECT=pool-patrol  (optional, defaults to pool-patrol)
 """
 
+import asyncio
 import os
 import sys
 from pathlib import Path
@@ -218,6 +219,50 @@ def test_mismatch_vanpool():
         return False
 
 
+def test_async_vanpools():
+    """Test async verification for VP-102 and VP-103 in parallel."""
+    print("\n" + "=" * 60)
+    print("Testing async verification (VP-102 + VP-103)")
+    print("=" * 60)
+
+    if not os.environ.get("OPENAI_API_KEY"):
+        print("\n⚠ OPENAI_API_KEY not set. Skipping.")
+        return False
+
+    from agents import verify_vanpool_shifts
+
+    async def run_checks():
+        return await asyncio.gather(
+            verify_vanpool_shifts("VP-102"),
+            verify_vanpool_shifts("VP-103"),
+        )
+
+    print("\n   Verifying VP-102 and VP-103 concurrently...")
+    print("   This may take a moment...\n")
+
+    try:
+        result_102, result_103 = asyncio.run(run_checks())
+
+        print(f"   VP-102 Verdict: {result_102.verdict.upper()}")
+        print(f"   VP-103 Verdict: {result_103.verdict.upper()}")
+
+        if result_102.verdict != "pass":
+            print("\n⚠ Expected VP-102 to PASS")
+            return False
+        if result_103.verdict != "fail":
+            print("\n⚠ Expected VP-103 to FAIL")
+            return False
+
+        print("\n✓ Async verification returned expected verdicts!")
+        return True
+
+    except Exception as e:
+        print(f"\n✗ Error: {e}")
+        import traceback
+        traceback.print_exc()
+        return False
+
+
 def main():
     """Run all tests."""
     print("\n" + "=" * 60)
@@ -247,6 +292,7 @@ def main():
         # Run additional tests
         test_mixed_shift_vanpool()
         mismatch_ok = test_mismatch_vanpool()
+        test_async_vanpools()
     
     print("\n" + "=" * 60)
     print("Test Summary")

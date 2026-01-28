@@ -204,7 +204,7 @@ pool_patrol/
 │   │   └── shift_specialist.py       # Shift verification agent
 │   │
 │   ├── tools/                        # LangChain tool wrappers
-│   │   ├── roster.py                 # Vanpool roster tools
+│   │   ├── vanpool.py                # Vanpool tools
 │   │   └── shifts.py                 # Employee shift tools
 │   │
 │   ├── prompts/                      # Agent system prompts
