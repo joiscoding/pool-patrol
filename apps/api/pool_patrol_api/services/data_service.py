@@ -4,7 +4,7 @@ import json
 from functools import lru_cache
 from pathlib import Path
 
-from pool_patrol_core.models import (
+from core.models import (
     Case,
     CaseStatus,
     EmailThread,

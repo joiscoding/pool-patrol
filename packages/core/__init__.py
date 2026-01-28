@@ -1,7 +1,7 @@
 """Pool Patrol Core - Shared models, config, and utilities."""
 
 # Pydantic models (for API request/response validation)
-from pool_patrol_core.models import (
+from .models import (
     Case,
     CaseMetadata,
     CaseStatus,
@@ -25,7 +25,7 @@ from pool_patrol_core.models import (
 )
 
 # Database utilities
-from pool_patrol_core.database import (
+from .database import (
     get_session,
     get_engine,
     init_db,
@@ -35,7 +35,7 @@ from pool_patrol_core.database import (
 
 # SQLAlchemy models (for database queries)
 # Import with DB prefix to distinguish from Pydantic models
-from pool_patrol_core.db_models import (
+from .db_models import (
     Shift as DBShift,
     Vanpool as DBVanpool,
     Employee as DBEmployee,

@@ -3,7 +3,7 @@
 from fastapi import APIRouter, HTTPException, Query
 
 from pool_patrol_api.dependencies import DataServiceDep
-from pool_patrol_core.models import Rider, Vanpool, VanpoolStatus
+from core.models import Rider, Vanpool, VanpoolStatus
 
 router = APIRouter(prefix="/api/vanpools", tags=["vanpools"])
 

@@ -25,7 +25,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import relationship
 
-from pool_patrol_core.database import Base
+from core.database import Base
 
 
 # =============================================================================

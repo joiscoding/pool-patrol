@@ -15,12 +15,12 @@ import uuid
 from datetime import datetime
 from pathlib import Path
 
-# Add parent to path for imports
+# Add packages to path for imports
 import sys
-sys.path.insert(0, str(Path(__file__).parent.parent))
+sys.path.insert(0, str(Path(__file__).parent.parent / "packages"))
 
-from pool_patrol_core.database import get_session, get_engine, Base
-from pool_patrol_core.db_models import (
+from core.database import get_session, get_engine, Base
+from core.db_models import (
     Shift, Vanpool, Employee, Rider, Case, EmailThread, Message
 )
 

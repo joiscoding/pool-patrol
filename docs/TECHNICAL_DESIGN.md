@@ -194,15 +194,22 @@ pool_patrol/
 │           └── database/             # Prisma Client singleton
 │
 ├── packages/
-│   ├── core/                         # Shared models, config
+│   ├── core/                         # Shared models, database, config
+│   │   ├── database.py               # SQLAlchemy engine and sessions
+│   │   ├── db_models.py              # SQLAlchemy ORM models
+│   │   └── models.py                 # Pydantic models for API
+│   │
+│   ├── agents/                       # LangGraph multi-agent workflow
+│   │   ├── state.py                  # Agent state definitions
+│   │   └── shift_specialist.py       # Shift verification agent
+│   │
 │   ├── tools/                        # LangChain tool wrappers
-│   ├── graph/                        # LangGraph multi-agent workflow
-│   │   └── pool_patrol_graph/
-│   │       └── agents/
-│   │           ├── case_manager.py       # Orchestrator, lifecycle, synthesis
-│   │           ├── location_specialist.py # Location verification
-│   │           ├── shift_specialist.py    # Shift verification
-│   │           └── outreach.py            # Email outreach + reply handling
+│   │   ├── roster.py                 # Vanpool roster tools
+│   │   └── shifts.py                 # Employee shift tools
+│   │
+│   ├── prompts/                      # Agent system prompts
+│   │   └── shift_specialist.py       # Shift Specialist prompt
+│   │
 │   └── eval/                         # LangSmith evaluation
 │
 ├── mock/                             # Mock data for POC

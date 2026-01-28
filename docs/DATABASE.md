@@ -42,9 +42,9 @@ Pool Patrol uses a **Prisma-first** approach where the Prisma schema is the sing
 | `prisma/schema.prisma` | Database schema definition (source of truth) |
 | `prisma/seed.ts` | TypeScript seed script for populating database |
 | `apps/web/src/database/db.ts` | Prisma Client singleton for frontend queries |
-| `packages/core/pool_patrol_core/database.py` | SQLAlchemy engine and session management |
-| `packages/core/pool_patrol_core/db_models.py` | SQLAlchemy ORM models |
-| `packages/core/pool_patrol_core/models.py` | Pydantic models for API validation |
+| `packages/core/database.py` | SQLAlchemy engine and session management |
+| `packages/core/db_models.py` | SQLAlchemy ORM models |
+| `packages/core/models.py` | Pydantic models for API validation |
 | `scripts/seed_database.py` | Python seed script (alternative to TypeScript) |
 | `mock/*.json` | Source data for seeding |
 
@@ -164,7 +164,7 @@ This automatically:
 
 ### Step 3: Update SQLAlchemy Models
 
-Edit `packages/core/pool_patrol_core/db_models.py` to match (current repo uses manual sync; `sqlacodegen` can be used to verify or regenerate from the DB):
+Edit `packages/core/db_models.py` to match (current repo uses manual sync; `sqlacodegen` can be used to verify or regenerate from the DB):
 
 ```python
 class Employee(Base):
@@ -187,7 +187,7 @@ class Employee(Base):
 
 ### Step 4: Update Pydantic Models (If Needed)
 
-If the API should expose the new field, edit `packages/core/pool_patrol_core/models.py`:
+If the API should expose the new field, edit `packages/core/models.py`:
 
 ```python
 class Employee(BaseModel):
@@ -269,7 +269,7 @@ employee.pto_dates_list  # Returns list of PTO date strings
 vanpool.coords           # Returns { lat, lng }
 
 # Writing JSON
-from pool_patrol_core.db_models import to_json
+from core.db_models import to_json
 shift.schedule = to_json([{"day": "Mon", "start_time": "07:00", "end_time": "16:00"}])
 ```
 

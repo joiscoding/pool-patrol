@@ -4,7 +4,7 @@
 This script demonstrates the Shift Specialist verifying shift compatibility
 for vanpools. Run from the project root:
 
-    python scripts/test_shift_specialist.py
+    python tests/test_shift_specialist.py
 
 Make sure you have:
 1. Set OPENAI_API_KEY in your environment
@@ -21,9 +21,7 @@ from pathlib import Path
 
 # Add packages to path for development
 project_root = Path(__file__).parent.parent
-sys.path.insert(0, str(project_root / "packages" / "core"))
-sys.path.insert(0, str(project_root / "packages" / "tools"))
-sys.path.insert(0, str(project_root / "packages" / "graph"))
+sys.path.insert(0, str(project_root / "packages"))
 
 from dotenv import load_dotenv
 
@@ -50,7 +48,7 @@ def test_tools():
     print("Testing LangChain Tools")
     print("=" * 60)
     
-    from pool_patrol_tools import get_vanpool_roster, get_employee_shifts, list_all_shifts
+    from tools import get_vanpool_roster, get_employee_shifts, list_all_shifts
     
     # Test list_all_shifts
     print("\n1. Testing list_all_shifts...")
@@ -103,7 +101,7 @@ def test_shift_specialist():
         print("  Set your API key to test the full agent.")
         return False
     
-    from pool_patrol_graph import verify_vanpool_shifts_sync
+    from agents import verify_vanpool_shifts_sync
     
     # Test with VP-101 (should be mostly Day Shift employees)
     print("\n1. Verifying VP-101 (Day Shift vanpool)...")
@@ -140,7 +138,7 @@ def test_mixed_shift_vanpool():
         print("\n⚠ OPENAI_API_KEY not set. Skipping.")
         return False
     
-    from pool_patrol_graph import verify_vanpool_shifts_sync
+    from agents import verify_vanpool_shifts_sync
     
     print("\n   Verifying VP-102...")
     print("   This may take a moment...\n")
@@ -169,7 +167,7 @@ def test_mismatch_vanpool():
         print("\n⚠ OPENAI_API_KEY not set. Skipping.")
         return False
     
-    from pool_patrol_graph import verify_vanpool_shifts_sync
+    from agents import verify_vanpool_shifts_sync
     
     print("\n   Verifying VP-103 (5 Day Shift + 1 Night Shift)...")
     print("   This may take a moment...\n")

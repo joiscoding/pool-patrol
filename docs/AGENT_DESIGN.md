@@ -283,7 +283,7 @@ The Shift Specialist agent is fully implemented and can be tested.
 
 ```bash
 # Requires OPENAI_API_KEY in environment or .env
-poetry run python scripts/test_shift_specialist.py
+poetry run python tests/test_shift_specialist.py
 ```
 
 ---

@@ -2,8 +2,8 @@
 
 from langchain_core.tools import tool
 
-from pool_patrol_core.database import get_session
-from pool_patrol_core.db_models import Employee, Shift
+from core.database import get_session
+from core.db_models import Employee, Shift
 
 
 @tool

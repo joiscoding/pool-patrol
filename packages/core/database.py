@@ -4,7 +4,7 @@ This module provides SQLAlchemy database connectivity that works with
 both SQLite (development) and PostgreSQL (production).
 
 Usage:
-    from pool_patrol_core.database import get_session, init_db
+    from core.database import get_session, init_db
     
     # Initialize database (creates tables if needed)
     init_db()
@@ -111,7 +111,7 @@ def init_db():
     This is mainly for testing or development convenience.
     """
     # Import models to register them with Base
-    from pool_patrol_core.db_models import (
+    from core.db_models import (
         Shift, Vanpool, Employee, Rider, Case, EmailThread, Message
     )
     Base.metadata.create_all(bind=get_engine())

@@ -1,9 +1,13 @@
 #!/usr/bin/env python
 """Test script for vanpool roster tools."""
 
-import json
+import sys
+from pathlib import Path
 
-from pool_patrol_tools import get_vanpool_roster, get_vanpool_info, list_vanpools
+# Add packages to path for development
+sys.path.insert(0, str(Path(__file__).parent.parent / "packages"))
+
+from tools import get_vanpool_roster, get_vanpool_info, list_vanpools
 
 
 def main():

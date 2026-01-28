@@ -3,7 +3,7 @@
 from fastapi import APIRouter, HTTPException, Query
 
 from pool_patrol_api.dependencies import DataServiceDep
-from pool_patrol_core.models import Employee, EmployeeStatus, Shifts
+from core.models import Employee, EmployeeStatus, Shifts
 
 router = APIRouter(prefix="/api/employees", tags=["employees"])
 

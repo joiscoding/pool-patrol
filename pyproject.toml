@@ -6,10 +6,11 @@ authors = ["InnovateCorp"]
 readme = "README.md"
 packages = [
     { include = "pool_patrol_api", from = "apps/api" },
-    { include = "pool_patrol_graph", from = "packages/graph" },
-    { include = "pool_patrol_core", from = "packages/core" },
-    { include = "pool_patrol_tools", from = "packages/tools" },
-    { include = "pool_patrol_eval", from = "packages/eval" },
+    { include = "agents", from = "packages" },
+    { include = "core", from = "packages" },
+    { include = "tools", from = "packages" },
+    { include = "eval", from = "packages" },
+    { include = "prompts", from = "packages" },
 ]
 
 [tool.poetry.dependencies]

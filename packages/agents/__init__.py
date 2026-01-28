@@ -1,13 +1,13 @@
-"""Pool Patrol Graph - LangGraph multi-agent workflow."""
+"""Pool Patrol Agents - LangGraph multi-agent workflow."""
 
-from pool_patrol_graph.state import (
+from .state import (
     ShiftVerificationResult,
     LocationVerificationResult,
     VerificationResult,
     ShiftSpecialistState,
     CaseManagerState,
 )
-from pool_patrol_graph.agents.shift_specialist import (
+from .shift_specialist import (
     verify_vanpool_shifts,
     verify_vanpool_shifts_sync,
     compile_shift_specialist,
