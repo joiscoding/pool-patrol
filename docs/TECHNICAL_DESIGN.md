@@ -312,8 +312,8 @@ One case per vanpool (multiple employees):
 
 | Tool | Data Source | Purpose |
 |------|-------------|---------|
-| `send_investigation_email` | Email system | Send inquiry to all vanpool riders |
-| `get_email_replies` | Email system | Fetch threaded replies |
+| `send_email` | Email system | Send inquiry to all vanpool riders |
+| `get_email` | Email system | Fetch threaded replies |
 | `classify_reply` | LLM | Classify reply into bucket |
 
 **Case Manager Capabilities:**

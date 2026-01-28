@@ -7,7 +7,7 @@ This document describes the database setup for Pool Patrol, including the schema
 Pool Patrol uses a **Prisma-first** approach where the Prisma schema is the single source of truth for the database structure. This enables:
 
 - **TypeScript**: Auto-generated types via Prisma Client
-- **Python**: SQLAlchemy models for queries (manually synced)
+- **Python**: SQLAlchemy models for queries (kept in sync manually; optionally verified/regenerated with `sqlacodegen`)
 - **Database**: SQLite for development, PostgreSQL for production
 
 ```
@@ -64,9 +64,10 @@ DATABASE_URL="postgresql://user:password@localhost:5432/pool_patrol"
 
 ### Connection Details
 
-- **SQLite**: File stored at `prisma/dev.db`
+- **SQLite**: File stored at `prisma/dev.db` (default for Python via `database.py`)
 - **PostgreSQL**: Standard connection string format
 - Both use the same SQLAlchemy code - only the connection string changes
+- If `DATABASE_URL="file:./dev.db"`, the Python code resolves it to `prisma/dev.db`. Prisma resolves SQLite paths relative to where you run it, so set `DATABASE_URL="file:./prisma/dev.db"` from repo root if you want both to use the same file.
 
 ## Schema Structure
 
@@ -120,7 +121,7 @@ bun run db:studio
 # Install dependencies
 poetry install
 
-# Seed database (creates tables automatically)
+# Seed database (creates tables automatically via SQLAlchemy models)
 poetry run python scripts/seed_database.py
 ```
 
@@ -163,7 +164,7 @@ This automatically:
 
 ### Step 3: Update SQLAlchemy Models
 
-Edit `packages/core/pool_patrol_core/db_models.py` to match:
+Edit `packages/core/pool_patrol_core/db_models.py` to match (current repo uses manual sync; `sqlacodegen` can be used to verify or regenerate from the DB):
 
 ```python
 class Employee(Base):
@@ -310,7 +311,7 @@ bun run db:reset
 
 ### SQLAlchemy model out of sync
 
-Use `sqlacodegen` to see what the actual DB schema looks like:
+Use `sqlacodegen` to see what the actual DB schema looks like (and optionally regenerate):
 ```bash
 pip install sqlacodegen
 sqlacodegen sqlite:///prisma/dev.db

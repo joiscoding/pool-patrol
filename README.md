@@ -76,7 +76,7 @@ The system uses a **hierarchical multi-agent architecture** with 4 specialized a
 | **Case Manager** | Orchestrates verification (parallel or selective), synthesizes results, owns case lifecycle | Delegates to specialists |
 | **Location Specialist** | Validates employee home location against vanpool pickup | `get_employee_profile`, `check_commute_distance` |
 | **Shift Specialist** | Validates employee shift schedule against vanpool hours | `get_employee_shifts`, `get_vanpool_roster` |
-| **Outreach Agent** | Sends investigation emails, monitors replies, classifies responses | `send_email`, `get_replies`, `classify_reply` |
+| **Outreach Agent** | Sends investigation emails, monitors replies, classifies responses | `send_email`, `get_email`, `classify_reply` |
 
 **Why this architecture?**
 - **One agent, one decision** - Each specialist makes a single, focused decision
