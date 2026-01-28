@@ -27,7 +27,7 @@ Base = declarative_base()
 
 # Default to SQLite in development
 # Set DATABASE_URL environment variable to use PostgreSQL
-DEFAULT_DATABASE_URL = f"sqlite:///{Path(__file__).parent.parent.parent.parent / 'prisma' / 'dev.db'}"
+DEFAULT_DATABASE_URL = f"sqlite:///{Path(__file__).parent.parent.parent / 'prisma' / 'dev.db'}"
 
 
 def get_database_url() -> str:
@@ -37,12 +37,14 @@ def get_database_url() -> str:
     # Prisma uses "file:" prefix for SQLite, SQLAlchemy uses "sqlite:///"
     if url.startswith("file:"):
         # Convert Prisma-style path to SQLAlchemy-style
+        # Prisma resolves paths relative to schema.prisma location (prisma/)
+        # So "file:./dev.db" means prisma/dev.db from project root
         path = url.replace("file:", "")
         if path.startswith("./"):
-            # Relative path - make it absolute from project root
-            # Note: path may already contain "prisma/" if set that way in .env
-            project_root = Path(__file__).parent.parent.parent.parent
-            path = str(project_root / path[2:])
+            # Relative path - resolve from prisma/ directory (where schema.prisma lives)
+            project_root = Path(__file__).parent.parent.parent
+            prisma_dir = project_root / "prisma"
+            path = str(prisma_dir / path[2:])
         url = f"sqlite:///{path}"
     
     return url

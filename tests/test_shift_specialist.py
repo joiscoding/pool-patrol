@@ -25,8 +25,8 @@ sys.path.insert(0, str(project_root / "packages"))
 
 from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv(project_root / ".env")
+# Load environment variables (override=True ensures .env takes precedence over shell env)
+load_dotenv(project_root / ".env", override=True)
 
 
 def configure_langsmith():
@@ -47,6 +47,10 @@ def test_tools():
     print("=" * 60)
     print("Testing LangChain Tools")
     print("=" * 60)
+    
+    # Reset database engine to ensure fresh connection
+    from core.database import reset_engine  # type: ignore[import-not-found]
+    reset_engine()
     
     from tools import get_vanpool_roster, get_employee_shifts, list_all_shifts
     
@@ -84,6 +88,22 @@ def test_tools():
         for day in shift_result["schedule"][:3]:  # Show first 3 days
             print(f"   - {day['day']}: {day['start_time']} - {day['end_time']}")
         print(f"   PTO Dates: {shift_result['pto_dates'] or 'None'}")
+    
+    # Test EMP-1014 (Leo Nguyen) - should be Night Shift (VP-103 mismatch case)
+    print("\n4. Testing get_employee_shifts for EMP-1014 (should be Night Shift)...")
+    shift_result_1014 = get_employee_shifts.invoke({"employee_id": "EMP-1014"})
+    if "error" in shift_result_1014:
+        print(f"   Error: {shift_result_1014['error']}")
+        return False
+    else:
+        print(f"   Employee: {shift_result_1014['employee_name']}")
+        print(f"   Shift: {shift_result_1014['shift_name']}")
+        expected_shift = "Night Shift"
+        if shift_result_1014['shift_name'] == expected_shift:
+            print(f"   ✓ Correctly identified as {expected_shift}")
+        else:
+            print(f"   ✗ Expected '{expected_shift}' but got '{shift_result_1014['shift_name']}'")
+            return False
     
     print("\n✓ All tools working correctly!")
     return True
