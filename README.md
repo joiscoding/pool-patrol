@@ -39,7 +39,8 @@ pool_patrol/
 ├── .env.example
 │
 ├── docs/
-│   └── TECHNICAL_DESIGN.md
+│   ├── TECHNICAL_DESIGN.md
+│   └── AGENT_DESIGN.md
 │
 ├── prisma/
 │   ├── schema.prisma           # Database schema (source of truth)
@@ -69,24 +70,7 @@ pool_patrol/
 
 ## Multi-Agent Architecture
 
-The system uses a **hierarchical multi-agent architecture** with 4 specialized agents orchestrated via LangGraph:
-
-| Agent | Responsibility | Tools / Capabilities |
-|-------|----------------|---------------------|
-| **Case Manager** | Orchestrates verification (parallel or selective), synthesizes results, owns case lifecycle | Delegates to specialists |
-| **Location Specialist** | Validates employee home location against vanpool pickup | `get_employee_profile`, `check_commute_distance` |
-| **Shift Specialist** | Validates employee shift schedule against vanpool hours | `get_employee_shifts`, `get_vanpool_roster` |
-| **Outreach Agent** | Sends investigation emails, monitors replies, classifies responses | `send_email`, `get_email`, `classify_reply` |
-
-**Why this architecture?**
-- **One agent, one decision** - Each specialist makes a single, focused decision
-- **Agent-as-tool** - Case Manager invokes specialists as tools (enables parallel execution, selective re-verification)
-- **Hierarchical over flat** - Orchestrator + specialists outperforms peer-to-peer communication
-- **Scalable** - New verification types (badge swipes, parking) are easy to add
-
-**Human-in-the-loop (HITL)** interrupts at:
-1. Unknown reply bucket labeling
-2. Pre-cancel approval
+The multi-agent workflow (Case Manager, Location Specialist, Shift Specialist, Outreach Agent) and HITL flow are documented in `docs/AGENT_DESIGN.md`.
 
 ## LangSmith: Evaluation & Observability
 
@@ -197,7 +181,8 @@ poetry run python scripts/run_case.py --vanpool-id VP-101
 
 ## Documentation
 
-- [Technical Design](docs/TECHNICAL_DESIGN.md) - Architecture, trade-offs, agent design
+- [Technical Design](docs/TECHNICAL_DESIGN.md) - LangSmith infrastructure architecture and trade-offs
+- [Agent Design](docs/AGENT_DESIGN.md) - Multi-agent workflow, lifecycle, tools, evaluation
 - [Database](docs/DATABASE.md) - Database setup, schema changes, SQLAlchemy usage
 
 ## License
