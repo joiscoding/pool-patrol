@@ -275,6 +275,19 @@ The Case Manager uses specialists as tool calls (agent-as-tool). These tools exe
 | `run_shift_specialist` | Shift Specialist | Validate employee shift schedule vs vanpool hours |
 | `run_outreach_agent` | Outreach Agent | Send inquiry, fetch replies, classify responses |
 
+## Testing the Shift Specialist
+
+The Shift Specialist agent is fully implemented and can be tested.
+
+### Run the Test Suite
+
+```bash
+# Requires OPENAI_API_KEY in environment or .env
+poetry run python scripts/test_shift_specialist.py
+```
+
+---
+
 ## LangSmith Evaluation
 
 **Test Dataset:** 40+ scenarios covering:

@@ -4,6 +4,8 @@ These models mirror the Prisma schema and are used for Python database queries.
 The schema source of truth is prisma/schema.prisma.
 
 Note: JSON fields are stored as TEXT in SQLite and used with json.loads/dumps.
+Note: Prisma stores DateTime as Unix milliseconds (BigInt), so we use a custom
+      type decorator to convert to/from Python datetime.
 """
 
 import json
@@ -12,18 +14,50 @@ from datetime import datetime
 from typing import Any, Optional
 
 from sqlalchemy import (
+    BigInteger,
     Column,
-    DateTime,
-    Enum,
     ForeignKey,
     Integer,
     String,
     Text,
+    TypeDecorator,
     UniqueConstraint,
 )
 from sqlalchemy.orm import relationship
 
 from pool_patrol_core.database import Base
+
+
+# =============================================================================
+# Custom Type for Prisma DateTime (Unix milliseconds)
+# =============================================================================
+
+
+class PrismaDateTime(TypeDecorator):
+    """SQLAlchemy type that converts Prisma's Unix milliseconds to Python datetime.
+    
+    Prisma stores DateTime as BigInt (Unix timestamp in milliseconds).
+    This type decorator handles the conversion automatically.
+    """
+    
+    impl = BigInteger
+    cache_ok = True
+    
+    def process_bind_param(self, value, dialect):
+        """Convert Python datetime to Unix milliseconds for storage."""
+        if value is None:
+            return None
+        if isinstance(value, datetime):
+            return int(value.timestamp() * 1000)
+        return value
+    
+    def process_result_value(self, value, dialect):
+        """Convert Unix milliseconds from storage to Python datetime."""
+        if value is None:
+            return None
+        if isinstance(value, int):
+            return datetime.fromtimestamp(value / 1000)
+        return value
 
 
 # =============================================================================
@@ -112,8 +146,8 @@ class Shift(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     name = Column(String, unique=True, nullable=False)  # "Day Shift", "Night Shift", etc.
     schedule = Column(Text, nullable=False)  # JSON: [{ day, start_time, end_time }, ...]
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(PrismaDateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(PrismaDateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     # Relationships
     employees = relationship("Employee", back_populates="shift")
@@ -145,8 +179,8 @@ class Vanpool(Base):
     capacity = Column(Integer, nullable=False)
     coordinator_id = Column(String, ForeignKey("employees.employee_id"), unique=True, nullable=True)
     status = Column(String, default=VanpoolStatus.ACTIVE, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(PrismaDateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(PrismaDateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     # Relationships
     coordinator = relationship("Employee", back_populates="coordinated_vanpool", foreign_keys=[coordinator_id])
@@ -188,15 +222,15 @@ class Employee(Base):
     manager = Column(String, nullable=False)  # Manager name (may not be in employee database)
     supervisor = Column(String, nullable=False)  # Supervisor name (may not be in employee database)
     time_type = Column(String, nullable=False)  # TimeType enum value
-    date_onboarded = Column(DateTime, nullable=False)
+    date_onboarded = Column(PrismaDateTime, nullable=False)
     work_site = Column(String, nullable=False)
     home_address = Column(String, nullable=False)
     home_zip = Column(String, nullable=False)
     shift_id = Column(String, ForeignKey("shifts.id"), nullable=False)
     pto_dates = Column(Text, nullable=False)  # JSON: ["2024-12-25", "2024-12-26"]
     status = Column(String, default=EmployeeStatus.ACTIVE, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(PrismaDateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(PrismaDateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 
     # Relationships
     shift = relationship("Shift", back_populates="employees")
@@ -244,7 +278,7 @@ class Rider(Base):
     participant_id = Column(String, nullable=False)  # External ID from source system
     vanpool_id = Column(String, ForeignKey("vanpools.vanpool_id", ondelete="CASCADE"), nullable=False)
     employee_id = Column(String, ForeignKey("employees.employee_id", ondelete="CASCADE"), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(PrismaDateTime, default=datetime.utcnow, nullable=False)
 
     # Relationships
     vanpool = relationship("Vanpool", back_populates="riders")
@@ -263,14 +297,14 @@ class Case(Base):
     id = Column(String, primary_key=True, default=lambda: str(uuid.uuid4()))
     case_id = Column(String, unique=True, nullable=False)
     vanpool_id = Column(String, ForeignKey("vanpools.vanpool_id"), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(PrismaDateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(PrismaDateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     status = Column(String, default=CaseStatus.OPEN, nullable=False)
     # Note: 'metadata' is reserved by SQLAlchemy, so we use 'meta' as the Python attribute
     # but map it to 'metadata' column in the database
     meta = Column("metadata", Text, nullable=False)  # JSON: { reason, details, additional_info }
     outcome = Column(String, nullable=True)
-    resolved_at = Column(DateTime, nullable=True)
+    resolved_at = Column(PrismaDateTime, nullable=True)
 
     # Relationships
     vanpool = relationship("Vanpool", back_populates="cases")
@@ -305,7 +339,7 @@ class EmailThread(Base):
     case_id = Column(String, ForeignKey("cases.case_id"), unique=True, nullable=False)
     vanpool_id = Column(String, ForeignKey("vanpools.vanpool_id"), nullable=False)
     subject = Column(String, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(PrismaDateTime, default=datetime.utcnow, nullable=False)
     status = Column(String, default=ThreadStatus.ACTIVE, nullable=False)
 
     # Relationships
@@ -338,13 +372,13 @@ class Message(Base):
     thread_id = Column(String, ForeignKey("email_threads.thread_id", ondelete="CASCADE"), nullable=False)
     from_email = Column(String, nullable=False)
     to_emails = Column(Text, nullable=False)  # JSON array
-    sent_at = Column(DateTime, nullable=False)
+    sent_at = Column(PrismaDateTime, nullable=False)
     body = Column(Text, nullable=False)
     direction = Column(String, nullable=False)
     classification_bucket = Column(String, nullable=True)  # ClassificationBucket enum value
     classification_confidence = Column(Integer, nullable=True)  # 1-5 scale
     status = Column(String, default=MessageStatusEnum.DRAFT, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    created_at = Column(PrismaDateTime, default=datetime.utcnow, nullable=False)
 
     # Relationships
     thread = relationship("EmailThread", back_populates="messages")

@@ -39,8 +39,10 @@ def get_database_url() -> str:
         # Convert Prisma-style path to SQLAlchemy-style
         path = url.replace("file:", "")
         if path.startswith("./"):
-            # Relative path - make it absolute from prisma directory
-            path = str(Path(__file__).parent.parent.parent.parent / "prisma" / path[2:])
+            # Relative path - make it absolute from project root
+            # Note: path may already contain "prisma/" if set that way in .env
+            project_root = Path(__file__).parent.parent.parent.parent
+            path = str(project_root / path[2:])
         url = f"sqlite:///{path}"
     
     return url
