@@ -294,6 +294,21 @@ poetry run python tests/test_shift_specialist.py
 
 Comprehensive evaluation strategy for the Shift Specialist agent covering dataset creation, automated evaluation, model comparison, and agent behavior analysis.
 
+### Evaluator Strategy by Agent
+
+**Specialists (Location + Shift):**
+- **Primary:** Heuristic evaluators with fixed datapoints should yield deterministic, correct verdicts.
+- **Secondary:** LLM-as-judge to score reasoning clarity and evidence faithfulness (does not gate pass/fail).
+
+**Case Manager:**
+- **Primary:** Heuristic tool-choice evals (correct tools called; order not required for correctness).
+- **Efficiency:** Minimize total tool calls per case to reduce cost/latency.
+- **Secondary:** A/B testing to pick the most cost-effective model with acceptable quality.
+
+**Outreach Agent:**
+- **Primary:** LLM-as-judge for tone, accuracy, faithfulness, and relevance.
+- **Optional:** Human review for borderline or high-impact communications.
+
 **Key Metrics:**
 
 | Metric | Description | Target |
