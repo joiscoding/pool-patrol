@@ -288,21 +288,129 @@ poetry run python tests/test_shift_specialist.py
 
 ---
 
-## LangSmith Evaluation
+## LangSmith Evaluation Plan
 
-**Test Dataset:** 40+ scenarios covering:
-- Valid cases (should pass initial verification)
-- True misuse (should escalate to pre-cancel)
-- Ambiguous replies (should route to human)
-- Data updated replies (should trigger re-verification)
-- Silent fixes (employee fixes data but doesn't reply - caught on timeout re-verify)
-- No-response cases (should re-verify then escalate)
-- Novel shift types (agent must reason about unfamiliar shift structures)
+### Overview
 
-**Custom Metrics:**
+Comprehensive evaluation strategy for the Shift Specialist agent covering dataset creation, automated evaluation, model comparison, and agent behavior analysis.
+
+**Key Metrics:**
 
 | Metric | Description | Target |
 |--------|-------------|--------|
-| `bucket_accuracy` | Reply classification accuracy | > 85% |
-| `cancel_precision` | Minimize false cancels | > 95% |
-| `automation_rate` | Cases closed without human | > 60% |
+| `verdict_accuracy` | Correct pass/fail decisions | ≥ 95% |
+| `reasoning_quality` | LLM judge score (1-5) | ≥ 4.0 |
+| `shift_conflict_accuracy` | Heuristic overlap calculation | ≥ 98% |
+| `tool_choice_accuracy` | Correct tool selection | ≥ 95% |
+| `trajectory_optimality` | Follows efficient path | ≥ 70% |
+
+### Phase 1: Create Evaluation Dataset
+
+Build 60 test cases covering valid alignments, true conflicts, and edge cases.
+
+**Dataset Structure:**
+- **Inputs:** `employee_id`, `vanpool_id`
+- **Expected Outputs:** `verdict`, `confidence`, `reasoning`, `should_detect_conflict`
+- **Metadata:** `scenario_type`, `complexity`
+
+**Categories:**
+- **Valid Alignments (20):** Standard 9-5, night shifts, flexible schedules, split shifts
+- **True Conflicts (20):** Night shift with morning vanpool, timing mismatches
+- **Edge Cases (20):** Rotating shifts, PTO, novel shift types, partial overlaps
+
+**Data Sources:**
+- Existing tests in `tests/test_shift_specialist.py`
+- Mock data from `mock/shifts.json` and `mock/vanpools.json`
+- LLM-generated synthetic scenarios
+
+### Phase 2: LLM-as-Judge Evaluation
+
+Use LangChain's built-in evaluators with GPT-4 for qualitative assessment.
+
+**Evaluators:**
+- **Reasoning Quality:** Checks logic, hallucinations, clarity
+- **Criteria:** Correctness, relevance, conciseness, helpfulness
+- **Pairwise Comparison:** Compare model versions for regression testing
+
+Use `load_evaluator("labeled_criteria")` with custom criteria for verdict correctness, reasoning quality, and evidence accuracy.
+
+### Phase 3: Custom Heuristic Evaluators
+
+Deterministic evaluators for technical correctness.
+
+**Evaluators:**
+1. **Shift Conflict Detector:** Parse time windows, calculate overlap, verify `overlap >= 30 min → pass`
+2. **Evidence Completeness:** Check required fields (employee_id, shift_id, vanpool_id, overlap_minutes)
+3. **Confidence Calibration:** Track confidence vs correctness, flag misalignments
+4. **Time Format Validator:** Ensure parseable times, timezone consistency, 24-hour format
+
+**Metrics:** Verdict accuracy, overlap calculation accuracy (±5 min), evidence completeness, false positive/negative rates
+
+### Phase 4: A/B Testing with Alternative Models
+
+Compare models to optimize cost, latency, and accuracy.
+
+**Models:**
+- GPT-4 Turbo (baseline), GPT-4o-mini (faster/cheaper), Claude 3.5 Sonnet (reasoning), Gemini 1.5 Pro (complex cases)
+
+**Comparison Metrics:**
+- Accuracy (verdict correctness), latency, cost per 1K evals, reasoning quality, edge case performance
+
+**Decision Criteria:**
+- ≥95% accuracy on simple cases, ≥80% on edge cases
+- Cost reduction acceptable if accuracy drop <2%
+
+Use `client.run_on_dataset()` with same dataset across all models, tag with `ab_test` and model name.
+
+### Phase 5: Single-Step Tool Choice Evaluation
+
+Evaluate individual tool calls for correctness, efficiency, and proper error handling.
+
+**What to Evaluate:**
+
+1. **Tool Selection:** Did agent choose correct tools? Track unnecessary/missing calls
+2. **Parameter Accuracy:** Correct IDs passed? Detect hallucinated parameters
+3. **Sequencing:** Optimal order (check vanpool exists before fetching shifts)
+4. **Error Handling:** Graceful failures on 404, timeouts, invalid responses
+
+**Key Metrics:**
+
+| Metric | Target |
+|--------|--------|
+| Tool choice accuracy | ≥ 95% |
+| Parameter accuracy | ≥ 98% |
+| Avg tools per case | ≤ 3 |
+| Redundant call rate | ≤ 5% |
+
+**Implementation:** Create `ToolChoiceEvaluator(RunEvaluator)` that extracts tool calls from LangSmith traces and scores selection, parameters, and sequencing.
+
+### Phase 6: Trajectory Evaluation (Multi-Step Sequences)
+
+Analyze complete agent execution path from start to finish.
+
+**What to Evaluate:**
+
+1. **Path Optimality:** Compare actual vs optimal trajectory, calculate edit distance
+2. **State Tracking:** Information gain per step, when agent has sufficient info
+3. **Self-Correction:** Detect productive retries vs repeated errors
+4. **Pattern Mining:** Cluster similar trajectories to find common behaviors
+5. **Multi-Turn (for Outreach Agent):** Context retention, progressive refinement
+
+**Trajectory Types:**
+- **Optimal:** Shortest path to solution
+- **Exploratory:** Extra context gathering
+- **Recovery:** Mistake → correction
+- **Circular:** Repeats without progress
+- **Dead-end:** Gets stuck
+
+**Key Metrics:**
+
+| Metric | Target |
+|--------|--------|
+| Trajectory optimality | ≥ 70% |
+| Avg path length | ≤ 4 steps |
+| Path efficiency ratio | ≥ 0.80 |
+| Self-correction success | ≥ 90% |
+| Circular trajectory rate | ≤ 1% |
+
+**Implementation:** Create `TrajectoryEvaluator(RunEvaluator)` that extracts full tool sequence, compares to optimal path, tracks information gain, and identifies self-corrections. Include visualization with graphviz for trajectory graphs.
