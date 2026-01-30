@@ -8,6 +8,7 @@ packages = [
     { include = "pool_patrol_api", from = "apps/api" },
     { include = "agents", from = "packages" },
     { include = "core", from = "packages" },
+    { include = "data", from = "packages" },
     { include = "tools", from = "packages" },
     { include = "eval", from = "packages" },
     { include = "prompts", from = "packages" },
