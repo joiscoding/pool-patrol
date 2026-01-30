@@ -78,24 +78,6 @@
     "resolved_at": null
   },
   {
-    "case_id": "CASE-005",
-    "vanpool_id": "VP-104",
-    "created_at": "2024-01-22T09:00:00Z",
-    "updated_at": "2024-01-22T10:00:00Z",
-    "status": "pending_reply",
-    "metadata": {
-      "reason": "shift_mismatch",
-      "details": "Employees on swing shift (14:00-22:00) but vanpool runs standard day schedule",
-      "additional_info": {
-        "shift_type": "Swing Shift",
-        "vanpool_schedule": "day"
-      }
-    },
-    "email_thread_id": "THREAD-009",
-    "outcome": null,
-    "resolved_at": null
-  },
-  {
     "case_id": "CASE-006",
     "vanpool_id": "VP-107",
     "created_at": "2024-01-05T14:00:00Z",
@@ -121,10 +103,12 @@
     "status": "pending_reply",
     "metadata": {
       "reason": "shift_mismatch",
-      "details": "Swing shift employees (Wed-Sat) using vanpool that runs Mon-Fri",
+      "details": "Multiple shifts in the vanpool roster: three swing shifts and one night shift",
       "additional_info": {
-        "shift_days": ["Wed", "Thu", "Fri", "Sat"],
-        "vanpool_days": ["Mon", "Tue", "Wed", "Thu", "Fri"]
+        "shift_breakdown": {
+          "swing": 3,
+          "night": 1
+        }
       }
     },
     "email_thread_id": "THREAD-006",
@@ -139,10 +123,13 @@
     "status": "pending_reply",
     "metadata": {
       "reason": "shift_mismatch",
-      "details": "Employee shift schedule does not align with vanpool operating hours",
+      "details": "Multiple shifts in the vanpool roster: day, swing, and night",
       "additional_info": {
-        "shift_type": "Night Shift",
-        "vanpool_schedule": "day"
+        "shift_breakdown": {
+          "day": 3,
+          "swing": 1,
+          "night": 1
+        }
       }
     },
     "email_thread_id": "THREAD-010",

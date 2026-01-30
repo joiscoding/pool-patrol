@@ -670,7 +670,7 @@
     "home_address": "900 Nucleus Blvd, Sunnyvale, CA 94085",
     "home_zip": "94085",
     "status": "active",
-    "shift_id": "SHIFT_SWING",
+    "shift_id": "SHIFT_NIGHT",
     "pto_dates": []
   },
   {
@@ -742,7 +742,7 @@
     "home_address": "400 Admin Blvd, Hayward, CA 94545",
     "home_zip": "94545",
     "status": "active",
-    "shift_id": "SHIFT_DAY",
+    "shift_id": "SHIFT_NIGHT",
     "pto_dates": []
   },
   {
@@ -760,7 +760,7 @@
     "home_address": "500 Control Ct, San Leandro, CA 94579",
     "home_zip": "94579",
     "status": "active",
-    "shift_id": "SHIFT_DAY",
+    "shift_id": "SHIFT_SWING",
     "pto_dates": []
   },
   {

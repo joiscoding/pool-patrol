@@ -229,7 +229,7 @@
           "james.roberts@innovatecorp.com"
         ],
         "sent_at": "2024-01-18T09:00:00Z",
-        "body": "Dear VP-108 Vanpool Members,\n\nAs part of our routine vanpool program review, we are verifying the eligibility of all participants.\n\nOur records indicate a potential mismatch between your work schedule and the vanpool operating hours. The vanpool departure/arrival times may not align with your assigned shift.\n\nSwing shift employees (Wed-Sat) are using a vanpool that runs Mon-Fri.\n\nPlease confirm your current work schedule by replying to this email.\n\n**What we need from you:**\n- Confirm your current work shift assignment\n- Let us know if the current vanpool schedule meets your commute needs\n\nPlease respond within 5 business days.\n\nThank you for your cooperation.\n\nPool Patrol Team",
+        "body": "Dear VP-108 Vanpool Members,\n\nAs part of our routine vanpool program review, we are verifying the eligibility of all participants.\n\nOur records indicate a potential mismatch between your work schedule and the vanpool operating hours. The vanpool departure/arrival times may not align with your assigned shift.\n\nMultiple shifts in the vanpool roster: three swing shifts and one night shift.\n\nPlease confirm your current work schedule by replying to this email.\n\n**What we need from you:**\n- Confirm your current work shift assignment\n- Let us know if the current vanpool schedule meets your commute needs\n\nPlease respond within 5 business days.\n\nThank you for your cooperation.\n\nPool Patrol Team",
         "direction": "outbound",
         "status": "sent",
         "classification_bucket": null,
@@ -373,32 +373,6 @@
     ]
   },
   {
-    "thread_id": "THREAD-009",
-    "case_id": "CASE-005",
-    "vanpool_id": "VP-104",
-    "subject": "Vanpool Schedule Review - VP-104 - Action Required",
-    "created_at": "2024-01-22T10:00:00Z",
-    "status": "active",
-    "messages": [
-      {
-        "message_id": "MSG-009-001",
-        "from": "poolpatrol@innovatecorp.com",
-        "to": [
-          "nathan.white@innovatecorp.com",
-          "olivia.thomas@innovatecorp.com",
-          "peter.jackson@innovatecorp.com",
-          "quinn.harris@innovatecorp.com"
-        ],
-        "sent_at": "2024-01-22T10:00:00Z",
-        "body": "Dear VP-104 Vanpool Members,\n\nAs part of our routine vanpool program review, we are verifying the eligibility of all participants.\n\nOur records indicate a potential mismatch between your work schedule and the vanpool operating hours. The vanpool departure/arrival times may not align with your assigned shift.\n\nEmployees on swing shift (14:00-22:00) but vanpool runs standard day schedule.\n\nPlease confirm your current work schedule by replying to this email.\n\n**What we need from you:**\n- Confirm your current work shift assignment\n- Let us know if the current vanpool schedule meets your commute needs\n\nPlease respond within 5 business days.\n\nThank you for your cooperation.\n\nPool Patrol Team",
-        "direction": "outbound",
-        "status": "sent",
-        "classification_bucket": null,
-        "classification_confidence": null
-      }
-    ]
-  },
-  {
     "thread_id": "THREAD-010",
     "case_id": "CASE-008",
     "vanpool_id": "VP-109",
@@ -417,7 +391,7 @@
           "olivia.evans@innovatecorp.com"
         ],
         "sent_at": "2024-01-19T14:00:00Z",
-        "body": "Dear VP-109 Vanpool Members,\n\nAs part of our routine vanpool program review, we are verifying the eligibility of all participants.\n\nOur records indicate a potential mismatch between your work schedule and the vanpool operating hours. The vanpool departure/arrival times may not align with your assigned shift.\n\nEmployee shift schedule does not align with vanpool operating hours.\n\nPlease confirm your current work schedule by replying to this email.\n\n**What we need from you:**\n- Confirm your current work shift assignment\n- Let us know if the current vanpool schedule meets your commute needs\n\nPlease respond within 5 business days.\n\nThank you for your cooperation.\n\nPool Patrol Team",
+        "body": "Dear VP-109 Vanpool Members,\n\nAs part of our routine vanpool program review, we are verifying the eligibility of all participants.\n\nOur records indicate a potential mismatch between your work schedule and the vanpool operating hours. The vanpool departure/arrival times may not align with your assigned shift.\n\nMultiple shifts in the vanpool roster: day, swing, and night.\n\nPlease confirm your current work schedule by replying to this email.\n\n**What we need from you:**\n- Confirm your current work shift assignment\n- Let us know if the current vanpool schedule meets your commute needs\n\nPlease respond within 5 business days.\n\nThank you for your cooperation.\n\nPool Patrol Team",
         "direction": "outbound",
         "status": "sent",
         "classification_bucket": null,
