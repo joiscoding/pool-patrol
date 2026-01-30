@@ -49,7 +49,7 @@ from tools.shifts import get_employee_shifts
 # Configuration
 # =============================================================================
 
-DATASET_NAME = "shift-specialist-eval"
+DATASET_NAME = "shift-specialist-eval-small"
 EXPERIMENT_PREFIX = "shift-specialist"
 
 OUTPUT_PARSER = PydanticOutputParser(pydantic_object=ShiftVerificationResult)
@@ -195,16 +195,17 @@ def verdict_match(outputs: dict, reference_outputs: dict) -> bool:
     predicted = outputs.get("verdict")
     expected = reference_outputs.get("verdict")
     
-    return predicted == expected
+    return {
+        "key": "verdict_match",
+        "score": predicted == expected
+    }
 
-
-# LLM-as-judge evaluator for semantic correctness of reasoning
+# LLM-as-judge evaluator for correctness checks
 # Uses openevals prebuilt CORRECTNESS_PROMPT
 correctness_evaluator = create_llm_as_judge(
     prompt=CORRECTNESS_PROMPT,
     feedback_key="correctness",
     model="openai:gpt-4.1-mini",
-    choices=[1, 2, 3, 4, 5],
 )
 
 
@@ -276,7 +277,7 @@ def run_evaluation(
     results = evaluate(
         target_fn,
         data=dataset_name,
-        evaluators=[correctness_evaluator],
+        evaluators=[verdict_match, correctness_evaluator],
         experiment_prefix=experiment_prefix,
         max_concurrency=max_concurrency,
     )
