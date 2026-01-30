@@ -78,8 +78,11 @@ class EmployeeStatus:
 
 class CaseStatus:
     OPEN = "open"
+    VERIFICATION = "verification"
     PENDING_REPLY = "pending_reply"
-    UNDER_REVIEW = "under_review"
+    RE_AUDIT = "re_audit"
+    HITL_REVIEW = "hitl_review"
+    PRE_CANCEL = "pre_cancel"
     RESOLVED = "resolved"
     CANCELLED = "cancelled"
 

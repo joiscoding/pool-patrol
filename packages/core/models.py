@@ -32,8 +32,11 @@ class CaseStatus(str, Enum):
     """Case status options."""
 
     OPEN = "open"
+    VERIFICATION = "verification"
     PENDING_REPLY = "pending_reply"
-    UNDER_REVIEW = "under_review"
+    RE_AUDIT = "re_audit"
+    HITL_REVIEW = "hitl_review"
+    PRE_CANCEL = "pre_cancel"
     RESOLVED = "resolved"
     CANCELLED = "cancelled"
 
@@ -70,6 +73,13 @@ class ClassificationBucket(str, Enum):
     DISPUTE = "dispute"
     ACKNOWLEDGMENT = "acknowledgment"
     UNKNOWN = "unknown"
+
+
+class CaseReason(str, Enum):
+    """Case reason/type options."""
+
+    SHIFT_MISMATCH = "shift_mismatch"
+    LOCATION_MISMATCH = "location_mismatch"
 
 
 class TimeType(str, Enum):
@@ -175,7 +185,7 @@ class Employee(BaseModel):
 class CaseMetadata(BaseModel):
     """Metadata for a flagged case."""
 
-    reason: str
+    reason: CaseReason
     details: str
     additional_info: dict[str, Any] = Field(default_factory=dict)
 
