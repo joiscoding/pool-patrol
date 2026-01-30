@@ -4,7 +4,7 @@
     "vanpool_id": "VP-101",
     "created_at": "2024-01-15T09:00:00Z",
     "updated_at": "2024-01-16T15:30:00Z",
-    "status": "pending_reply",
+    "status": "hitl_review",
     "metadata": {
       "reason": "location_mismatch",
       "details": "Employee home address is in Los Angeles, significantly far from Fremont Factory",
@@ -22,8 +22,8 @@
     "case_id": "CASE-002",
     "vanpool_id": "VP-102",
     "created_at": "2024-01-10T11:00:00Z",
-    "updated_at": "2024-01-18T09:15:00Z",
-    "status": "resolved",
+    "updated_at": "2024-01-11T10:30:00Z",
+    "status": "pending_reply",
     "metadata": {
       "reason": "location_mismatch",
       "details": "Employee home address is in Sacramento, far from Fremont Factory",
@@ -34,15 +34,15 @@
       }
     },
     "email_thread_id": "THREAD-002",
-    "outcome": "address_updated",
-    "resolved_at": "2024-01-18T09:15:00Z"
+    "outcome": null,
+    "resolved_at": null
   },
   {
     "case_id": "CASE-003",
     "vanpool_id": "VP-106",
     "created_at": "2024-01-20T08:30:00Z",
-    "updated_at": "2024-01-22T14:00:00Z",
-    "status": "under_review",
+    "updated_at": "2024-01-21T14:00:00Z",
+    "status": "pending_reply",
     "metadata": {
       "reason": "location_mismatch",
       "details": "Employee lives in San Diego, commute to Fremont Factory is not feasible",
@@ -60,27 +60,29 @@
     "case_id": "CASE-004",
     "vanpool_id": "VP-103",
     "created_at": "2024-01-08T10:00:00Z",
-    "updated_at": "2024-01-12T16:45:00Z",
-    "status": "resolved",
+    "updated_at": "2024-01-15T10:00:00Z",
+    "status": "pre_cancel",
     "metadata": {
       "reason": "shift_mismatch",
       "details": "Vanpool schedule does not align with reported employee shift times",
       "additional_info": {
         "vanpool_departure": "06:30",
         "shift_start_times": ["08:00"],
-        "time_gap_minutes": 90
+        "time_gap_minutes": 90,
+        "timeout_days": 7,
+        "re_audit_result": "fail"
       }
     },
     "email_thread_id": "THREAD-004",
-    "outcome": "schedule_adjusted",
-    "resolved_at": "2024-01-12T16:45:00Z"
+    "outcome": null,
+    "resolved_at": null
   },
   {
     "case_id": "CASE-005",
     "vanpool_id": "VP-104",
     "created_at": "2024-01-22T09:00:00Z",
-    "updated_at": "2024-01-22T09:00:00Z",
-    "status": "open",
+    "updated_at": "2024-01-22T10:00:00Z",
+    "status": "pending_reply",
     "metadata": {
       "reason": "shift_mismatch",
       "details": "Employees on swing shift (14:00-22:00) but vanpool runs standard day schedule",
@@ -89,7 +91,7 @@
         "vanpool_schedule": "day"
       }
     },
-    "email_thread_id": null,
+    "email_thread_id": "THREAD-009",
     "outcome": null,
     "resolved_at": null
   },
@@ -98,7 +100,7 @@
     "vanpool_id": "VP-107",
     "created_at": "2024-01-05T14:00:00Z",
     "updated_at": "2024-01-15T11:30:00Z",
-    "status": "cancelled",
+    "status": "resolved",
     "metadata": {
       "reason": "location_mismatch",
       "details": "Initial flag for distance, but employee lives in Fremont near work site",
@@ -133,18 +135,17 @@
     "case_id": "CASE-008",
     "vanpool_id": "VP-109",
     "created_at": "2024-01-19T13:00:00Z",
-    "updated_at": "2024-01-19T13:00:00Z",
-    "status": "open",
+    "updated_at": "2024-01-19T14:00:00Z",
+    "status": "pending_reply",
     "metadata": {
-      "reason": "capacity_review",
-      "details": "Vanpool has 5 riders but capacity is 8, reviewing for consolidation",
+      "reason": "shift_mismatch",
+      "details": "Employee shift schedule does not align with vanpool operating hours",
       "additional_info": {
-        "current_riders": 5,
-        "capacity": 8,
-        "utilization_percent": 62.5
+        "shift_type": "Night Shift",
+        "vanpool_schedule": "day"
       }
     },
-    "email_thread_id": null,
+    "email_thread_id": "THREAD-010",
     "outcome": null,
     "resolved_at": null
   },
@@ -153,7 +154,7 @@
     "vanpool_id": "VP-111",
     "created_at": "2024-01-21T10:30:00Z",
     "updated_at": "2024-01-23T08:45:00Z",
-    "status": "under_review",
+    "status": "hitl_review",
     "metadata": {
       "reason": "location_mismatch",
       "details": "Employee in Fresno, 160 miles from Fremont Factory",
@@ -174,11 +175,12 @@
     "updated_at": "2024-01-20T14:20:00Z",
     "status": "resolved",
     "metadata": {
-      "reason": "verification_complete",
-      "details": "Routine quarterly verification of Fremont Factory R&D vanpool",
+      "reason": "location_mismatch",
+      "details": "Employee address flagged for review, verified to be within acceptable commute distance",
       "additional_info": {
-        "verification_type": "quarterly",
-        "all_clear": true
+        "distance_miles": 25,
+        "employee_zip": "94587",
+        "work_site_zip": "94538"
       }
     },
     "email_thread_id": "THREAD-008",
