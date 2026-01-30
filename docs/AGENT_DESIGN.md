@@ -24,7 +24,7 @@ Automate vanpool misuse detection (location/shift mismatches). Target: reduce ~2
 |-------|----------------|---------------------|
 | **Case Manager** | Orchestrates verification (parallel or selective), synthesizes specialist results, owns case lifecycle (timeouts, re-audit), routes to Outreach on failures, answers "why did this fail?" | Delegates to specialists - no direct tools |
 | **Location Specialist** | Validates employee home location against vanpool pickup. Returns verdict + reasoning + evidence with citations. | `get_employee_profile`, `check_commute_distance` |
-| **Shift Specialist** | Validates employee shift schedule against vanpool hours. Reasons about dynamic shift types. Returns verdict + reasoning + evidence with citations. | `get_employee_shifts`, `get_vanpool_roster` |
+| **Shift Specialist** | Validates that a group of employees have compatible work shifts for carpooling together. Reasons about dynamic shift types. Returns verdict + reasoning + evidence with citations. | `get_employee_shifts` |
 | **Outreach Agent** | Sends investigation emails, monitors replies, classifies responses into buckets. Returns classification to Case Manager. | `send_email`, `get_replies`, `classify_reply` |
 
 **Why this architecture?**
@@ -255,7 +255,6 @@ One case per vanpool. Use a UUID for the internal `id` and keep `case_id` as a h
 | Tool | Data Source | Purpose |
 |------|-------------|---------|
 | `get_employee_shifts` | Mock/Internal DB | Fetch shift schedule + PTO (dynamic structures) |
-| `get_vanpool_roster` | Mock/Internal DB | Fetch vanpool schedule and requirements |
 
 **Outreach Agent Tools:**
 
@@ -272,7 +271,7 @@ The Case Manager uses specialists as tool calls (agent-as-tool). These tools exe
 | Tool | Agent | Purpose |
 |------|-------|---------|
 | `run_location_specialist` | Location Specialist | Validate employee home location vs pickup location |
-| `run_shift_specialist` | Shift Specialist | Validate employee shift schedule vs vanpool hours |
+| `run_shift_specialist` | Shift Specialist | Validate that employees have compatible shifts for carpooling |
 | `run_outreach_agent` | Outreach Agent | Send inquiry, fetch replies, classify responses |
 
 ## Testing the Shift Specialist
@@ -324,7 +323,7 @@ Comprehensive evaluation strategy for the Shift Specialist agent covering datase
 Build 60 test cases covering valid alignments, true conflicts, and edge cases.
 
 **Dataset Structure:**
-- **Inputs:** `employee_id`, `vanpool_id`
+- **Inputs:** `employee_ids` (list of employee IDs to verify for shift compatibility)
 - **Expected Outputs:** `verdict`, `confidence`, `reasoning`, `should_detect_conflict`
 - **Metadata:** `scenario_type`, `complexity`
 

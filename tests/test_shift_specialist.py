@@ -2,7 +2,7 @@
 """Test script for the Shift Specialist agent.
 
 This script demonstrates the Shift Specialist verifying shift compatibility
-for vanpools. Run from the project root:
+for groups of employees. Run from the project root:
 
     python tests/test_shift_specialist.py
 
@@ -110,6 +110,15 @@ def test_tools():
     return True
 
 
+def get_employee_ids_for_vanpool(vanpool_id: str) -> list[str]:
+    """Helper to get employee IDs for a vanpool."""
+    from tools import get_vanpool_roster
+    roster = get_vanpool_roster.invoke({"vanpool_id": vanpool_id})
+    if "error" in roster:
+        return []
+    return [rider["employee_id"] for rider in roster["riders"]]
+
+
 def test_shift_specialist():
     """Test the Shift Specialist agent."""
     print("\n" + "=" * 60)
@@ -122,14 +131,16 @@ def test_shift_specialist():
         print("  Set your API key to test the full agent.")
         return False
     
-    from agents import verify_vanpool_shifts_sync
+    from agents import verify_employee_shifts_sync
     
-    # Test with VP-101 (should be mostly Day Shift employees)
-    print("\n1. Verifying VP-101 (Day Shift vanpool)...")
+    # Get employee IDs for VP-101 (Day Shift vanpool)
+    employee_ids = get_employee_ids_for_vanpool("VP-101")
+    print(f"\n1. Verifying {len(employee_ids)} employees from VP-101 (Day Shift vanpool)...")
+    print(f"   Employee IDs: {employee_ids[:3]}..." if len(employee_ids) > 3 else f"   Employee IDs: {employee_ids}")
     print("   This may take a moment while the agent reasons...\n")
     
     try:
-        result = verify_vanpool_shifts_sync("VP-101")
+        result = verify_employee_shifts_sync(employee_ids)
         
         print(f"   Verdict: {result.verdict.upper()}")
         print(f"   Confidence: {result.confidence}/5")
@@ -152,20 +163,22 @@ def test_shift_specialist():
 def test_mixed_shift_vanpool():
     """Test with VP-102 which has Night Shift employees."""
     print("\n" + "=" * 60)
-    print("Testing VP-102 (Night Shift vanpool - should PASS)")
+    print("Testing VP-102 employees (Night Shift - should PASS)")
     print("=" * 60)
     
     if not os.environ.get("OPENAI_API_KEY"):
         print("\n⚠ OPENAI_API_KEY not set. Skipping.")
         return False
     
-    from agents import verify_vanpool_shifts_sync
+    from agents import verify_employee_shifts_sync
     
-    print("\n   Verifying VP-102...")
+    # Get employee IDs for VP-102
+    employee_ids = get_employee_ids_for_vanpool("VP-102")
+    print(f"\n   Verifying {len(employee_ids)} employees from VP-102...")
     print("   This may take a moment...\n")
     
     try:
-        result = verify_vanpool_shifts_sync("VP-102")
+        result = verify_employee_shifts_sync(employee_ids)
         
         print(f"   Verdict: {result.verdict.upper()}")
         print(f"   Confidence: {result.confidence}/5")
@@ -181,20 +194,22 @@ def test_mixed_shift_vanpool():
 def test_mismatch_vanpool():
     """Test with VP-103 which has a shift mismatch (Day + Night)."""
     print("\n" + "=" * 60)
-    print("Testing VP-103 (Mixed shifts - should FAIL)")
+    print("Testing VP-103 employees (Mixed shifts - should FAIL)")
     print("=" * 60)
     
     if not os.environ.get("OPENAI_API_KEY"):
         print("\n⚠ OPENAI_API_KEY not set. Skipping.")
         return False
     
-    from agents import verify_vanpool_shifts_sync
+    from agents import verify_employee_shifts_sync
     
-    print("\n   Verifying VP-103 (5 Day Shift + 1 Night Shift)...")
+    # Get employee IDs for VP-103 (5 Day Shift + 1 Night Shift)
+    employee_ids = get_employee_ids_for_vanpool("VP-103")
+    print(f"\n   Verifying {len(employee_ids)} employees from VP-103 (5 Day Shift + 1 Night Shift)...")
     print("   This may take a moment...\n")
     
     try:
-        result = verify_vanpool_shifts_sync("VP-103")
+        result = verify_employee_shifts_sync(employee_ids)
         
         print(f"   Verdict: {result.verdict.upper()}")
         print(f"   Confidence: {result.confidence}/5")
@@ -220,37 +235,41 @@ def test_mismatch_vanpool():
 
 
 def test_async_vanpools():
-    """Test async verification for VP-102 and VP-103 in parallel."""
+    """Test async verification for VP-102 and VP-103 employees in parallel."""
     print("\n" + "=" * 60)
-    print("Testing async verification (VP-102 + VP-103)")
+    print("Testing async verification (VP-102 + VP-103 employees)")
     print("=" * 60)
 
     if not os.environ.get("OPENAI_API_KEY"):
         print("\n⚠ OPENAI_API_KEY not set. Skipping.")
         return False
 
-    from agents import verify_vanpool_shifts
+    from agents import verify_employee_shifts
+
+    # Get employee IDs for both vanpools
+    employee_ids_102 = get_employee_ids_for_vanpool("VP-102")
+    employee_ids_103 = get_employee_ids_for_vanpool("VP-103")
 
     async def run_checks():
         return await asyncio.gather(
-            verify_vanpool_shifts("VP-102"),
-            verify_vanpool_shifts("VP-103"),
+            verify_employee_shifts(employee_ids_102),
+            verify_employee_shifts(employee_ids_103),
         )
 
-    print("\n   Verifying VP-102 and VP-103 concurrently...")
+    print(f"\n   Verifying {len(employee_ids_102)} + {len(employee_ids_103)} employees concurrently...")
     print("   This may take a moment...\n")
 
     try:
         result_102, result_103 = asyncio.run(run_checks())
 
-        print(f"   VP-102 Verdict: {result_102.verdict.upper()}")
-        print(f"   VP-103 Verdict: {result_103.verdict.upper()}")
+        print(f"   VP-102 employees Verdict: {result_102.verdict.upper()}")
+        print(f"   VP-103 employees Verdict: {result_103.verdict.upper()}")
 
         if result_102.verdict != "pass":
-            print("\n⚠ Expected VP-102 to PASS")
+            print("\n⚠ Expected VP-102 employees to PASS")
             return False
         if result_103.verdict != "fail":
-            print("\n⚠ Expected VP-103 to FAIL")
+            print("\n⚠ Expected VP-103 employees to FAIL")
             return False
 
         print("\n✓ Async verification returned expected verdicts!")

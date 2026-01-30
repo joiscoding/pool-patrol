@@ -100,14 +100,12 @@ class ShiftSpecialistState(TypedDict):
 
     Attributes:
         messages: Conversation history with the agent
-        vanpool_id: The vanpool being verified
-        employee_id: Optional specific employee to verify (if None, verify all riders)
+        employee_ids: List of employee IDs to verify for shift compatibility
         result: The verification result after processing
     """
 
     messages: Annotated[list, add_messages]
-    vanpool_id: str
-    employee_id: str | None
+    employee_ids: list[str]
     result: ShiftVerificationResult | None
 
 

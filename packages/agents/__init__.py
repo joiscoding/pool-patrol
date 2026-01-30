@@ -8,8 +8,8 @@ from .state import (
     CaseManagerState,
 )
 from .shift_specialist import (
-    verify_vanpool_shifts,
-    verify_vanpool_shifts_sync,
+    verify_employee_shifts,
+    verify_employee_shifts_sync,
     compile_shift_specialist,
 )
 
@@ -21,7 +21,7 @@ __all__ = [
     "ShiftSpecialistState",
     "CaseManagerState",
     # Shift Specialist
-    "verify_vanpool_shifts",
-    "verify_vanpool_shifts_sync",
+    "verify_employee_shifts",
+    "verify_employee_shifts_sync",
     "compile_shift_specialist",
 ]

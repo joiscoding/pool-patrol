@@ -2,8 +2,7 @@
 """Run LangSmith evaluation experiments for the Shift Specialist agent.
 
 This module evaluates the Shift Specialist agent against the LangSmith dataset.
-It wraps the agent to accept employee_ids directly (matching the dataset format)
-instead of vanpool_id.
+The agent accepts employee_ids directly, matching the dataset format.
 
 Usage:
     # Run from project root:
@@ -29,20 +28,18 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "packages"))
 
 from dotenv import load_dotenv
-from langchain_core.messages import HumanMessage
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_openai import ChatOpenAI
 from langsmith import Client
 from langsmith.evaluation import evaluate, LangChainStringEvaluator
-from langgraph.prebuilt import create_react_agent
 
 # Load environment variables
 load_dotenv(PROJECT_ROOT / ".env", override=True)
 
 # Import from the agents package (after path setup)
 from agents.state import ShiftVerificationResult
+from agents.shift_specialist import verify_employee_shifts_sync
 from agents.utils import parse_legacy_verification_result
-from prompts.shift_specialist import SHIFT_SPECIALIST_PROMPT
 from tools.shifts import get_employee_shifts
 
 
@@ -127,39 +124,6 @@ Rules:
     return parse_result(response.content)
 
 
-def create_employee_shift_agent():
-    """Create an agent that verifies shift compatibility for a list of employee IDs.
-    
-    This is a modified version of the shift specialist that accepts employee_ids
-    directly instead of vanpool_id, matching the evaluation dataset format.
-    """
-    model = get_model()
-    
-    # Modified prompt for direct employee ID verification
-    prompt = """You are the Shift Specialist for Pool Patrol. Your job is to verify that 
-a group of employees have compatible work shifts for carpooling together.
-
-Given a list of employee IDs, you must:
-1. Look up the shift information for each employee using the get_employee_shifts tool
-2. Determine if all employees work the same shift
-3. Return a verdict of "pass" if all employees have compatible shifts, or "fail" if there's a mismatch
-
-Important rules:
-- If the employee list is empty, return "fail" with reasoning explaining no employees were provided
-- A single employee always passes (no conflict possible)
-- Multiple employees pass only if they ALL work the same shift type
-
-""" + OUTPUT_PARSER.get_format_instructions()
-
-    agent = create_react_agent(
-        model=model,
-        tools=[get_employee_shifts],
-        prompt=prompt,
-    )
-    
-    return agent
-
-
 def parse_result(content: str) -> dict:
     """Parse the agent's response into verdict and reasoning."""
     try:
@@ -195,7 +159,8 @@ def target_function(inputs: dict) -> dict:
     """Target function for LangSmith evaluation.
     
     This function takes the dataset inputs and returns outputs that can be
-    compared against the expected outputs.
+    compared against the expected outputs. Uses the main Shift Specialist agent
+    which now accepts employee_ids directly.
     
     Args:
         inputs: Dict with "employee_ids" key containing list of employee IDs
@@ -205,35 +170,13 @@ def target_function(inputs: dict) -> dict:
     """
     employee_ids = inputs.get("employee_ids", [])
     
-    # Handle empty list edge case
-    if not employee_ids:
-        return {
-            "verdict": "fail",
-            "reasoning": "No employees provided. Cannot verify shift compatibility with an empty list.",
-        }
+    # Use the main agent directly (now accepts employee_ids)
+    result = verify_employee_shifts_sync(employee_ids)
     
-    # Create and run the agent
-    agent = create_employee_shift_agent()
-    
-    # Build the message for the agent
-    message = f"Verify shift compatibility for the following employees: {', '.join(employee_ids)}"
-    
-    result = agent.invoke(
-        {"messages": [HumanMessage(content=message)]},
-        config={
-            "run_name": "shift_specialist_eval",
-            "tags": ["evaluation", "shift-specialist"],
-            "metadata": {
-                "employee_count": len(employee_ids),
-            },
-        },
-    )
-    
-    # Extract and parse the final message
-    final_message = result["messages"][-1]
-    content = final_message.content if hasattr(final_message, "content") else str(final_message)
-    
-    return parse_result(content)
+    return {
+        "verdict": result.verdict,
+        "reasoning": result.reasoning,
+    }
 
 
 # =============================================================================

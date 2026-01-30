@@ -1,12 +1,12 @@
-"""Shift Specialist Agent - Validates employee shifts against vanpool schedules.
+"""Shift Specialist Agent - Validates employee shift compatibility for carpooling.
 
-This agent verifies that employees assigned to a vanpool have compatible
-work schedules. For example, a day shift vanpool should have day shift workers.
+This agent verifies that a group of employees have compatible work schedules
+for carpooling together. All employees should work the same shift type.
 
 The agent:
-1. Fetches the vanpool roster to get all riders
-2. For each rider, fetches their shift schedule
-3. Determines the expected shift type for the vanpool
+1. Takes a list of employee IDs as input
+2. Fetches each employee's shift schedule
+3. Determines if all employees work the same shift type
 4. Identifies any employees with mismatched shifts
 5. Returns a structured verdict with evidence
 """
@@ -22,7 +22,6 @@ from langgraph.prebuilt import create_react_agent
 from agents.state import ShiftVerificationResult
 from agents.utils import parse_legacy_verification_result
 from prompts.shift_specialist import SHIFT_SPECIALIST_PROMPT, SHIFT_SPECIALIST_PROMPT_VERSION
-from tools.vanpool import get_vanpool_roster
 from tools.shifts import get_employee_shifts
 
 
@@ -47,7 +46,7 @@ _langsmith_enabled = configure_langsmith()
 # =============================================================================
 
 # Tools available to the agent
-TOOLS = [get_vanpool_roster, get_employee_shifts]
+TOOLS = [get_employee_shifts]
 OUTPUT_PARSER = PydanticOutputParser(pydantic_object=ShiftVerificationResult)
 
 
@@ -97,7 +96,7 @@ def parse_verification_result(content: str) -> ShiftVerificationResult:
         return parse_legacy_verification_result(content, ShiftVerificationResult)
 
 
-def _build_trace_config(vanpool_id: str) -> dict[str, Any]:
+def _build_trace_config(employee_ids: list[str]) -> dict[str, Any]:
     """Build LangSmith trace metadata and tags for this run."""
     model_name = os.environ.get("OPENAI_MODEL", "gpt-4.1-mini")
     return {
@@ -105,7 +104,8 @@ def _build_trace_config(vanpool_id: str) -> dict[str, Any]:
         "tags": ["agent:shift_specialist", "component:verification"],
         "metadata": {
             "agent": "shift_specialist",
-            "vanpool_id": vanpool_id,
+            "employee_ids": employee_ids,
+            "employee_count": len(employee_ids),
             "prompt_version": SHIFT_SPECIALIST_PROMPT_VERSION,
             "model": model_name,
         },
@@ -117,28 +117,37 @@ def _build_trace_config(vanpool_id: str) -> dict[str, Any]:
 # =============================================================================
 
 
-async def verify_vanpool_shifts(vanpool_id: str) -> ShiftVerificationResult:
-    """Verify shift compatibility for a vanpool.
+async def verify_employee_shifts(employee_ids: list[str]) -> ShiftVerificationResult:
+    """Verify shift compatibility for a group of employees.
     
     This is the main entry point for the Shift Specialist.
     
     Args:
-        vanpool_id: The vanpool ID to verify (e.g., "VP-101")
+        employee_ids: List of employee IDs to verify (e.g., ["EMP-1001", "EMP-1002"])
         
     Returns:
         ShiftVerificationResult with verdict, confidence, reasoning, and evidence
     """
+    # Handle empty list edge case
+    if not employee_ids:
+        return ShiftVerificationResult(
+            verdict="fail",
+            confidence=5,
+            reasoning="No employees provided. Cannot verify shift compatibility with an empty list.",
+            evidence=[],
+        )
+    
     # Create the agent
     agent = create_shift_specialist()
     
+    # Build the message for the agent
+    employee_list = ", ".join(employee_ids)
+    message = f"Verify shift compatibility for the following employees: {employee_list}"
+    
     # Run the agent
     result = await agent.ainvoke(
-        {
-            "messages": [
-                HumanMessage(content=f"Verify shift compatibility for vanpool {vanpool_id}")
-            ]
-        },
-        config=_build_trace_config(vanpool_id),
+        {"messages": [HumanMessage(content=message)]},
+        config=_build_trace_config(employee_ids),
     )
     
     # Parse the final message into structured result
@@ -148,19 +157,28 @@ async def verify_vanpool_shifts(vanpool_id: str) -> ShiftVerificationResult:
     return parse_verification_result(content)
 
 
-def verify_vanpool_shifts_sync(vanpool_id: str) -> ShiftVerificationResult:
-    """Synchronous version of verify_vanpool_shifts."""
+def verify_employee_shifts_sync(employee_ids: list[str]) -> ShiftVerificationResult:
+    """Synchronous version of verify_employee_shifts."""
+    # Handle empty list edge case
+    if not employee_ids:
+        return ShiftVerificationResult(
+            verdict="fail",
+            confidence=5,
+            reasoning="No employees provided. Cannot verify shift compatibility with an empty list.",
+            evidence=[],
+        )
+    
     # Create the agent
     agent = create_shift_specialist()
     
+    # Build the message for the agent
+    employee_list = ", ".join(employee_ids)
+    message = f"Verify shift compatibility for the following employees: {employee_list}"
+    
     # Run the agent
     result = agent.invoke(
-        {
-            "messages": [
-                HumanMessage(content=f"Verify shift compatibility for vanpool {vanpool_id}")
-            ]
-        },
-        config=_build_trace_config(vanpool_id),
+        {"messages": [HumanMessage(content=message)]},
+        config=_build_trace_config(employee_ids),
     )
     
     # Parse the final message into structured result
