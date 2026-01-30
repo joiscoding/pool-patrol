@@ -1,8 +1,28 @@
 import Link from 'next/link';
-import type { Vanpool, Case, Rider } from '@prisma/client';
+import type { Vanpool, Case, Rider, CaseStatus } from '@prisma/client';
 import { StatusBadge } from './StatusBadge';
 
 type VanpoolWithRiders = Vanpool & { riders: Rider[] };
+
+// Case status categories - ordered by priority
+const PRECANCEL_STATUSES: CaseStatus[] = ['pre_cancel'];
+const HITL_STATUSES: CaseStatus[] = ['hitl_review'];
+const OPEN_STATUSES: CaseStatus[] = ['open', 'verification', 'pending_reply', 're_audit'];
+
+type CaseLevel = 'precancel' | 'hitl' | 'open' | 'none';
+
+function getCaseLevel(cases: Case[], vanpoolId: string): CaseLevel {
+  const hasPrecancel = cases.some(c => c.vanpoolId === vanpoolId && PRECANCEL_STATUSES.includes(c.status));
+  if (hasPrecancel) return 'precancel';
+  
+  const hasHitl = cases.some(c => c.vanpoolId === vanpoolId && HITL_STATUSES.includes(c.status));
+  if (hasHitl) return 'hitl';
+  
+  const hasOpen = cases.some(c => c.vanpoolId === vanpoolId && OPEN_STATUSES.includes(c.status));
+  if (hasOpen) return 'open';
+  
+  return 'none';
+}
 
 interface VanpoolCardProps {
   vanpool: VanpoolWithRiders;
@@ -11,11 +31,14 @@ interface VanpoolCardProps {
 }
 
 export function VanpoolCard({ vanpool, cases = [], index }: VanpoolCardProps) {
-  const openCases = cases.filter(c => 
-    c.vanpoolId === vanpool.vanpoolId && 
-    ['open', 'pending_reply', 'under_review'].includes(c.status)
-  );
-  const hasOpenCase = openCases.length > 0;
+  const level = getCaseLevel(cases, vanpool.vanpoolId);
+  
+  const indicatorStyles = {
+    precancel: 'bg-red-500',
+    hitl: 'bg-red-500',
+    open: 'bg-amber-500',
+    none: '',
+  };
   
   return (
     <Link
@@ -32,8 +55,11 @@ export function VanpoolCard({ vanpool, cases = [], index }: VanpoolCardProps) {
           {vanpool.vanpoolId}
         </h3>
         <StatusBadge status={vanpool.status} />
-        {hasOpenCase && (
-          <span className="h-1.5 w-1.5 rounded-full bg-red-500" title={`${openCases.length} open case(s)`} />
+        {level !== 'none' && (
+          <span 
+            className={`h-1.5 w-1.5 rounded-full ${indicatorStyles[level]}`} 
+            title={level === 'precancel' ? 'Pre Cancel' : level === 'hitl' ? 'Needs review' : 'Open case'} 
+          />
         )}
       </div>
       <p className="mt-1 text-sm text-neutral-500">

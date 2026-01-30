@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import prisma from '@/database/db';
 import { VanpoolMap } from '@/components/VanpoolMap';
+import ReactMarkdown from 'react-markdown';
 import type { Case, Employee, Shift, EmailThread, Message } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
@@ -283,9 +284,9 @@ export default async function VanpoolDetailPage({ params }: VanpoolDetailPagePro
                           {formatDateTime(message.sentAt)}
                         </span>
                       </div>
-                      <p className="text-sm text-neutral-600 whitespace-pre-line">
-                        {message.body}
-                      </p>
+                      <div className="text-sm text-neutral-600 markdown-content">
+                        <ReactMarkdown>{message.body}</ReactMarkdown>
+                      </div>
                       {message.classificationBucket && (
                         <div className="mt-2">
                           <span className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded">

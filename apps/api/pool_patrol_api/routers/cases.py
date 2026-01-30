@@ -16,7 +16,7 @@ async def list_cases(
 ) -> list[Case]:
     """List all cases with optional filtering.
 
-    - **status**: Filter by case status (open, pending_reply, under_review, resolved, cancelled)
+    - **status**: Filter by case status (open, verification, pending_reply, re_audit, hitl_review, pre_cancel, resolved, cancelled)
     - **vanpool_id**: Filter by vanpool ID
     """
     return data_service.get_cases(status=status, vanpool_id=vanpool_id)

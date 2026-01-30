@@ -3,25 +3,35 @@ import type { CaseStatus, EmployeeStatus, VanpoolStatus } from '@prisma/client';
 type StatusType = CaseStatus | EmployeeStatus | VanpoolStatus;
 
 const statusColors: Record<StatusType, string> = {
+  // Employee/Vanpool statuses
   active: 'bg-emerald-500',
   inactive: 'bg-neutral-300',
   suspended: 'bg-red-500',
   on_leave: 'bg-amber-500',
+  // Case statuses
   open: 'bg-blue-500',
+  verification: 'bg-cyan-500',
   pending_reply: 'bg-amber-500',
-  under_review: 'bg-violet-500',
+  re_audit: 'bg-cyan-500',
+  hitl_review: 'bg-violet-500',
+  pre_cancel: 'bg-red-400',
   resolved: 'bg-emerald-500',
   cancelled: 'bg-neutral-300',
 };
 
 const statusLabels: Record<StatusType, string> = {
+  // Employee/Vanpool statuses
   active: 'Active',
   inactive: 'Inactive',
   suspended: 'Suspended',
   on_leave: 'On Leave',
+  // Case statuses
   open: 'Open',
+  verification: 'Verification',
   pending_reply: 'Pending Reply',
-  under_review: 'Under Review',
+  re_audit: 'Re-Audit',
+  hitl_review: 'HITL Review',
+  pre_cancel: 'Pre-Cancel',
   resolved: 'Resolved',
   cancelled: 'Cancelled',
 };

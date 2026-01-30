@@ -1,20 +1,46 @@
 import Link from 'next/link';
 import prisma from '@/database/db';
-import type { Vanpool, Case, Rider } from '@prisma/client';
+import type { Vanpool, Case, Rider, CaseStatus } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
 type VanpoolWithRiders = Vanpool & { riders: Rider[] };
 
-function getOpenCaseForVanpool(vanpoolId: string, cases: Case[]): Case | undefined {
-  return cases.find(c => 
-    c.vanpoolId === vanpoolId && 
-    ['open', 'pending_reply', 'under_review'].includes(c.status)
+// Case status categories - ordered by priority
+const PRECANCEL_STATUSES: CaseStatus[] = ['pre_cancel'];
+const HITL_STATUSES: CaseStatus[] = ['hitl_review'];
+const OPEN_STATUSES: CaseStatus[] = ['open', 'verification', 'pending_reply', 're_audit'];
+const ALL_ACTIVE_STATUSES: CaseStatus[] = [...PRECANCEL_STATUSES, ...HITL_STATUSES, ...OPEN_STATUSES];
+
+type CaseLevel = 'precancel' | 'hitl' | 'open' | 'none';
+
+function getCaseLevelForVanpool(vanpoolId: string, cases: Case[]): { level: CaseLevel; case?: Case } {
+  // First check for pre-cancel cases (highest priority)
+  const precancelCase = cases.find(c => 
+    c.vanpoolId === vanpoolId && PRECANCEL_STATUSES.includes(c.status)
   );
+  if (precancelCase) return { level: 'precancel', case: precancelCase };
+  
+  // Then check for HITL cases
+  const hitlCase = cases.find(c => 
+    c.vanpoolId === vanpoolId && HITL_STATUSES.includes(c.status)
+  );
+  if (hitlCase) return { level: 'hitl', case: hitlCase };
+  
+  // Then check for other open cases
+  const openCase = cases.find(c => 
+    c.vanpoolId === vanpoolId && OPEN_STATUSES.includes(c.status)
+  );
+  if (openCase) return { level: 'open', case: openCase };
+  
+  return { level: 'none' };
 }
 
-function formatReason(reason: string): string {
-  return reason.split('_').map(word => 
+function formatStatus(status: string): string {
+  // Special case for HITL
+  if (status === 'hitl_review') return 'Review';
+  
+  return status.split('_').map(word => 
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ');
 }
@@ -25,6 +51,14 @@ function parseMetadata(metadata: string): { reason: string; details: string } {
   } catch {
     return { reason: 'unknown', details: '' };
   }
+}
+
+function formatReason(reason: string): string {
+  if (reason === 'shift_mismatch') return 'Shift';
+  if (reason === 'location_mismatch') return 'Location';
+  return reason.split('_').map(word => 
+    word.charAt(0).toUpperCase() + word.slice(1)
+  ).join(' ');
 }
 
 export default async function HomePage() {
@@ -44,20 +78,23 @@ export default async function HomePage() {
     error = e instanceof Error ? e.message : 'Failed to load data';
   }
 
-  const openCases = cases.filter(c => 
-    ['open', 'pending_reply', 'under_review'].includes(c.status)
-  );
+  const openCases = cases.filter(c => ALL_ACTIVE_STATUSES.includes(c.status));
+  const hitlCases = cases.filter(c => [...PRECANCEL_STATUSES, ...HITL_STATUSES].includes(c.status));
 
   // Calculate stats
   const activeVanpools = vanpools.filter(v => v.status === 'active').length;
   const totalRiders = vanpools.reduce((sum, v) => sum + v.riders.length, 0);
 
-  // Sort vanpools: flagged ones first, then by ID
+  // Sort vanpools: Pre Cancel first, then Review, then open cases, then by ID
   const sortedVanpools = [...vanpools].sort((a, b) => {
-    const aCase = getOpenCaseForVanpool(a.vanpoolId, cases);
-    const bCase = getOpenCaseForVanpool(b.vanpoolId, cases);
-    if (aCase && !bCase) return -1;
-    if (!aCase && bCase) return 1;
+    const aLevel = getCaseLevelForVanpool(a.vanpoolId, cases);
+    const bLevel = getCaseLevelForVanpool(b.vanpoolId, cases);
+    
+    // Priority: precancel > hitl > open > none
+    const priority = { precancel: 0, hitl: 1, open: 2, none: 3 };
+    if (priority[aLevel.level] !== priority[bLevel.level]) {
+      return priority[aLevel.level] - priority[bLevel.level];
+    }
     return a.vanpoolId.localeCompare(b.vanpoolId);
   });
 
@@ -81,7 +118,7 @@ export default async function HomePage() {
       )}
 
       {/* Stats Bar */}
-      <div className="mb-8 grid grid-cols-3 gap-4">
+      <div className="mb-8 grid grid-cols-4 gap-4">
         <div className="p-4 bg-neutral-50 rounded-lg">
           <div className="text-2xl font-semibold text-neutral-900">
             {activeVanpools}<span className="text-neutral-400 font-normal">/{vanpools.length}</span>
@@ -93,6 +130,14 @@ export default async function HomePage() {
             {totalRiders}
           </div>
           <div className="text-xs text-neutral-500 mt-1">Total Riders</div>
+        </div>
+        <div className={`p-4 rounded-lg ${hitlCases.length > 0 ? 'bg-red-50' : 'bg-neutral-50'}`}>
+          <div className={`text-2xl font-semibold ${hitlCases.length > 0 ? 'text-red-700' : 'text-neutral-400'}`}>
+            {hitlCases.length}
+          </div>
+          <div className={`text-xs mt-1 ${hitlCases.length > 0 ? 'text-red-600' : 'text-neutral-500'}`}>
+            Needs Review
+          </div>
         </div>
         <div className={`p-4 rounded-lg ${openCases.length > 0 ? 'bg-amber-50' : 'bg-emerald-50'}`}>
           <div className={`text-2xl font-semibold ${openCases.length > 0 ? 'text-amber-700' : 'text-emerald-700'}`}>
@@ -112,29 +157,41 @@ export default async function HomePage() {
         
         <div className="border border-neutral-200 rounded-lg overflow-hidden">
           {/* Header */}
-          <div className="grid grid-cols-[120px_1fr_80px_180px] bg-neutral-50 border-b border-neutral-200 text-sm">
+          <div className="grid grid-cols-[100px_1fr_70px_100px_140px] bg-neutral-50 border-b border-neutral-200 text-sm">
             <div className="font-medium text-neutral-600 px-4 py-3">Vanpool</div>
             <div className="font-medium text-neutral-600 px-4 py-3">Work Site</div>
             <div className="font-medium text-neutral-600 px-4 py-3 text-center">Riders</div>
+            <div className="font-medium text-neutral-600 px-4 py-3">Issue</div>
             <div className="font-medium text-neutral-600 px-4 py-3">Status</div>
           </div>
           
           {/* Rows */}
           <div className="divide-y divide-neutral-100">
             {sortedVanpools.map((vanpool) => {
-              const openCase = getOpenCaseForVanpool(vanpool.vanpoolId, cases);
-              const isFlagged = !!openCase;
-              const metadata = openCase ? parseMetadata(openCase.metadata) : null;
+              const { level, case: activeCase } = getCaseLevelForVanpool(vanpool.vanpoolId, cases);
+              const metadata = activeCase ? parseMetadata(activeCase.metadata) : null;
+              
+              // Row background colors based on case level
+              const rowStyles = {
+                precancel: 'bg-red-50 hover:bg-red-100',
+                hitl: 'bg-red-50 hover:bg-red-100',
+                open: 'bg-amber-50 hover:bg-amber-100',
+                none: 'bg-white hover:bg-neutral-50',
+              };
+              
+              // Status indicator styles
+              const statusStyles = {
+                precancel: { dot: 'bg-red-500', text: 'text-red-700' },
+                hitl: { dot: 'bg-red-500', text: 'text-red-700' },
+                open: { dot: 'bg-amber-500', text: 'text-amber-700' },
+                none: { dot: '', text: '' },
+              };
               
               return (
                 <Link
                   key={vanpool.vanpoolId}
                   href={`/vanpools/${vanpool.vanpoolId}`}
-                  className={`grid grid-cols-[120px_1fr_80px_180px] text-sm cursor-pointer transition-colors ${
-                    isFlagged 
-                      ? 'bg-amber-50 hover:bg-amber-100' 
-                      : 'bg-white hover:bg-neutral-50'
-                  }`}
+                  className={`grid grid-cols-[100px_1fr_70px_100px_140px] text-sm cursor-pointer transition-colors ${rowStyles[level]}`}
                 >
                   <div className="px-4 py-3 font-mono font-medium text-neutral-900">
                     {vanpool.vanpoolId}
@@ -145,18 +202,16 @@ export default async function HomePage() {
                   <div className="px-4 py-3 text-center text-neutral-600">
                     {vanpool.riders.length}
                   </div>
+                  <div className="px-4 py-3 text-neutral-600">
+                    {metadata ? formatReason(metadata.reason) : null}
+                  </div>
                   <div className="px-4 py-3">
-                    {isFlagged && metadata ? (
-                      <span className="inline-flex items-center gap-1.5 text-amber-700">
-                        <span className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                        {formatReason(metadata.reason)}
+                    {level !== 'none' && activeCase ? (
+                      <span className={`inline-flex items-center gap-1.5 ${statusStyles[level].text}`}>
+                        <span className={`h-1.5 w-1.5 rounded-full ${statusStyles[level].dot}`} />
+                        {formatStatus(activeCase.status)}
                       </span>
-                    ) : (
-                      <span className="inline-flex items-center gap-1.5 text-emerald-700">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                        Active
-                      </span>
-                    )}
+                    ) : null}
                   </div>
                 </Link>
               );
