@@ -41,8 +41,11 @@ enum EmployeeStatus {
 
 enum CaseStatus {
   open
+  verification
   pending_reply
-  under_review
+  re_audit
+  hitl_review
+  pre_cancel
   resolved
   cancelled
 }

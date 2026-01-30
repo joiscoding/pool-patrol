@@ -214,7 +214,7 @@ The following enums are defined in the schema:
 | `VanpoolStatus` | active, inactive, suspended | Vanpool.status |
 | `EmployeeStatus` | active, inactive, on_leave | Employee.status |
 | `TimeType` | full_time, part_time, contract | Employee.time_type |
-| `CaseStatus` | open, pending_reply, under_review, resolved, cancelled | Case.status |
+| `CaseStatus` | open, verification, pending_reply, re_audit, hitl_review, pre_cancel, resolved, cancelled | Case.status |
 | `ThreadStatus` | active, closed, archived | EmailThread.status |
 | `MessageDirection` | inbound, outbound | Message.direction |
 | `MessageStatus` | draft, sent, read, archived | Message.status |

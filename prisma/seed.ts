@@ -88,8 +88,11 @@ interface MockEmployee {
   status: 'active' | 'inactive' | 'on_leave';
 }
 
+// Valid case reasons - only shift_mismatch and location_mismatch are allowed
+type CaseReason = 'shift_mismatch' | 'location_mismatch';
+
 interface CaseMetadata {
-  reason: string;
+  reason: CaseReason;
   details: string;
   additional_info: Record<string, unknown>;
 }
@@ -99,7 +102,7 @@ interface MockCase {
   vanpool_id: string;
   created_at: string;
   updated_at: string;
-  status: 'open' | 'pending_reply' | 'under_review' | 'resolved' | 'cancelled';
+  status: 'open' | 'verification' | 'pending_reply' | 're_audit' | 'hitl_review' | 'pre_cancel' | 'resolved' | 'cancelled';
   metadata: CaseMetadata;
   email_thread_id: string | null;
   outcome: string | null;
