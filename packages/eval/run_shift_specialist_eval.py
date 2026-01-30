@@ -31,7 +31,9 @@ from dotenv import load_dotenv
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_openai import ChatOpenAI
 from langsmith import Client
-from langsmith.evaluation import evaluate, LangChainStringEvaluator
+from langsmith.evaluation import evaluate
+from openevals.llm import create_llm_as_judge
+from openevals.prompts import CORRECTNESS_PROMPT
 
 # Load environment variables
 load_dotenv(PROJECT_ROOT / ".env", override=True)
@@ -184,7 +186,7 @@ def target_function(inputs: dict) -> dict:
 # =============================================================================
 
 
-def verdict_match(outputs: dict, reference_outputs: dict) -> dict:
+def verdict_match(outputs: dict, reference_outputs: dict) -> bool:
     """Check if the verdict matches exactly.
     
     This is the primary metric - did the agent correctly identify
@@ -192,33 +194,18 @@ def verdict_match(outputs: dict, reference_outputs: dict) -> dict:
     """
     predicted = outputs.get("verdict")
     expected = reference_outputs.get("verdict")
-    match = predicted == expected
     
-    return {
-        "key": "verdict_match",
-        "score": 1.0 if match else 0.0,
-        "comment": f"Predicted: {predicted}, Expected: {expected}",
-    }
+    return predicted == expected
 
 
 # LLM-as-judge evaluator for semantic correctness of reasoning
-# Uses LangChain's built-in CoT QA evaluator
-def prepare_data(run, example):
-    """Prepare data for the CoT QA evaluator.
-    
-    Maps our output format to what the evaluator expects:
-    - prediction: the agent's reasoning
-    - reference: the expected reasoning from the dataset
-    - input: the employee_ids being evaluated
-    """
-    return {
-        "prediction": run.outputs.get("reasoning", ""),
-        "reference": example.outputs.get("reasoning", ""),
-        "input": str(example.inputs.get("employee_ids", [])),
-    }
-
-
-cot_qa_evaluator = LangChainStringEvaluator("cot_qa", prepare_data=prepare_data)
+# Uses openevals prebuilt CORRECTNESS_PROMPT
+correctness_evaluator = create_llm_as_judge(
+    prompt=CORRECTNESS_PROMPT,
+    feedback_key="correctness",
+    model="openai:gpt-4.1-mini",
+    choices=[1, 2, 3, 4, 5],
+)
 
 
 # =============================================================================
@@ -277,7 +264,7 @@ def run_evaluation(
     print(f"Max concurrency: {max_concurrency}")
     print(f"Model: {os.environ.get('OPENAI_MODEL', 'gpt-4.1-mini')}")
     print(f"Mode: {mode}")
-    print(f"Evaluators: verdict_match, cot_qa (LLM-as-judge)")
+    print(f"Evaluators: verdict_match, correctness (LLM-as-judge)")
     
     print("\n" + "-" * 60)
     print("Running evaluation...")
@@ -285,11 +272,11 @@ def run_evaluation(
     
     # Run evaluation with both evaluators:
     # 1. verdict_match - exact match of pass/fail verdict
-    # 2. cot_qa_evaluator - LLM-as-judge for semantic correctness of reasoning
+    # 2. correctness_evaluator - LLM-as-judge for semantic correctness
     results = evaluate(
         target_fn,
         data=dataset_name,
-        evaluators=[verdict_match, cot_qa_evaluator],
+        evaluators=[correctness_evaluator],
         experiment_prefix=experiment_prefix,
         max_concurrency=max_concurrency,
     )
