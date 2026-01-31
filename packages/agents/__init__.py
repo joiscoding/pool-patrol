@@ -1,6 +1,6 @@
 """Pool Patrol Agents - LangGraph multi-agent workflow."""
 
-from .state import (
+from .structures import (
     ShiftVerificationResult,
     LocationVerificationResult,
     VerificationResult,
@@ -12,8 +12,11 @@ from .shift_specialist import (
     verify_employee_shifts_sync,
     compile_shift_specialist,
 )
+from .utils import configure_langsmith
 
 __all__ = [
+    # Utilities
+    "configure_langsmith",
     # State types
     "ShiftVerificationResult",
     "LocationVerificationResult",

@@ -1,6 +1,6 @@
 """Pool Patrol Prompts - System prompts and email templates for agents."""
 
-from .shift_specialist import SHIFT_SPECIALIST_PROMPT
+from .shift_specialist_prompts import SHIFT_SPECIALIST_PROMPT
 from .initial_outreach import (
     IssueType,
     get_subject,

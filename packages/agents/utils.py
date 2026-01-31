@@ -1,8 +1,27 @@
 """Shared utilities for agent output handling."""
 
+import os
 from typing import Any, Type, TypeVar
 
-from agents.state import VerificationResult
+from agents.structures import VerificationResult
+
+
+def configure_langsmith(project: str = "pool-patrol") -> bool:
+    """Configure LangSmith tracing if API key is available.
+    
+    Call this once at module load time before importing agents.
+    
+    Args:
+        project: LangSmith project name (default: "pool-patrol")
+    
+    Returns:
+        True if LangSmith is enabled, False otherwise.
+    """
+    if os.environ.get("LANGSMITH_API_KEY"):
+        os.environ.setdefault("LANGSMITH_TRACING", "true")
+        os.environ.setdefault("LANGSMITH_PROJECT", project)
+        return True
+    return False
 
 ResultT = TypeVar("ResultT", bound=VerificationResult)
 

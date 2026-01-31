@@ -4,7 +4,7 @@
 This script demonstrates the Shift Specialist verifying shift compatibility
 for groups of employees. Run from the project root:
 
-    python tests/test_shift_specialist.py
+    poetry run python tests/test_shift_specialist.py
 
 Make sure you have:
 1. Set OPENAI_API_KEY in your environment
@@ -29,17 +29,8 @@ from dotenv import load_dotenv
 # Load environment variables (override=True ensures .env takes precedence over shell env)
 load_dotenv(project_root / ".env", override=True)
 
-
-def configure_langsmith():
-    """Configure LangSmith tracing."""
-    if os.environ.get("LANGSMITH_API_KEY"):
-        os.environ.setdefault("LANGSMITH_TRACING", "true")
-        os.environ.setdefault("LANGSMITH_PROJECT", "pool-patrol")
-        return True
-    return False
-
-
-# Configure LangSmith before importing the agent
+# Configure LangSmith tracing
+from agents.utils import configure_langsmith
 langsmith_enabled = configure_langsmith()
 
 

@@ -10,7 +10,7 @@ This script tests the individual tools used by the Outreach Agent:
 
 Run from the project root:
 
-    python tests/test_outreach_tools.py
+    poetry run python tests/test_outreach_tools.py
 
 Make sure you have:
 1. Run the database seed: npx prisma db seed

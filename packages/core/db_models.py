@@ -110,6 +110,7 @@ class ClassificationBucket:
     SHIFT_CHANGE = "shift_change"
     DISPUTE = "dispute"
     ACKNOWLEDGMENT = "acknowledgment"
+    INFO_REQUEST = "info_request"
     UNKNOWN = "unknown"
 
 
@@ -379,7 +380,6 @@ class Message(Base):
     body = Column(Text, nullable=False)
     direction = Column(String, nullable=False)
     classification_bucket = Column(String, nullable=True)  # ClassificationBucket enum value
-    classification_confidence = Column(Integer, nullable=True)  # 1-5 scale
     status = Column(String, default=MessageStatusEnum.DRAFT, nullable=False)
     created_at = Column(PrismaDateTime, default=datetime.utcnow, nullable=False)
 
@@ -398,7 +398,6 @@ class Message(Base):
             return None
         return {
             "bucket": self.classification_bucket,
-            "confidence": self.classification_confidence,
         }
 
     def to_dict(self) -> dict:

@@ -72,6 +72,7 @@ class ClassificationBucket(str, Enum):
     SHIFT_CHANGE = "shift_change"
     DISPUTE = "dispute"
     ACKNOWLEDGMENT = "acknowledgment"
+    INFO_REQUEST = "info_request"
     UNKNOWN = "unknown"
 
 

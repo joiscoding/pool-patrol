@@ -10,6 +10,7 @@ when sending emails for dispute or unknown classifications.
 """
 
 import os
+import uuid
 from typing import Any
 
 from langchain.agents import create_agent
@@ -20,7 +21,7 @@ from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import InMemorySaver
 
 from agents.structures import OutreachResult
-from agents.utils import parse_legacy_verification_result
+from agents.utils import configure_langsmith
 from prompts.outreach_prompts import OUTREACH_AGENT_PROMPT, OUTREACH_AGENT_PROMPT_VERSION
 from tools.outreach_tools import (
     get_email_thread,
@@ -30,22 +31,7 @@ from tools.outreach_tools import (
     send_email_for_review,
 )
 
-
-# =============================================================================
-# LangSmith Tracing Configuration
-# =============================================================================
-
-
-def configure_langsmith():
-    """Configure LangSmith tracing if API key is available."""
-    if os.environ.get("LANGSMITH_API_KEY"):
-        os.environ.setdefault("LANGSMITH_TRACING", "true")
-        os.environ.setdefault("LANGSMITH_PROJECT", "pool-patrol")
-        return True
-    return False
-
-
-# Auto-configure on import
+# Auto-configure LangSmith on import
 _langsmith_enabled = configure_langsmith()
 
 
@@ -84,24 +70,19 @@ def create_outreach_agent():
     """
     model = get_model()
 
-    # Inject structured output instructions into the prompt
-    structured_prompt = (
-        OUTREACH_AGENT_PROMPT
-        + "\n\n"
-        + OUTPUT_PARSER.get_format_instructions()
-    )
-
-    # Create the agent with HITL middleware
+    # Create the agent with HITL middleware and enforced response schema
     agent = create_agent(
         model=model,
         tools=TOOLS,
-        prompt=structured_prompt,
+        system_prompt=OUTREACH_AGENT_PROMPT,
         checkpointer=InMemorySaver(),
+        response_format=OutreachResult,  # Enforces deterministic JSON output
         middleware=[
             HumanInTheLoopMiddleware(
                 interrupt_on={
                     "send_email_for_review": {
                         "allowed_decisions": ["approve", "edit", "reject"],
+                        "description": "Email send requires human approval",
                     },
                 },
             )
@@ -116,18 +97,67 @@ def create_outreach_agent():
 # =============================================================================
 
 
-def parse_outreach_result(content: str) -> OutreachResult:
-    """Parse the agent's response into a structured result."""
+def parse_outreach_result(content: str | dict) -> OutreachResult:
+    """Parse the agent's response into a structured result.
+    
+    With response_format, the content may already be a dict or valid JSON.
+    Falls back gracefully if the agent returns wrong schema.
+    """
+    # If already a dict (from structured output), try to validate
+    if isinstance(content, dict):
+        # Check if it looks like OutreachResult fields
+        if "thread_id" in content:
+            return OutreachResult.model_validate(content)
+        # Agent returned wrong schema (VerificationResult) - create default
+        return OutreachResult(
+            thread_id="unknown",
+            bucket="unknown",
+            hitl_required=True,
+            sent=False,
+        )
+    
+    # Try parsing as JSON first (from response_format)
+    try:
+        import json
+        data = json.loads(content)
+        if "thread_id" in data:
+            return OutreachResult.model_validate(data)
+        # Wrong schema in JSON
+        return OutreachResult(
+            thread_id="unknown",
+            bucket="unknown", 
+            hitl_required=True,
+            sent=False,
+        )
+    except (json.JSONDecodeError, ValueError):
+        pass
+    
+    # Fallback to PydanticOutputParser for text format
     try:
         return OUTPUT_PARSER.parse(content)
     except Exception:
-        return parse_legacy_verification_result(content, OutreachResult)
+        # Last resort - return safe default
+        return OutreachResult(
+            thread_id="unknown",
+            bucket="unknown",
+            hitl_required=True,
+            sent=False,
+        )
 
 
-def _build_trace_config(case_id: str, thread_id: str | None = None) -> dict[str, Any]:
-    """Build LangSmith trace metadata and tags for this run."""
+def _build_config(case_id: str, thread_id: str | None = None) -> dict[str, Any]:
+    """Build config with thread ID for persistence and LangSmith tracing."""
     model_name = os.environ.get("OPENAI_MODEL", "gpt-4.1-mini")
+    
+    # Generate unique thread ID for checkpointer persistence
+    persistence_thread_id = thread_id or f"case-{case_id}-{uuid.uuid4()}"
+    
     return {
+        # Thread config required for checkpointer persistence
+        "configurable": {
+            "thread_id": persistence_thread_id,
+        },
+        # LangSmith trace metadata
         "run_name": "outreach_agent",
         "tags": ["agent:outreach", "component:communication"],
         "metadata": {
@@ -172,7 +202,7 @@ async def handle_outreach(
     # Run the agent
     result = await agent.ainvoke(
         {"messages": [HumanMessage(content=message)]},
-        config=_build_trace_config(case_id, thread_id),
+        config=_build_config(case_id, thread_id),
     )
 
     # Parse the final message into structured result
@@ -198,7 +228,7 @@ def handle_outreach_sync(
     # Run the agent
     result = agent.invoke(
         {"messages": [HumanMessage(content=message)]},
-        config=_build_trace_config(case_id, thread_id),
+        config=_build_config(case_id, thread_id),
     )
 
     # Parse the final message into structured result
