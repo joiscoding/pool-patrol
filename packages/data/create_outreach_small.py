@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Create a small LangSmith dataset for evaluating the Outreach Agent.
 
-Three happy path examples using THREAD-001, THREAD-003, and THREAD-005.
+Three happy path examples using THREAD-001, THREAD-003, and THREAD-008.
 
 Usage (Poetry):
     poetry run python packages/data/create_outreach_small.py
@@ -72,22 +72,22 @@ Pool Patrol Team""",
     },
     {
         "inputs": {
-            "email_thread_id": "THREAD-005",
+            "email_thread_id": "THREAD-008",
             "context": "Process this email thread.",
         },
         "outputs": {
-            "email_thread_id": "THREAD-005",
+            "email_thread_id": "THREAD-008",
             "bucket": "acknowledgment",
             "hitl_required": False,
             "sent": True,
         },
         "metadata": {
-            "description": "Brian Green confirmed address, lives 3 miles from factory",
-            "draft_email": """Hi Brian,
+            "description": "Charlie Cooper confirms 'All good here' - no changes needed",
+            "draft_email": """Hi Charlie,
 
-Thank you for confirming your address at 100 Innovation Way, Fremont.
+Thank you for confirming your address. Your vanpool eligibility for VP-112 has been verified.
 
-To complete the verification process, please update your address in the Employee Portal. Once you've made the update there, reply to this email and we'll verify your eligibility for VP-107.
+No further action is needed on your part. If anything changes in the future, please let us know.
 
 Best regards,
 Pool Patrol Team""",
