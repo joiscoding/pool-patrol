@@ -116,8 +116,7 @@ interface MockMessage {
   sent_at: string;
   body: string;
   direction: 'inbound' | 'outbound';
-  classification_bucket: string | null;
-  classification_confidence: number | null;
+  classification_bucket?: string | null;
   status: 'draft' | 'sent' | 'read' | 'archived';
 }
 
@@ -297,7 +296,6 @@ async function main() {
           classificationBucket: msg.classification_bucket
             ? toClassificationBucket(msg.classification_bucket)
             : null,
-          classificationConfidence: msg.classification_confidence,
           status: msg.status,
         },
       });

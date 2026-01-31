@@ -127,3 +127,66 @@ class CaseManagerState(TypedDict):
     shift_result: ShiftVerificationResult | None
     location_result: LocationVerificationResult | None
     overall_verdict: Literal["pass", "fail", "pending"] | None
+
+
+# =============================================================================
+# Outreach Agent Output Models
+# =============================================================================
+
+
+class OutreachResult(BaseModel):
+    """Output from the Outreach Agent.
+
+    The Outreach Agent sends investigation emails, monitors replies,
+    and classifies responses into action buckets.
+
+    Example:
+        OutreachResult(
+            thread_id="THREAD-001",
+            message_id="msg_abc123",
+            bucket="address_change",
+            hitl_required=False,
+            sent=True,
+        )
+    """
+
+    thread_id: str = Field(description="The email thread ID")
+    message_id: str | None = Field(
+        default=None,
+        description="ID of sent message, None if not sent",
+    )
+    bucket: Literal[
+        "address_change",
+        "shift_change",
+        "dispute",
+        "acknowledgment",
+        "info_request",
+        "unknown",
+    ] | None = Field(
+        default=None,
+        description="Classification of inbound reply",
+    )
+    hitl_required: bool = Field(
+        default=False,
+        description="Whether human review was needed",
+    )
+    sent: bool = Field(
+        default=False,
+        description="Whether email was actually sent",
+    )
+
+
+class OutreachAgentState(TypedDict):
+    """State for the Outreach Agent.
+
+    Attributes:
+        messages: Conversation history with the agent
+        case_id: The case being investigated
+        thread_id: The email thread ID (None if not yet created)
+        result: The outreach result after processing
+    """
+
+    messages: Annotated[list, add_messages]
+    case_id: str
+    thread_id: str | None
+    result: OutreachResult | None

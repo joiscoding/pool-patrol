@@ -226,7 +226,6 @@ model Message {
   body                     String
   direction                MessageDirection
   classificationBucket     ClassificationBucket? @map("classification_bucket")
-  classificationConfidence Int?                  @map("classification_confidence") // 1-5 scale
   status                   MessageStatus         @default(draft)
   createdAt                DateTime              @default(now()) @map("created_at")
 
