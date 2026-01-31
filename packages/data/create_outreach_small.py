@@ -1,192 +1,99 @@
 #!/usr/bin/env python3
 """Create a small LangSmith dataset for evaluating the Outreach Agent.
 
-This module creates a minimal dataset with three example paths:
-  - HITL path: dispute/unknown classification requiring human review
-  - Initial outreach path: case needing first email draft
-  - Respond path: existing thread with reply needing follow-up
+Three happy path examples using THREAD-001, THREAD-003, and THREAD-005.
 
 Usage (Poetry):
     poetry run python packages/data/create_outreach_small.py
 """
 
-import json
 import os
 import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
 
-# Project root is two levels up from this file
 PROJECT_ROOT = Path(__file__).parent.parent.parent
-
-# Load environment variables
 load_dotenv(PROJECT_ROOT / ".env", override=True)
 
 
-def load_mock_data():
-    """Load mock data from JSON files."""
-    mock_dir = PROJECT_ROOT / "mock"
-
-    with open(mock_dir / "cases.json") as f:
-        cases = json.load(f)
-
-    with open(mock_dir / "email_threads.json") as f:
-        email_threads = json.load(f)
-
-    return cases, email_threads
-
-
-def pick_example_threads(cases: list, email_threads: list) -> dict:
-    """Pick email threads for HITL, initial outreach, and respond examples.
-    
-    Selection criteria:
-    - HITL: Thread with dispute or unknown bucket in last inbound reply
-    - Initial outreach: Thread with only outbound messages (no replies yet)
-    - Respond: Thread with address_change or acknowledgment that needs follow-up
-    """
-    thread_map = {t["thread_id"]: t for t in email_threads}
-    case_map = {c["case_id"]: c for c in cases}
-    
-    hitl_thread = None
-    initial_outreach_thread = None
-    respond_thread = None
-    
-    for thread in email_threads:
-        thread_id = thread["thread_id"]
-        messages = thread.get("messages", [])
-        
-        # Get the last inbound message classification
-        inbound_msgs = [m for m in messages if m.get("direction") == "inbound"]
-        last_inbound_bucket = inbound_msgs[-1].get("classification_bucket") if inbound_msgs else None
-        
-        # HITL path: dispute or unknown classification
-        if last_inbound_bucket in ("dispute", "unknown") and hitl_thread is None:
-            hitl_thread = thread
-            continue
-        
-        # Initial outreach: only outbound messages (no inbound replies yet)
-        if not inbound_msgs and thread["status"] == "active" and initial_outreach_thread is None:
-            initial_outreach_thread = thread
-            continue
-        
-        # Respond path: thread with address_change needing follow-up
-        if last_inbound_bucket == "address_change" and respond_thread is None:
-            respond_thread = thread
-            continue
-    
-    # Fallback selections if primary criteria not met
-    if hitl_thread is None:
-        # Pick first thread with any inbound reply
-        for thread in email_threads:
-            if any(m.get("direction") == "inbound" for m in thread.get("messages", [])):
-                hitl_thread = thread
-                break
-    
-    if initial_outreach_thread is None:
-        # Pick first active thread
-        for thread in email_threads:
-            if thread["status"] == "active":
-                initial_outreach_thread = thread
-                break
-    
-    if respond_thread is None:
-        # Pick a thread different from others
-        for thread in email_threads:
-            if thread not in (hitl_thread, initial_outreach_thread):
-                respond_thread = thread
-                break
-    
-    return {
-        "hitl": hitl_thread,
-        "initial_outreach": initial_outreach_thread,
-        "respond": respond_thread,
-    }
-
-
-def create_examples(cases: list, email_threads: list) -> list:
-    """Create three evaluation examples (HITL, initial outreach, respond)."""
-    chosen = pick_example_threads(cases, email_threads)
-    
-    hitl_thread = chosen["hitl"]
-    initial_thread = chosen["initial_outreach"]
-    respond_thread = chosen["respond"]
-    
-    # Get last inbound classification for HITL thread
-    hitl_inbound = [m for m in hitl_thread["messages"] if m.get("direction") == "inbound"]
-    hitl_bucket = hitl_inbound[-1].get("classification_bucket", "unknown") if hitl_inbound else "unknown"
-    
-    # Get classification for respond thread
-    respond_inbound = [m for m in respond_thread["messages"] if m.get("direction") == "inbound"]
-    respond_bucket = respond_inbound[-1].get("classification_bucket", "acknowledgment") if respond_inbound else None
-    
-    examples = [
-        # Path 1: HITL - dispute/unknown classification requires human review
-        {
-            "inputs": {
-                "email_thread_id": hitl_thread["thread_id"],
-                "context": "New inbound reply received. Please review and respond appropriately.",
-            },
-            "outputs": {
-                "email_thread_id": hitl_thread["thread_id"],
-                "message_id": None,  # Not sent yet, awaiting human review
-                "bucket": hitl_bucket,
-                "hitl_required": True,
-                "sent": False,  # Should NOT auto-send for dispute/unknown
-            },
-            "metadata": {
-                "test_case": "hitl_path",
-                "path_type": "human_in_the_loop",
-                "case_id": hitl_thread.get("case_id"),
-                "vanpool_id": hitl_thread.get("vanpool_id"),
-                "reasoning": f"Thread has '{hitl_bucket}' classification which requires HITL review before sending response.",
-            },
+# Three happy path examples (matching tests/test_outreach_agent.py)
+# Paste the AI-drafted emails from test runs into the metadata.draft_email field
+EXAMPLES = [
+    {
+        "inputs": {
+            "email_thread_id": "THREAD-001",
+            "context": "Process this email thread.",
         },
-        # Path 2: Initial outreach - draft first email for a case
-        {
-            "inputs": {
-                "email_thread_id": initial_thread["thread_id"],
-                "context": "New case opened for this vanpool.",
-            },
-            "outputs": {
-                "email_thread_id": initial_thread["thread_id"],
-                "message_id": "*",  # Expect a message ID (email sent)
-                "bucket": None,  # No inbound reply to classify yet
-                "hitl_required": False,
-                "sent": True,  # Initial outreach can be auto-sent
-            },
-            "metadata": {
-                "test_case": "initial_outreach_path",
-                "path_type": "initial_outreach",
-                "case_id": initial_thread.get("case_id"),
-                "vanpool_id": initial_thread.get("vanpool_id"),
-                "reasoning": "No prior communication. Agent should draft and send initial outreach email.",
-            },
+        "outputs": {
+            "email_thread_id": "THREAD-001",
+            "bucket": "address_change",
+            "hitl_required": False,
+            "sent": True,
         },
-        # Path 3: Respond - existing thread with reply needs follow-up
-        {
-            "inputs": {
-                "email_thread_id": respond_thread["thread_id"],
-                "context": "New inbound reply received. Please review and respond appropriately.",
-            },
-            "outputs": {
-                "email_thread_id": respond_thread["thread_id"],
-                "message_id": "*",  # Expect a message ID (email sent)
-                "bucket": respond_bucket,
-                "hitl_required": False,  # address_change/acknowledgment can be auto-handled
-                "sent": True,  # Should send follow-up response
-            },
-            "metadata": {
-                "test_case": "respond_path",
-                "path_type": "respond_followup",
-                "case_id": respond_thread.get("case_id"),
-                "vanpool_id": respond_thread.get("vanpool_id"),
-                "reasoning": f"Existing thread with '{respond_bucket}' reply. Agent should draft appropriate follow-up.",
-            },
+        "metadata": {
+            "description": "Bob Johnson moved to LA, needs address update in Employee Portal",
+            "draft_email": """Hi Bob,
+
+Thank you for letting us know about your address change. We appreciate you keeping us informed about your living situation.
+
+Before we can confirm your continued vanpool eligibility, please update your home address in the Employee Portal. Once you've made the update there, reply to this email and we'll verify your eligibility for VP-101.
+
+If you have any questions about the process, feel free to reach out.
+
+Best regards,
+Pool Patrol Team""",
         },
-    ]
-    
-    return examples
+    },
+    {
+        "inputs": {
+            "email_thread_id": "THREAD-003",
+            "context": "Process this email thread.",
+        },
+        "outputs": {
+            "email_thread_id": "THREAD-003",
+            "bucket": "dispute",
+            "hitl_required": True,
+            "sent": False,
+        },
+        "metadata": {
+            "description": "Xavier disputes the review, feels it's harassment",
+            "draft_email": """Hi Xavier,
+
+Thank you for your response. I understand your concern, and I want to assure you that this is a routine review conducted for all vanpool participants—it is not targeted at any individual.
+
+Our records show your address is in San Diego (92101), which is approximately 480 miles from the Fremont Factory. We want to ensure this commute arrangement still works for you and meets program guidelines.
+
+Could you please confirm your current home address and help us understand your commute arrangement?
+
+Best regards,
+Pool Patrol Team""",
+        },
+    },
+    {
+        "inputs": {
+            "email_thread_id": "THREAD-005",
+            "context": "Process this email thread.",
+        },
+        "outputs": {
+            "email_thread_id": "THREAD-005",
+            "bucket": "acknowledgment",
+            "hitl_required": False,
+            "sent": True,
+        },
+        "metadata": {
+            "description": "Brian Green confirmed address, lives 3 miles from factory",
+            "draft_email": """Hi Brian,
+
+Thank you for confirming your address at 100 Innovation Way, Fremont.
+
+To complete the verification process, please update your address in the Employee Portal. Once you've made the update there, reply to this email and we'll verify your eligibility for VP-107.
+
+Best regards,
+Pool Patrol Team""",
+        },
+    },
+]
 
 
 def create_langsmith_dataset(dataset_name: str, examples: list, description: str = None):
@@ -201,30 +108,22 @@ def create_langsmith_dataset(dataset_name: str, examples: list, description: str
         if not unique_suffix:
             unique_suffix = str(int(__import__("time").time()))
         dataset_name = f"{dataset_name}-{unique_suffix}"
-        print(
-            "\n✓ Dataset name already exists. Creating new dataset: "
-            f"{dataset_name}"
-        )
+        print(f"\n✓ Dataset exists. Creating: {dataset_name}")
 
     dataset = client.create_dataset(
         dataset_name=dataset_name,
         description=description or "Small evaluation dataset for Outreach Agent",
     )
-    print(f"\n✓ Created new dataset: {dataset_name} (id: {dataset.id})")
-
-    print(f"\n  Adding {len(examples)} examples to dataset...")
-    inputs = [ex["inputs"] for ex in examples]
-    outputs = [ex["outputs"] for ex in examples]
-    metadata = [ex["metadata"] for ex in examples]
+    print(f"\n✓ Created dataset: {dataset_name} (id: {dataset.id})")
 
     client.create_examples(
-        inputs=inputs,
-        outputs=outputs,
-        metadata=metadata,
+        inputs=[ex["inputs"] for ex in examples],
+        outputs=[ex["outputs"] for ex in examples],
+        metadata=[ex.get("metadata") for ex in examples],
         dataset_id=dataset.id,
     )
 
-    print(f"\n✓ Successfully added {len(examples)} examples to dataset '{dataset_name}'")
+    print(f"✓ Added {len(examples)} examples")
     print(f"\n  View at: https://smith.langchain.com/datasets/{dataset.id}")
 
     return dataset
@@ -237,51 +136,25 @@ def main():
     print("=" * 60)
 
     if not os.environ.get("LANGSMITH_API_KEY"):
-        print("\n✗ Error: LANGSMITH_API_KEY environment variable not set")
-        print("  Set your API key to create datasets on LangSmith.")
+        print("\n✗ Error: LANGSMITH_API_KEY not set")
         return 1
 
-    print("\n1. Loading mock data...")
-    cases, email_threads = load_mock_data()
-    print(f"   Loaded {len(cases)} cases, {len(email_threads)} email threads")
+    print("\nExamples:")
+    for ex in EXAMPLES:
+        tid = ex["inputs"]["email_thread_id"]
+        bucket = ex["outputs"]["bucket"]
+        print(f"  - {tid}: {bucket}")
 
-    print("\n2. Creating outreach evaluation examples...")
-    examples = create_examples(cases, email_threads)
-    
-    # Summarize paths
-    hitl_count = sum(1 for e in examples if e["metadata"]["path_type"] == "human_in_the_loop")
-    initial_count = sum(1 for e in examples if e["metadata"]["path_type"] == "initial_outreach")
-    respond_count = sum(1 for e in examples if e["metadata"]["path_type"] == "respond_followup")
-    print(f"   Summary: {hitl_count} HITL, {initial_count} Initial Outreach, {respond_count} Respond")
-    
-    for ex in examples:
-        print(f"   - {ex['metadata']['test_case']}: {ex['inputs']['email_thread_id']}")
-
-    print("\n3. Creating LangSmith dataset...")
     dataset_name = "outreach-agent-eval-small"
-    description = (
-        "Small evaluation dataset for the Outreach Agent. "
-        "Contains three paths: HITL (dispute/unknown), Initial Outreach, and Respond (follow-up)."
-    )
+    description = "Small evaluation dataset for Outreach Agent (3 happy paths)."
 
     try:
-        dataset = create_langsmith_dataset(dataset_name, examples, description)
-
-        print("\n" + "=" * 60)
-        print("Dataset Creation Complete!")
-        print("=" * 60)
-        print(f"\n  Dataset: {dataset_name}")
-        print(f"  Examples: {len(examples)}")
-        print(f"  HITL cases: {hitl_count}")
-        print(f"  Initial outreach cases: {initial_count}")
-        print(f"  Respond cases: {respond_count}")
-
+        create_langsmith_dataset(dataset_name, EXAMPLES, description)
+        print("\n✓ Done!")
         return 0
-
     except Exception as e:
-        print(f"\n✗ Error creating dataset: {e}")
+        print(f"\n✗ Error: {e}")
         import traceback
-
         traceback.print_exc()
         return 1
 
