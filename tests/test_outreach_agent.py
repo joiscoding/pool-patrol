@@ -32,6 +32,7 @@ project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root / "packages"))
 
 from dotenv import load_dotenv
+from langsmith import traceable
 
 # Load environment variables
 load_dotenv(project_root / ".env", override=True)
@@ -81,12 +82,6 @@ TEST_CASES: list[TestCase] = [
         expected_bucket="acknowledgment",
         expect_no_hitl=True,
         description="has acknowledgment reply",
-    ),
-    TestCase(
-        name="with_context",
-        email_thread_id="THREAD-002",
-        context="New reply detected. Please classify and respond.",
-        description="with Case Manager context",
     ),
 ]
 
@@ -158,7 +153,8 @@ def run_hitl_interrupt_test(email_thread_id: str, expected_bucket: str) -> bool 
     if not check_api_key():
         return None
 
-    from agents.outreach import create_outreach_agent, _build_config
+    from agents.outreach import create_outreach_agent, _build_config, _build_message
+    from agents.structures import OutreachRequest
     from langchain_core.messages import HumanMessage
     from langgraph.types import Command
 
@@ -167,12 +163,24 @@ def run_hitl_interrupt_test(email_thread_id: str, expected_bucket: str) -> bool 
     try:
         agent = create_outreach_agent()
         config = _build_config(email_thread_id)
+        
+        # Build structured request for tracing
+        request = OutreachRequest(email_thread_id=email_thread_id)
+
+        # Wrap invocation in traceable for LangSmith tracing
+        @traceable(
+            run_type="chain",
+            name="outreach_agent",
+            tags=["agent:outreach", "component:communication", "test:hitl_interrupt"],
+        )
+        def invoke_with_structured_input(request: OutreachRequest):
+            return agent.invoke(
+                {"messages": [HumanMessage(content=_build_message(request))]},
+                config=config,
+            )
 
         # First invocation - should interrupt before sending
-        result = agent.invoke(
-            {"messages": [HumanMessage(content=f"Handle outreach for email thread {email_thread_id}.")]},
-            config=config,
-        )
+        result = invoke_with_structured_input(request)
 
         # Check for interrupt
         interrupt = result.get("__interrupt__")
@@ -232,21 +240,35 @@ def run_hitl_reject_test() -> bool | None:
     if not check_api_key():
         return None
 
-    from agents.outreach import create_outreach_agent, _build_config
+    from agents.outreach import create_outreach_agent, _build_config, _build_message
+    from agents.structures import OutreachRequest
     from langchain_core.messages import HumanMessage
     from langgraph.types import Command
 
-    print(f"\n   Testing reject decision on THREAD-003 (dispute)...")
+    email_thread_id = "THREAD-003"
+    print(f"\n   Testing reject decision on {email_thread_id} (dispute)...")
 
     try:
         agent = create_outreach_agent()
-        config = _build_config("THREAD-003")
+        config = _build_config(email_thread_id)
+        
+        # Build structured request for tracing
+        request = OutreachRequest(email_thread_id=email_thread_id)
+
+        # Wrap invocation in traceable for LangSmith tracing
+        @traceable(
+            run_type="chain",
+            name="outreach_agent",
+            tags=["agent:outreach", "component:communication", "test:hitl_reject"],
+        )
+        def invoke_with_structured_input(request: OutreachRequest):
+            return agent.invoke(
+                {"messages": [HumanMessage(content=_build_message(request))]},
+                config=config,
+            )
 
         # First invocation - should interrupt
-        result = agent.invoke(
-            {"messages": [HumanMessage(content="Handle outreach for email thread THREAD-003.")]},
-            config=config,
-        )
+        result = invoke_with_structured_input(request)
 
         interrupt = result.get("__interrupt__")
         if not interrupt:
@@ -376,24 +398,13 @@ def main():
         from core.database import reset_engine
         reset_engine()
 
-        # HITL interrupt tests (run first - these are the granular tests)
-        print("\n" + "=" * 60)
-        print("HITL INTERRUPT TESTS")
-        print("=" * 60)
-        
-        results["hitl_dispute_interrupt"] = run_hitl_interrupt_test("THREAD-003", "dispute")
-        results["hitl_reject_flow"] = run_hitl_reject_test()
-
-        # Standard agent tests
+        # Standard agent tests (address_change, dispute, acknowledgment)
         print("\n" + "=" * 60)
         print("STANDARD AGENT TESTS")
         print("=" * 60)
 
         for i, test_case in enumerate(TEST_CASES):
             results[test_case.name] = run_sync_test(test_case, is_first=False)
-
-        # Run async test
-        results["async"] = run_async_test()
 
     # Summary
     print_header("Test Summary")

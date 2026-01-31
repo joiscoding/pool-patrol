@@ -19,6 +19,7 @@ from langchain_core.messages import HumanMessage
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import InMemorySaver
+from langsmith import traceable
 
 from agents.structures import OutreachRequest, OutreachResult
 from agents.utils import configure_langsmith
@@ -148,6 +149,8 @@ def _build_config(email_thread_id: str) -> dict[str, Any]:
     
     Note: 'thread_id' in configurable is for LangGraph checkpointer (HITL resume).
     'email_thread_id' in metadata is the business ID from email_threads table.
+    
+    The run_name and tags are set on the @traceable decorator for the entry points.
     """
     model_name = os.environ.get("OPENAI_MODEL", "gpt-4.1-mini")
     
@@ -156,9 +159,7 @@ def _build_config(email_thread_id: str) -> dict[str, Any]:
         "configurable": {
             "thread_id": f"outreach-{email_thread_id}-{uuid.uuid4()}",
         },
-        # LangSmith trace metadata
-        "run_name": "outreach_agent",
-        "tags": ["agent:outreach", "component:communication"],
+        # LangSmith trace metadata (run_name and tags are on @traceable decorator)
         "metadata": {
             "agent": "outreach_agent",
             "email_thread_id": email_thread_id,
@@ -181,6 +182,11 @@ def _build_message(request: OutreachRequest) -> str:
     return message
 
 
+@traceable(
+    run_type="chain",
+    name="outreach_agent",
+    tags=["agent:outreach", "component:communication"],
+)
 async def handle_outreach(request: OutreachRequest) -> OutreachResult:
     """Main entry point for the Outreach Agent.
 
@@ -208,6 +214,11 @@ async def handle_outreach(request: OutreachRequest) -> OutreachResult:
     return parse_outreach_result(content)
 
 
+@traceable(
+    run_type="chain",
+    name="outreach_agent",
+    tags=["agent:outreach", "component:communication"],
+)
 def handle_outreach_sync(request: OutreachRequest) -> OutreachResult:
     """Synchronous version of handle_outreach."""
     agent = create_outreach_agent()

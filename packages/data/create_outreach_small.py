@@ -4,7 +4,7 @@
 This module creates a minimal dataset with three example paths:
   - HITL path: dispute/unknown classification requiring human review
   - Initial outreach path: case needing first email draft
-  - Respawn path: existing thread with reply needing follow-up
+  - Respond path: existing thread with reply needing follow-up
 
 Usage (Poetry):
     poetry run python packages/data/create_outreach_small.py
@@ -38,19 +38,19 @@ def load_mock_data():
 
 
 def pick_example_threads(cases: list, email_threads: list) -> dict:
-    """Pick email threads for HITL, initial outreach, and respawn examples.
+    """Pick email threads for HITL, initial outreach, and respond examples.
     
     Selection criteria:
     - HITL: Thread with dispute or unknown bucket in last inbound reply
     - Initial outreach: Thread with only outbound messages (no replies yet)
-    - Respawn: Thread with address_change or acknowledgment that needs follow-up
+    - Respond: Thread with address_change or acknowledgment that needs follow-up
     """
     thread_map = {t["thread_id"]: t for t in email_threads}
     case_map = {c["case_id"]: c for c in cases}
     
     hitl_thread = None
     initial_outreach_thread = None
-    respawn_thread = None
+    respond_thread = None
     
     for thread in email_threads:
         thread_id = thread["thread_id"]
@@ -70,9 +70,9 @@ def pick_example_threads(cases: list, email_threads: list) -> dict:
             initial_outreach_thread = thread
             continue
         
-        # Respawn path: thread with address_change needing follow-up
-        if last_inbound_bucket == "address_change" and respawn_thread is None:
-            respawn_thread = thread
+        # Respond path: thread with address_change needing follow-up
+        if last_inbound_bucket == "address_change" and respond_thread is None:
+            respond_thread = thread
             continue
     
     # Fallback selections if primary criteria not met
@@ -90,45 +90,46 @@ def pick_example_threads(cases: list, email_threads: list) -> dict:
                 initial_outreach_thread = thread
                 break
     
-    if respawn_thread is None:
+    if respond_thread is None:
         # Pick a thread different from others
         for thread in email_threads:
             if thread not in (hitl_thread, initial_outreach_thread):
-                respawn_thread = thread
+                respond_thread = thread
                 break
     
     return {
         "hitl": hitl_thread,
         "initial_outreach": initial_outreach_thread,
-        "respawn": respawn_thread,
+        "respond": respond_thread,
     }
 
 
 def create_examples(cases: list, email_threads: list) -> list:
-    """Create three evaluation examples (HITL, initial outreach, respawn)."""
+    """Create three evaluation examples (HITL, initial outreach, respond)."""
     chosen = pick_example_threads(cases, email_threads)
     
     hitl_thread = chosen["hitl"]
     initial_thread = chosen["initial_outreach"]
-    respawn_thread = chosen["respawn"]
+    respond_thread = chosen["respond"]
     
     # Get last inbound classification for HITL thread
     hitl_inbound = [m for m in hitl_thread["messages"] if m.get("direction") == "inbound"]
     hitl_bucket = hitl_inbound[-1].get("classification_bucket", "unknown") if hitl_inbound else "unknown"
     
-    # Get classification for respawn thread
-    respawn_inbound = [m for m in respawn_thread["messages"] if m.get("direction") == "inbound"]
-    respawn_bucket = respawn_inbound[-1].get("classification_bucket", "acknowledgment") if respawn_inbound else None
+    # Get classification for respond thread
+    respond_inbound = [m for m in respond_thread["messages"] if m.get("direction") == "inbound"]
+    respond_bucket = respond_inbound[-1].get("classification_bucket", "acknowledgment") if respond_inbound else None
     
     examples = [
         # Path 1: HITL - dispute/unknown classification requires human review
         {
             "inputs": {
                 "email_thread_id": hitl_thread["thread_id"],
-                "context": f"Inbound reply classified as '{hitl_bucket}'. Requires human review before responding.",
+                "context": "New inbound reply received. Please review and respond appropriately.",
             },
             "outputs": {
                 "email_thread_id": hitl_thread["thread_id"],
+                "message_id": None,  # Not sent yet, awaiting human review
                 "bucket": hitl_bucket,
                 "hitl_required": True,
                 "sent": False,  # Should NOT auto-send for dispute/unknown
@@ -145,10 +146,11 @@ def create_examples(cases: list, email_threads: list) -> list:
         {
             "inputs": {
                 "email_thread_id": initial_thread["thread_id"],
-                "context": "New case opened. Draft initial outreach email to vanpool members.",
+                "context": "New case opened for this vanpool.",
             },
             "outputs": {
                 "email_thread_id": initial_thread["thread_id"],
+                "message_id": "*",  # Expect a message ID (email sent)
                 "bucket": None,  # No inbound reply to classify yet
                 "hitl_required": False,
                 "sent": True,  # Initial outreach can be auto-sent
@@ -161,24 +163,25 @@ def create_examples(cases: list, email_threads: list) -> list:
                 "reasoning": "No prior communication. Agent should draft and send initial outreach email.",
             },
         },
-        # Path 3: Respawn - existing thread with reply needs follow-up
+        # Path 3: Respond - existing thread with reply needs follow-up
         {
             "inputs": {
-                "email_thread_id": respawn_thread["thread_id"],
-                "context": f"Inbound reply received with '{respawn_bucket}' classification. Continue conversation.",
+                "email_thread_id": respond_thread["thread_id"],
+                "context": "New inbound reply received. Please review and respond appropriately.",
             },
             "outputs": {
-                "email_thread_id": respawn_thread["thread_id"],
-                "bucket": respawn_bucket,
+                "email_thread_id": respond_thread["thread_id"],
+                "message_id": "*",  # Expect a message ID (email sent)
+                "bucket": respond_bucket,
                 "hitl_required": False,  # address_change/acknowledgment can be auto-handled
                 "sent": True,  # Should send follow-up response
             },
             "metadata": {
-                "test_case": "respawn_path",
-                "path_type": "respawn_followup",
-                "case_id": respawn_thread.get("case_id"),
-                "vanpool_id": respawn_thread.get("vanpool_id"),
-                "reasoning": f"Existing thread with '{respawn_bucket}' reply. Agent should draft appropriate follow-up.",
+                "test_case": "respond_path",
+                "path_type": "respond_followup",
+                "case_id": respond_thread.get("case_id"),
+                "vanpool_id": respond_thread.get("vanpool_id"),
+                "reasoning": f"Existing thread with '{respond_bucket}' reply. Agent should draft appropriate follow-up.",
             },
         },
     ]
@@ -248,8 +251,8 @@ def main():
     # Summarize paths
     hitl_count = sum(1 for e in examples if e["metadata"]["path_type"] == "human_in_the_loop")
     initial_count = sum(1 for e in examples if e["metadata"]["path_type"] == "initial_outreach")
-    respawn_count = sum(1 for e in examples if e["metadata"]["path_type"] == "respawn_followup")
-    print(f"   Summary: {hitl_count} HITL, {initial_count} Initial Outreach, {respawn_count} Respawn")
+    respond_count = sum(1 for e in examples if e["metadata"]["path_type"] == "respond_followup")
+    print(f"   Summary: {hitl_count} HITL, {initial_count} Initial Outreach, {respond_count} Respond")
     
     for ex in examples:
         print(f"   - {ex['metadata']['test_case']}: {ex['inputs']['email_thread_id']}")
@@ -258,7 +261,7 @@ def main():
     dataset_name = "outreach-agent-eval-small"
     description = (
         "Small evaluation dataset for the Outreach Agent. "
-        "Contains three paths: HITL (dispute/unknown), Initial Outreach, and Respawn (follow-up)."
+        "Contains three paths: HITL (dispute/unknown), Initial Outreach, and Respond (follow-up)."
     )
 
     try:
@@ -271,7 +274,7 @@ def main():
         print(f"  Examples: {len(examples)}")
         print(f"  HITL cases: {hitl_count}")
         print(f"  Initial outreach cases: {initial_count}")
-        print(f"  Respawn cases: {respawn_count}")
+        print(f"  Respond cases: {respond_count}")
 
         return 0
 

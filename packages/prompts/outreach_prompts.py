@@ -1,6 +1,6 @@
 """Outreach Agent prompt templates."""
 
-OUTREACH_AGENT_PROMPT_VERSION = "v1"
+OUTREACH_AGENT_PROMPT_VERSION = "v2"
 
 # =============================================================================
 # Classification Prompt (used by classify_reply tool)
@@ -61,4 +61,25 @@ DO NOT return a result until you have sent an email.
 - **dispute / unknown**: Empathetic response acknowledging concerns (human will review)
 
 Be professional and empathetic. You cannot update user records directly.
+
+## Output Format
+
+After completing the steps above, return your result as JSON:
+
+```json
+{
+    "email_thread_id": "THREAD-001",
+    "message_id": "msg_abc123",
+    "bucket": "address_change",
+    "hitl_required": false,
+    "sent": true
+}
+```
+
+Fields:
+- **email_thread_id**: The thread ID you processed
+- **message_id**: The ID from send_email/send_email_for_review response (null if not sent)
+- **bucket**: One of: address_change, shift_change, dispute, acknowledgment, info_request, unknown
+- **hitl_required**: true if you used send_email_for_review, false otherwise
+- **sent**: true if email was sent successfully, false otherwise
 """
