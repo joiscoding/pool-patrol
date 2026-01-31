@@ -92,7 +92,7 @@ This enables:
 {
   "email_thread_id": "THREAD-001",
   "message_id": "msg_abc123",
-  "bucket": "shift_change",
+  "bucket": "update",
   "hitl_required": false,
   "sent": true
 }
@@ -101,8 +101,8 @@ This enables:
 **Fields:**
 - `email_thread_id`: The email thread ID from the database
 - `message_id`: ID of sent message (null if not sent)
-- `bucket`: Classification of inbound reply (`address_change`, `shift_change`, `acknowledgment`, `info_request`, `dispute`, `unknown`)
-- `hitl_required`: Whether human review was needed (true for `dispute`/`unknown`)
+- `bucket`: Classification of inbound reply - REQUIRED, never null (`acknowledgment`, `question`, `update`, `escalation`)
+- `hitl_required`: Whether human review was needed (true for `escalation`)
 - `sent`: Whether email was actually sent
 
 ## Verification Workflow (Sequence Diagram)
@@ -212,12 +212,10 @@ This enables:
 
 | Bucket | Description | Case Manager Action |
 |--------|-------------|---------------------|
-| `address_change` | User mentions they moved or address is wrong | Re-call Location Specialist after user updates Employee Portal |
-| `shift_change` | User mentions their work shift changed | Re-call Shift Specialist after user updates Employee Portal |
-| `acknowledgment` | Simple confirmation of current situation | Continue case lifecycle, no re-verification needed |
-| `info_request` | User asks questions about the review | Provide information, await further reply |
-| `dispute` | User disputes the review or expresses frustration | HITL review of Outreach Agent's drafted response |
-| `unknown` | Cannot determine intent | HITL review of Outreach Agent's drafted response |
+| `acknowledgment` | Simple confirmation, no changes needed (e.g., "All good here") | Confirm eligibility, close case |
+| `question` | User asks questions about the review process | Provide explanation, await further reply |
+| `update` | User reports info changed (address, shift, etc.) | Direct to Employee Portal, then re-verify |
+| `escalation` | User disputes, expresses frustration, or intent unclear | HITL review of Outreach Agent's drafted response |
 | `timeout` | No reply within deadline | Re-audit first, then escalate to pre-cancel if still failing |
 
 **Loop Termination:** Max 3 re-audit attempts. After 3 failures → automatic escalation to pre-cancel + HITL.
@@ -271,9 +269,9 @@ One case per vanpool. Use a UUID for the internal `id` and keep `case_id` as a h
 | Tool | Data Source | Purpose | HITL? |
 |------|-------------|---------|-------|
 | `get_email_thread` | Database | Fetch thread and all messages by email_thread_id | No |
-| `classify_reply` | LLM | Classify inbound reply into bucket | No |
-| `send_email` | Resend API | Send email directly (for `address_change`, `shift_change`, `acknowledgment`, `info_request`) | No |
-| `send_email_for_review` | Resend API | Send email with human review (for `dispute`, `unknown`). Human can approve, edit, or reject. | **Yes** |
+| `classify_reply` | LLM | Classify inbound reply into bucket (`acknowledgment`, `question`, `update`, `escalation`) | No |
+| `send_email` | Resend API | Send email directly (for `acknowledgment`, `question`, `update`) | No |
+| `send_email_for_review` | Resend API | Send email with human review (for `escalation`). Human can approve, edit, or reject. | **Yes** |
 
 **Case Manager Tools (agent tool calls):**
 
@@ -316,8 +314,9 @@ Comprehensive evaluation strategy for the Shift Specialist agent covering datase
 - **Secondary:** A/B testing to pick the most cost-effective model with acceptable quality.
 
 **Outreach Agent:**
-- **Primary:** LLM-as-judge for tone, accuracy, faithfulness, and relevance.
-- **Optional:** Human review for borderline or high-impact communications.
+- **Primary:** Heuristic evaluators for bucket classification (`bucket_match`) and HITL routing (`hitl_match`)
+- **Secondary:** LLM-as-judge for answer relevance and tone (non-toxicity)
+- **Optional:** Human review for borderline or high-impact communications
 
 **Key Metrics:**
 
