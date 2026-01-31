@@ -20,9 +20,7 @@
         "sent_at": "2024-01-15T10:00:00Z",
         "body": "Dear VP-101 Vanpool Members,\n\nAs part of our routine vanpool program review, we are verifying the eligibility of all participants.\n\nOur records indicate a potential discrepancy with one or more rider home addresses. The registered address may be outside the typical service area for this vanpool route.\n\nEmployee home address is in Los Angeles, significantly far from Fremont Factory (approximately 350 miles).\n\nPlease confirm your current home address by replying to this email.\n\n**What we need from you:**\n- Confirm your current home address\n- If your address has changed, please provide your updated information\n\nPlease respond within 5 business days.\n\nThank you for your cooperation.\n\nPool Patrol Team",
         "direction": "outbound",
-        "status": "sent",
-        "classification_bucket": null,
-        "classification_confidence": null
+        "status": "sent"
       },
       {
         "message_id": "MSG-001-002",
@@ -34,8 +32,7 @@
         "body": "Hi,\n\nI received your email about the vanpool review. I should mention that I recently moved to Los Angeles for family reasons but I'm still commuting to Fremont for work. I stay with a friend during the week.\n\nIs this going to be a problem for the vanpool?\n\nBob Johnson",
         "direction": "inbound",
         "status": "read",
-        "classification_bucket": "address_change",
-        "classification_confidence": 4
+        "classification_bucket": "address_change"
       }
     ]
   },
@@ -59,9 +56,7 @@
         "sent_at": "2024-01-10T12:00:00Z",
         "body": "Dear VP-102 Vanpool Members,\n\nAs part of our routine vanpool program review, we are verifying the eligibility of all participants.\n\nOur records indicate a potential discrepancy with one or more rider home addresses. The registered address may be outside the typical service area for this vanpool route.\n\nEmployee home address is in Sacramento, far from Fremont Factory (approximately 120 miles).\n\nPlease confirm your current home address by replying to this email.\n\n**What we need from you:**\n- Confirm your current home address\n- If your address has changed, please provide your updated information\n\nPlease respond within 5 business days.\n\nThank you for your cooperation.\n\nPool Patrol Team",
         "direction": "outbound",
-        "status": "sent",
-        "classification_bucket": null,
-        "classification_confidence": null
+        "status": "sent"
       },
       {
         "message_id": "MSG-002-002",
@@ -73,8 +68,7 @@
         "body": "Hello,\n\nI apologize for the confusion. My address in your system is outdated. I moved from Sacramento to Hayward three months ago but forgot to update my records.\n\nMy new address is: 456 Lakeline Blvd, Hayward, CA 94541\n\nPlease update my information. I'm much closer to the plant now.\n\nThanks,\nFrank Miller",
         "direction": "inbound",
         "status": "read",
-        "classification_bucket": "address_change",
-        "classification_confidence": 5
+        "classification_bucket": "address_change"
       },
       {
         "message_id": "MSG-002-003",
@@ -85,9 +79,7 @@
         "sent_at": "2024-01-11T10:30:00Z",
         "body": "Hi Frank,\n\nThank you for letting us know about your address change. Before we can confirm your vanpool eligibility, please update your address in the Employee Portal.\n\nOnce you've updated your information there, reply to this email and we'll verify your eligibility.\n\nBest regards,\nPool Patrol Team",
         "direction": "outbound",
-        "status": "sent",
-        "classification_bucket": null,
-        "classification_confidence": null
+        "status": "sent"
       }
     ]
   },
@@ -111,9 +103,7 @@
         "sent_at": "2024-01-20T09:00:00Z",
         "body": "Dear VP-106 Vanpool Members,\n\nAs part of our routine vanpool program review, we are verifying the eligibility of all participants.\n\nOur records indicate a potential discrepancy with one or more rider home addresses. The registered address may be outside the typical service area for this vanpool route.\n\nEmployee lives in San Diego, commute to Fremont Factory is not feasible (approximately 480 miles).\n\nPlease confirm your current home address by replying to this email.\n\n**What we need from you:**\n- Confirm your current home address\n- If your address has changed, please provide your updated information\n\nPlease respond within 5 business days.\n\nThank you for your cooperation.\n\nPool Patrol Team",
         "direction": "outbound",
-        "status": "sent",
-        "classification_bucket": null,
-        "classification_confidence": null
+        "status": "sent"
       },
       {
         "message_id": "MSG-003-002",
@@ -125,8 +115,7 @@
         "body": "I don't understand why I'm being reviewed. I've been on this vanpool for 2 years without any issues. My address is the same as it's always been. This feels like harassment.\n\nXavier",
         "direction": "inbound",
         "status": "read",
-        "classification_bucket": "dispute",
-        "classification_confidence": 4
+        "classification_bucket": "dispute"
       },
       {
         "message_id": "MSG-003-003",
@@ -137,9 +126,7 @@
         "sent_at": "2024-01-21T14:00:00Z",
         "body": "Hi Xavier,\n\nThank you for your response. This is a routine review conducted for all vanpool participants, not targeted at any individual.\n\nOur records show your address is in San Diego (92101), which is approximately 480 miles from the Fremont Factory. We want to ensure this commute arrangement still works for you.\n\nCould you please confirm this is still your current situation?\n\nBest regards,\nPool Patrol Team",
         "direction": "outbound",
-        "status": "sent",
-        "classification_bucket": null,
-        "classification_confidence": null
+        "status": "sent"
       }
     ]
   },
@@ -165,9 +152,7 @@
         "sent_at": "2024-01-08T11:00:00Z",
         "body": "Dear VP-103 Vanpool Members,\n\nAs part of our routine vanpool program review, we are verifying the eligibility of all participants.\n\nOur records indicate a potential mismatch between your work schedule and the vanpool operating hours. The vanpool departure/arrival times may not align with your assigned shift.\n\nVanpool schedule does not align with reported employee shift times. The vanpool departs at 6:30 AM but shift starts at 8:00 AM, creating a 90-minute gap.\n\nPlease confirm your current work schedule by replying to this email.\n\n**What we need from you:**\n- Confirm your current work shift assignment\n- Let us know if the current vanpool schedule meets your commute needs\n\nPlease respond within 5 business days.\n\nThank you for your cooperation.\n\nPool Patrol Team",
         "direction": "outbound",
-        "status": "sent",
-        "classification_bucket": null,
-        "classification_confidence": null
+        "status": "sent"
       }
     ]
   },
@@ -192,9 +177,7 @@
         "sent_at": "2024-01-05T15:00:00Z",
         "body": "Dear VP-107 Vanpool Members,\n\nAs part of our routine vanpool program review, we are verifying the eligibility of all participants.\n\nOur records indicate a potential discrepancy with one or more rider home addresses. The registered address may be outside the typical service area for this vanpool route.\n\nPlease confirm your current home address by replying to this email.\n\n**What we need from you:**\n- Confirm your current home address\n- If your address has changed, please provide your updated information\n\nPlease respond within 5 business days.\n\nThank you for your cooperation.\n\nPool Patrol Team",
         "direction": "outbound",
-        "status": "sent",
-        "classification_bucket": null,
-        "classification_confidence": null
+        "status": "sent"
       },
       {
         "message_id": "MSG-005-002",
@@ -206,8 +189,7 @@
         "body": "Hi,\n\nMy address is 100 Innovation Way, Fremont, CA 94536. I live about 3 miles from the Fremont Factory.\n\nLet me know if you need anything else.\n\nBrian Green",
         "direction": "inbound",
         "status": "read",
-        "classification_bucket": "acknowledgment",
-        "classification_confidence": 5
+        "classification_bucket": "acknowledgment"
       }
     ]
   },
@@ -231,9 +213,7 @@
         "sent_at": "2024-01-18T09:00:00Z",
         "body": "Dear VP-108 Vanpool Members,\n\nAs part of our routine vanpool program review, we are verifying the eligibility of all participants.\n\nOur records indicate a potential mismatch between your work schedule and the vanpool operating hours. The vanpool departure/arrival times may not align with your assigned shift.\n\nMultiple shifts in the vanpool roster: three swing shifts and one night shift.\n\nPlease confirm your current work schedule by replying to this email.\n\n**What we need from you:**\n- Confirm your current work shift assignment\n- Let us know if the current vanpool schedule meets your commute needs\n\nPlease respond within 5 business days.\n\nThank you for your cooperation.\n\nPool Patrol Team",
         "direction": "outbound",
-        "status": "sent",
-        "classification_bucket": null,
-        "classification_confidence": null
+        "status": "sent"
       }
     ]
   },
@@ -259,9 +239,7 @@
         "sent_at": "2024-01-21T11:00:00Z",
         "body": "Dear VP-111 Vanpool Members,\n\nAs part of our routine vanpool program review, we are verifying the eligibility of all participants.\n\nOur records indicate a potential discrepancy with one or more rider home addresses. The registered address may be outside the typical service area for this vanpool route.\n\nEmployee in Fresno, 160 miles from Fremont Factory.\n\nPlease confirm your current home address by replying to this email.\n\n**What we need from you:**\n- Confirm your current home address\n- If your address has changed, please provide your updated information\n\nPlease respond within 5 business days.\n\nThank you for your cooperation.\n\nPool Patrol Team",
         "direction": "outbound",
-        "status": "sent",
-        "classification_bucket": null,
-        "classification_confidence": null
+        "status": "sent"
       },
       {
         "message_id": "MSG-007-002",
@@ -273,8 +251,7 @@
         "body": "Hello,\n\nMy address is 333 Central Valley Rd, Fresno, CA 93721. Yes, it's about 160 miles from the plant, but the vanpool route passes through Fresno on the way to Fremont.\n\nThe driver picks me up at 6:15 AM and I'm at the plant by 6:50 AM. It's been working great for 8 months.\n\nPlease don't remove me from the vanpool. This is my only affordable commute option.\n\nVince Reed",
         "direction": "inbound",
         "status": "read",
-        "classification_bucket": "unknown",
-        "classification_confidence": 3
+        "classification_bucket": "unknown"
       }
     ]
   },
@@ -298,9 +275,7 @@
         "sent_at": "2024-01-17T10:00:00Z",
         "body": "Dear VP-112 Vanpool Members,\n\nAs part of our routine vanpool program review, we are verifying the eligibility of all participants.\n\nOur records indicate a potential discrepancy with one or more rider home addresses. The registered address may be outside the typical service area for this vanpool route.\n\nPlease confirm your current home address by replying to this email.\n\n**What we need from you:**\n- Confirm your current home address\n- If your address has changed, please provide your updated information\n\nPlease respond within 5 business days.\n\nThank you for your cooperation.\n\nPool Patrol Team",
         "direction": "outbound",
-        "status": "sent",
-        "classification_bucket": null,
-        "classification_confidence": null
+        "status": "sent"
       },
       {
         "message_id": "MSG-008-002",
@@ -312,8 +287,7 @@
         "body": "Confirmed. Address: 100 Research Way, Sunnyvale, CA 94087. Still using VP-112 daily.\n\n-Zoe",
         "direction": "inbound",
         "status": "read",
-        "classification_bucket": "acknowledgment",
-        "classification_confidence": 5
+        "classification_bucket": "acknowledgment"
       },
       {
         "message_id": "MSG-008-003",
@@ -325,8 +299,7 @@
         "body": "Confirmed. 200 Dev Dr, Mountain View, CA 94041. Active rider.\n\nAdam",
         "direction": "inbound",
         "status": "read",
-        "classification_bucket": "acknowledgment",
-        "classification_confidence": 5
+        "classification_bucket": "acknowledgment"
       },
       {
         "message_id": "MSG-008-004",
@@ -338,8 +311,7 @@
         "body": "Hi, confirming: 300 Prototype Pkwy, Palo Alto, CA 94306. Yes, I use the vanpool Mon-Fri.\n\nBella",
         "direction": "inbound",
         "status": "read",
-        "classification_bucket": "acknowledgment",
-        "classification_confidence": 5
+        "classification_bucket": "acknowledgment"
       },
       {
         "message_id": "MSG-008-005",
@@ -351,8 +323,7 @@
         "body": "400 Test Terrace, Santa Clara, CA 95050. All good here.\n\nCharlie",
         "direction": "inbound",
         "status": "read",
-        "classification_bucket": "acknowledgment",
-        "classification_confidence": 5
+        "classification_bucket": "acknowledgment"
       },
       {
         "message_id": "MSG-008-006",
@@ -366,9 +337,7 @@
         "sent_at": "2024-01-20T14:00:00Z",
         "body": "Dear VP-112 Members,\n\nThank you for your prompt responses. Your vanpool eligibility has been verified for Q1 2024.\n\nNo further action is needed.\n\nBest regards,\nPool Patrol Team",
         "direction": "outbound",
-        "status": "sent",
-        "classification_bucket": null,
-        "classification_confidence": null
+        "status": "sent"
       }
     ]
   },
@@ -393,9 +362,7 @@
         "sent_at": "2024-01-19T14:00:00Z",
         "body": "Dear VP-109 Vanpool Members,\n\nAs part of our routine vanpool program review, we are verifying the eligibility of all participants.\n\nOur records indicate a potential mismatch between your work schedule and the vanpool operating hours. The vanpool departure/arrival times may not align with your assigned shift.\n\nMultiple shifts in the vanpool roster: day, swing, and night.\n\nPlease confirm your current work schedule by replying to this email.\n\n**What we need from you:**\n- Confirm your current work shift assignment\n- Let us know if the current vanpool schedule meets your commute needs\n\nPlease respond within 5 business days.\n\nThank you for your cooperation.\n\nPool Patrol Team",
         "direction": "outbound",
-        "status": "sent",
-        "classification_bucket": null,
-        "classification_confidence": null
+        "status": "sent"
       }
     ]
   }

@@ -213,7 +213,6 @@ class Classification(BaseModel):
     """Reply classification result."""
 
     bucket: ClassificationBucket
-    confidence: int = Field(ge=1, le=5)
 
 
 class Message(BaseModel):
