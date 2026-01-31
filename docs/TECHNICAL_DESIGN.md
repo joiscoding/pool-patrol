@@ -200,15 +200,20 @@ pool_patrol/
 │   │   └── models.py                 # Pydantic models for API
 │   │
 │   ├── agents/                       # LangGraph multi-agent workflow
-│   │   ├── state.py                  # Agent state definitions
-│   │   └── shift_specialist.py       # Shift verification agent
+│   │   ├── structures.py             # Agent state definitions and output models
+│   │   ├── shift_specialist.py       # Shift verification agent
+│   │   ├── outreach.py               # Outreach Agent (email communication with HITL)
+│   │   └── utils.py                  # Shared utilities (LangSmith config)
 │   │
 │   ├── tools/                        # LangChain tool wrappers
 │   │   ├── vanpool.py                # Vanpool tools
-│   │   └── shifts.py                 # Employee shift tools
+│   │   ├── shift_specialist_tools.py # Employee shift tools
+│   │   └── outreach_tools.py         # Email tools (get_email_thread, classify_reply, send_email, send_email_for_review)
 │   │
 │   ├── prompts/                      # Agent system prompts
-│   │   └── shift_specialist.py       # Shift Specialist prompt
+│   │   ├── shift_specialist_prompts.py  # Shift Specialist prompt
+│   │   ├── outreach_prompts.py          # Outreach Agent prompt and classification prompt
+│   │   └── initial_outreach.py          # Initial outreach email templates
 │   │
 │   └── eval/                         # LangSmith evaluation
 │

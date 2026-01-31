@@ -52,12 +52,16 @@ pool_patrol/
 │
 ├── packages/
 │   ├── core/                   # Shared models, config, database utilities
-│   │   └── pool_patrol_core/
-│   │       ├── models.py       # Pydantic models (API)
-│   │       ├── db_models.py    # SQLAlchemy models (Database)
-│   │       └── database.py     # Database connection utilities
+│   │   ├── models.py           # Pydantic models (API)
+│   │   ├── db_models.py        # SQLAlchemy models (Database)
+│   │   └── database.py         # Database connection utilities
+│   ├── agents/                 # LangGraph multi-agent workflow
+│   │   ├── structures.py       # Agent state definitions and output models
+│   │   ├── shift_specialist.py # Shift verification agent
+│   │   ├── outreach.py         # Outreach Agent (email + HITL)
+│   │   └── utils.py            # Shared utilities
 │   ├── tools/                  # LangChain tool wrappers
-│   ├── graph/                  # LangGraph multi-agent workflow
+│   ├── prompts/                # Agent system prompts
 │   └── eval/                   # LangSmith evaluation
 │
 ├── mock/                       # Mock data (JSON) for seeding

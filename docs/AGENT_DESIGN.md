@@ -25,7 +25,7 @@ Automate vanpool misuse detection (location/shift mismatches). Target: reduce ~2
 | **Case Manager** | Orchestrates verification (parallel or selective), synthesizes specialist results, owns case lifecycle (timeouts, re-audit), routes to Outreach on failures, answers "why did this fail?" | Delegates to specialists - no direct tools |
 | **Location Specialist** | Validates employee home location against vanpool pickup. Returns verdict + reasoning + evidence with citations. | `get_employee_profile`, `check_commute_distance` |
 | **Shift Specialist** | Validates that a group of employees have compatible work shifts for carpooling together. Reasons about dynamic shift types. Returns verdict + reasoning + evidence with citations. | `get_employee_shifts` |
-| **Outreach Agent** | Sends investigation emails, monitors replies, classifies responses into buckets. Returns classification to Case Manager. | `send_email`, `get_replies`, `classify_reply` |
+| **Outreach Agent** | Sends investigation emails, monitors replies, classifies responses into buckets. Returns classification to Case Manager. Uses HITL for dispute/unknown classifications. | `get_email_thread`, `get_email_thread_by_case`, `classify_reply`, `send_email`, `send_email_for_review` |
 
 **Why this architecture?**
 
@@ -91,12 +91,19 @@ This enables:
 ```json
 {
   "thread_id": "THREAD-001",
-  "message_id": "MSG-003",
+  "message_id": "msg_abc123",
   "bucket": "shift_change",
-  "confidence": 4,
-  "summary": "Rider reports new night shift starting next week."
+  "hitl_required": false,
+  "sent": true
 }
 ```
+
+**Fields:**
+- `thread_id`: The email thread ID
+- `message_id`: ID of sent message (null if not sent)
+- `bucket`: Classification of inbound reply (`address_change`, `shift_change`, `acknowledgment`, `info_request`, `dispute`, `unknown`)
+- `hitl_required`: Whether human review was needed (true for `dispute`/`unknown`)
+- `sent`: Whether email was actually sent
 
 ## Verification Workflow (Sequence Diagram)
 
@@ -201,14 +208,17 @@ This enables:
 5. **Re-audit passes** → Case closed (data was fixed)
 6. **Re-audit fails after timeout** → Pre-cancel with HITL approval
 
-**Reply Buckets:**
+**Reply Buckets (from Outreach Agent):**
 
-| Bucket | Case Manager Action |
-|--------|---------------------|
-| `data_updated` | Re-call specialists (parallel or selective based on claim) |
-| `valid_explanation` | Human review (may close case) |
-| `unknown` | HITL to label the reply |
-| `timeout` | Re-audit first, then escalate to pre-cancel if still failing |
+| Bucket | Description | Case Manager Action |
+|--------|-------------|---------------------|
+| `address_change` | User mentions they moved or address is wrong | Re-call Location Specialist after user updates Employee Portal |
+| `shift_change` | User mentions their work shift changed | Re-call Shift Specialist after user updates Employee Portal |
+| `acknowledgment` | Simple confirmation of current situation | Continue case lifecycle, no re-verification needed |
+| `info_request` | User asks questions about the review | Provide information, await further reply |
+| `dispute` | User disputes the review or expresses frustration | HITL review of Outreach Agent's drafted response |
+| `unknown` | Cannot determine intent | HITL review of Outreach Agent's drafted response |
+| `timeout` | No reply within deadline | Re-audit first, then escalate to pre-cancel if still failing |
 
 **Loop Termination:** Max 3 re-audit attempts. After 3 failures → automatic escalation to pre-cancel + HITL.
 
@@ -258,11 +268,13 @@ One case per vanpool. Use a UUID for the internal `id` and keep `case_id` as a h
 
 **Outreach Agent Tools:**
 
-| Tool | Data Source | Purpose |
-|------|-------------|---------|
-| `send_email` | Email system | Send inquiry to all vanpool riders |
-| `get_replies` | Email system | Fetch threaded replies |
-| `classify_reply` | LLM | Classify reply into bucket |
+| Tool | Data Source | Purpose | HITL? |
+|------|-------------|---------|-------|
+| `get_email_thread` | Database | Fetch thread and all messages by thread_id | No |
+| `get_email_thread_by_case` | Database | Fetch thread by case_id | No |
+| `classify_reply` | LLM | Classify inbound reply into bucket | No |
+| `send_email` | Resend API | Send email directly (for `address_change`, `shift_change`, `acknowledgment`, `info_request`) | No |
+| `send_email_for_review` | Resend API | Send email with human review (for `dispute`, `unknown`). Human can approve, edit, or reject. | **Yes** |
 
 **Case Manager Tools (agent tool calls):**
 
