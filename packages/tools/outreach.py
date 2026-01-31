@@ -16,7 +16,7 @@ from langchain_openai import ChatOpenAI
 
 from core.database import get_session
 from core.db_models import EmailThread
-from prompts.outreach_agent import CLASSIFICATION_PROMPT
+from prompts.outreach import CLASSIFICATION_PROMPT
 
 
 # Configure Resend API
