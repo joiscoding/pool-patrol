@@ -177,12 +177,6 @@ poetry run uvicorn pool_patrol_api.main:app --reload --port 8000
 
 The API will be available at http://localhost:8000 with docs at `/docs`.
 
-### Run the Agent (CLI)
-
-```bash
-poetry run python scripts/run_case.py --vanpool-id VP-101
-```
-
 ## Documentation
 
 - [Technical Design](docs/TECHNICAL_DESIGN.md) - LangSmith infrastructure architecture and trade-offs

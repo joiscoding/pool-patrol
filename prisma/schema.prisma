@@ -69,11 +69,10 @@ enum MessageStatus {
 }
 
 enum ClassificationBucket {
-  address_change
-  shift_change
-  dispute
   acknowledgment
-  unknown
+  question
+  update
+  escalation
 }
 
 enum TimeType {

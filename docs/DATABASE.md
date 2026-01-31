@@ -218,7 +218,7 @@ The following enums are defined in the schema:
 | `ThreadStatus` | active, closed, archived | EmailThread.status |
 | `MessageDirection` | inbound, outbound | Message.direction |
 | `MessageStatus` | draft, sent, read, archived | Message.status |
-| `ClassificationBucket` | address_change, shift_change, dispute, acknowledgment, unknown | Message.classification_bucket |
+| `ClassificationBucket` | acknowledgment, question, update, escalation | Message.classification_bucket |
 
 ## Quick Reference: What to Update
 

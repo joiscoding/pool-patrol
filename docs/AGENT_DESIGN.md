@@ -216,7 +216,6 @@ This enables:
 | `question` | User asks questions about the review process | Provide explanation, await further reply |
 | `update` | User reports info changed (address, shift, etc.) | Direct to Employee Portal, then re-verify |
 | `escalation` | User disputes, expresses frustration, or intent unclear | HITL review of Outreach Agent's drafted response |
-| `timeout` | No reply within deadline | Re-audit first, then escalate to pre-cancel if still failing |
 
 **Loop Termination:** Max 3 re-audit attempts. After 3 failures → automatic escalation to pre-cancel + HITL.
 
@@ -263,6 +262,14 @@ One case per vanpool. Use a UUID for the internal `id` and keep `case_id` as a h
 | Tool | Data Source | Purpose |
 |------|-------------|---------|
 | `get_employee_shifts` | Mock/Internal DB | Fetch shift schedule + PTO (dynamic structures) |
+
+**Vanpool Tools:**
+
+| Tool | Data Source | Purpose |
+|------|-------------|---------|
+| `get_vanpool_roster` | Internal DB | Fetch vanpool's full roster with rider profiles |
+| `get_vanpool_info` | Internal DB | Get basic vanpool info (location, capacity, status) |
+| `list_vanpools` | Internal DB | List all vanpools, optionally filtered by status |
 
 **Outreach Agent Tools:**
 
