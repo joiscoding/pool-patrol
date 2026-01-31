@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
 """Run LangSmith evaluation for the Outreach Agent.
 
-Evaluators (TODO):
-===================
+Evaluators:
+===========
 
 1. HEURISTIC EVALUATORS (exact match):
    - hitl_match: Does hitl_required match expected? (escalation → True)
    - bucket_match: Does bucket classification match expected?
 
-2. LLM-AS-JUDGE EVALUATORS (for draft_email in metadata):
-   - correctness: Is the email factually correct given the thread context?
-   - hallucination: Does the email contain made-up information?
-   - tone: Is the tone professional and appropriate?
+2. LLM-AS-JUDGE EVALUATORS:
+   - answer_relevance: Is the agent's response relevant to the user's message?
+   - toxicity: Does the agent's response contain toxic/inappropriate content?
 
 Usage:
     poetry run python -m eval.run_outreach_eval
@@ -32,11 +31,15 @@ sys.path.insert(0, str(PROJECT_ROOT / "packages"))
 from dotenv import load_dotenv
 from langsmith import Client
 from langsmith.evaluation import evaluate
+from openevals.llm import create_llm_as_judge
+from openevals.prompts import ANSWER_RELEVANCE_PROMPT
+from prompts.eval_prompts import TOXICITY_EVAL_PROMPT
 
 load_dotenv(PROJECT_ROOT / ".env", override=True)
 
 from agents.outreach import handle_outreach_sync
 from agents.structures import OutreachRequest
+from tools.outreach_tools import get_email_thread
 
 
 # =============================================================================
@@ -45,6 +48,34 @@ from agents.structures import OutreachRequest
 
 DATASET_NAME = "outreach-agent-eval-small"
 EXPERIMENT_PREFIX = "outreach-agent"
+
+
+# =============================================================================
+# Helper Functions
+# =============================================================================
+
+
+def format_thread_for_eval(thread: dict) -> str:
+    """Format email thread as readable text for the evaluator."""
+    if "error" in thread:
+        return f"Error: {thread['error']}"
+    
+    lines = [
+        f"Thread: {thread['thread_id']}",
+        f"Subject: {thread.get('subject', 'N/A')}",
+        f"Vanpool: {thread.get('vanpool_id', 'N/A')}",
+        "",
+        "Messages:",
+    ]
+    
+    for msg in thread.get("messages", []):
+        direction = msg.get("direction", "unknown").upper()
+        sender = msg.get("from", "unknown")
+        body = msg.get("body", "")
+        lines.append(f"\n[{direction}] From: {sender}")
+        lines.append(body)
+    
+    return "\n".join(lines)
 
 
 # =============================================================================
@@ -59,20 +90,45 @@ def target_function(inputs: dict) -> dict:
         inputs: Dict with "email_thread_id" and optional "context"
         
     Returns:
-        Dict with bucket, hitl_required, sent fields
+        Dict with bucket, hitl_required, sent, user message, and agent response
     """
+    thread_id = inputs["email_thread_id"]
+    
+    # Fetch the email thread content BEFORE agent runs
+    thread_before = get_email_thread.invoke({"thread_id": thread_id})
+    
+    # Get the last inbound message (user's message)
+    user_message = ""
+    messages_before = thread_before.get("messages", [])
+    inbound_msgs = [m for m in messages_before if m.get("direction") == "inbound"]
+    if inbound_msgs:
+        user_message = inbound_msgs[-1].get("body", "")
+    
+    # Run the agent
     request = OutreachRequest(
-        email_thread_id=inputs["email_thread_id"],
+        email_thread_id=thread_id,
         context=inputs.get("context"),
     )
-    
     result = handle_outreach_sync(request)
+    
+    # Fetch the thread AFTER agent runs to get the agent's response
+    thread_after = get_email_thread.invoke({"thread_id": thread_id})
+    
+    # Get the agent's response (last outbound message)
+    agent_response = ""
+    messages_after = thread_after.get("messages", [])
+    outbound_msgs = [m for m in messages_after if m.get("direction") == "outbound"]
+    if outbound_msgs:
+        agent_response = outbound_msgs[-1].get("body", "")
     
     return {
         "email_thread_id": result.email_thread_id,
         "bucket": result.bucket,
         "hitl_required": result.hitl_required,
         "sent": result.sent,
+        # For evaluators
+        "user_message": user_message,
+        "agent_response": agent_response,
     }
 
 
@@ -110,12 +166,79 @@ def bucket_match(outputs: dict, reference_outputs: dict) -> dict:
 
 
 # =============================================================================
-# LLM-as-Judge Evaluators (TODO)
+# LLM-as-Judge Evaluators
 # =============================================================================
 
-# TODO: correctness_evaluator - Is the drafted email factually correct?
-# TODO: hallucination_evaluator - Does the email contain made-up info?
-# TODO: tone_evaluator - Is the tone professional and appropriate?
+# Base evaluator using openevals ANSWER_RELEVANCE_PROMPT
+_answer_relevance_judge = create_llm_as_judge(
+    prompt=ANSWER_RELEVANCE_PROMPT,
+    feedback_key="answer_relevance",
+    model="openai:gpt-4.1",
+)
+
+
+def answer_relevance_evaluator(inputs: dict, outputs: dict) -> dict:
+    """Custom evaluator that checks if agent's email response is relevant to the user's message.
+    
+    Uses openevals ANSWER_RELEVANCE_PROMPT with:
+    - inputs: The last inbound message from the employee
+    - outputs: The agent's drafted email response
+    """
+    # Get the user's message and agent's response from outputs
+    user_message = outputs.get("user_message", "")
+    agent_response = outputs.get("agent_response", "")
+    
+    # If no agent response (e.g., HITL case where email wasn't sent), skip
+    if not agent_response:
+        return {
+            "key": "answer_relevance",
+            "score": True,
+            "comment": "No email sent (HITL case) - skipping relevance check",
+        }
+    
+    # Call the openevals judge with user's message as input, agent's email as output
+    return _answer_relevance_judge(
+        inputs=user_message,
+        outputs=agent_response,
+    )
+
+
+# Toxicity evaluator using custom prompt
+_toxicity_judge = create_llm_as_judge(
+    prompt=TOXICITY_EVAL_PROMPT,
+    feedback_key="toxicity",
+    model="openai:gpt-4.1",
+)
+
+
+def non_toxic_evaluator(inputs: dict, outputs: dict) -> dict:
+    """Check if agent's email response is professional and non-toxic.
+    
+    Uses TOXICITY_EVAL_PROMPT and inverts the score:
+    - Prompt returns true if toxic, false if not toxic
+    - We invert so LangSmith shows: Non-toxic → 1 (PASS), Toxic → 0 (FAIL)
+    """
+    agent_response = outputs.get("agent_response", "")
+    
+    # If no agent response (e.g., HITL case where email wasn't sent), skip
+    if not agent_response:
+        return {
+            "key": "non_toxic",
+            "score": True,
+            "comment": "No email sent (HITL case) - skipping toxicity check",
+        }
+    
+    # Call the judge (only needs agent response)
+    result = _toxicity_judge(
+        outputs=agent_response,
+    )
+    
+    # Invert: prompt returns True if toxic, we want True if non-toxic
+    return {
+        "key": "non_toxic",
+        "score": not result.get("score", False),
+        "comment": result.get("comment", ""),
+    }
 
 
 # =============================================================================
@@ -151,7 +274,7 @@ def run_evaluation(
     
     print(f"\nDataset: {dataset_name}")
     print(f"Examples: {example_count}")
-    print(f"Evaluators: hitl_match, bucket_match")
+    print(f"Evaluators: hitl_match, bucket_match, answer_relevance, toxicity (LLM-as-judge)")
     
     print("\n" + "-" * 60)
     print("Running evaluation...")
@@ -160,7 +283,7 @@ def run_evaluation(
     results = evaluate(
         target_function,
         data=dataset_name,
-        evaluators=[hitl_match, bucket_match],
+        evaluators=[hitl_match, bucket_match, non_toxic_evaluator],
         experiment_prefix=experiment_prefix,
         max_concurrency=max_concurrency,
     )
