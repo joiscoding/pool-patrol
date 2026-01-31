@@ -70,31 +70,6 @@ def get_email_thread(thread_id: str) -> dict:
         return thread.to_dict(include_messages=True)
 
 
-@tool
-def get_email_thread_by_case(case_id: str) -> dict:
-    """Fetch email thread by case_id.
-
-    Use this tool when you have a case ID but not the thread ID.
-
-    Args:
-        case_id: The case ID (e.g., "CASE-001")
-
-    Returns:
-        Same as get_email_thread, or error if not found.
-    """
-    with get_session() as session:
-        thread = (
-            session.query(EmailThread)
-            .filter(EmailThread.case_id == case_id)
-            .first()
-        )
-
-        if thread is None:
-            return {"error": f"No email thread found for case {case_id}"}
-
-        return thread.to_dict(include_messages=True)
-
-
 # =============================================================================
 # Classification Tool
 # =============================================================================

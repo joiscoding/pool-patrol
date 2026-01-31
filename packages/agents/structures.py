@@ -130,8 +130,28 @@ class CaseManagerState(TypedDict):
 
 
 # =============================================================================
-# Outreach Agent Output Models
+# Outreach Agent Input/Output Models
 # =============================================================================
+
+
+class OutreachRequest(BaseModel):
+    """Input to the Outreach Agent from Case Manager.
+
+    The Case Manager calls the Outreach Agent with this structured input
+    to handle email communication for a specific thread.
+
+    Example:
+        OutreachRequest(
+            email_thread_id="THREAD-003",
+            context="New inbound reply detected. Employee may be disputing the review."
+        )
+    """
+
+    email_thread_id: str = Field(description="The email thread ID from the database")
+    context: str | None = Field(
+        default=None,
+        description="Optional context/guidance from Case Manager",
+    )
 
 
 class OutreachResult(BaseModel):
@@ -142,7 +162,7 @@ class OutreachResult(BaseModel):
 
     Example:
         OutreachResult(
-            thread_id="THREAD-001",
+            email_thread_id="THREAD-001",
             message_id="msg_abc123",
             bucket="address_change",
             hitl_required=False,
@@ -150,7 +170,7 @@ class OutreachResult(BaseModel):
         )
     """
 
-    thread_id: str = Field(description="The email thread ID")
+    email_thread_id: str = Field(description="The email thread ID from the database")
     message_id: str | None = Field(
         default=None,
         description="ID of sent message, None if not sent",
@@ -181,12 +201,10 @@ class OutreachAgentState(TypedDict):
 
     Attributes:
         messages: Conversation history with the agent
-        case_id: The case being investigated
-        thread_id: The email thread ID (None if not yet created)
+        email_thread_id: The email thread ID from the database
         result: The outreach result after processing
     """
 
     messages: Annotated[list, add_messages]
-    case_id: str
-    thread_id: str | None
+    email_thread_id: str
     result: OutreachResult | None

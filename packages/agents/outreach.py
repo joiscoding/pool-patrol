@@ -20,12 +20,11 @@ from langchain_core.output_parsers import PydanticOutputParser
 from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import InMemorySaver
 
-from agents.structures import OutreachResult
+from agents.structures import OutreachRequest, OutreachResult
 from agents.utils import configure_langsmith
 from prompts.outreach_prompts import OUTREACH_AGENT_PROMPT, OUTREACH_AGENT_PROMPT_VERSION
 from tools.outreach_tools import (
     get_email_thread,
-    get_email_thread_by_case,
     classify_reply,
     send_email,
     send_email_for_review,
@@ -42,7 +41,6 @@ _langsmith_enabled = configure_langsmith()
 # Tools available to the agent
 TOOLS = [
     get_email_thread,
-    get_email_thread_by_case,
     classify_reply,
     send_email,
     send_email_for_review,
@@ -106,11 +104,11 @@ def parse_outreach_result(content: str | dict) -> OutreachResult:
     # If already a dict (from structured output), try to validate
     if isinstance(content, dict):
         # Check if it looks like OutreachResult fields
-        if "thread_id" in content:
+        if "email_thread_id" in content:
             return OutreachResult.model_validate(content)
         # Agent returned wrong schema (VerificationResult) - create default
         return OutreachResult(
-            thread_id="unknown",
+            email_thread_id="unknown",
             bucket="unknown",
             hitl_required=True,
             sent=False,
@@ -120,11 +118,11 @@ def parse_outreach_result(content: str | dict) -> OutreachResult:
     try:
         import json
         data = json.loads(content)
-        if "thread_id" in data:
+        if "email_thread_id" in data:
             return OutreachResult.model_validate(data)
         # Wrong schema in JSON
         return OutreachResult(
-            thread_id="unknown",
+            email_thread_id="unknown",
             bucket="unknown", 
             hitl_required=True,
             sent=False,
@@ -138,32 +136,32 @@ def parse_outreach_result(content: str | dict) -> OutreachResult:
     except Exception:
         # Last resort - return safe default
         return OutreachResult(
-            thread_id="unknown",
+            email_thread_id="unknown",
             bucket="unknown",
             hitl_required=True,
             sent=False,
         )
 
 
-def _build_config(case_id: str, thread_id: str | None = None) -> dict[str, Any]:
-    """Build config with thread ID for persistence and LangSmith tracing."""
+def _build_config(email_thread_id: str) -> dict[str, Any]:
+    """Build config with thread ID for persistence and LangSmith tracing.
+    
+    Note: 'thread_id' in configurable is for LangGraph checkpointer (HITL resume).
+    'email_thread_id' in metadata is the business ID from email_threads table.
+    """
     model_name = os.environ.get("OPENAI_MODEL", "gpt-4.1-mini")
     
-    # Generate unique thread ID for checkpointer persistence
-    persistence_thread_id = thread_id or f"case-{case_id}-{uuid.uuid4()}"
-    
     return {
-        # Thread config required for checkpointer persistence
+        # Thread config required for checkpointer persistence (LangGraph concept)
         "configurable": {
-            "thread_id": persistence_thread_id,
+            "thread_id": f"outreach-{email_thread_id}-{uuid.uuid4()}",
         },
         # LangSmith trace metadata
         "run_name": "outreach_agent",
         "tags": ["agent:outreach", "component:communication"],
         "metadata": {
             "agent": "outreach_agent",
-            "case_id": case_id,
-            "thread_id": thread_id,
+            "email_thread_id": email_thread_id,
             "prompt_version": OUTREACH_AGENT_PROMPT_VERSION,
             "model": model_name,
         },
@@ -175,34 +173,32 @@ def _build_config(case_id: str, thread_id: str | None = None) -> dict[str, Any]:
 # =============================================================================
 
 
-async def handle_outreach(
-    case_id: str,
-    thread_id: str | None = None,
-) -> OutreachResult:
+def _build_message(request: OutreachRequest) -> str:
+    """Build the input message for the agent from the request."""
+    message = f"Handle outreach for email thread {request.email_thread_id}."
+    if request.context:
+        message += f"\n\nContext from Case Manager: {request.context}"
+    return message
+
+
+async def handle_outreach(request: OutreachRequest) -> OutreachResult:
     """Main entry point for the Outreach Agent.
 
-    Called by Case Manager when there's activity on a case that requires
+    Called by Case Manager when there's activity on a thread that requires
     email communication.
 
     Args:
-        case_id: The case ID to handle
-        thread_id: Optional thread ID if known
+        request: OutreachRequest with email_thread_id and optional context
 
     Returns:
-        OutreachResult with thread_id, message_id, bucket, hitl_required, sent
+        OutreachResult with email_thread_id, message_id, bucket, hitl_required, sent
     """
     agent = create_outreach_agent()
 
-    # Build the message for the agent
-    if thread_id:
-        message = f"Handle outreach for case {case_id}, thread {thread_id}."
-    else:
-        message = f"Handle outreach for case {case_id}."
-
     # Run the agent
     result = await agent.ainvoke(
-        {"messages": [HumanMessage(content=message)]},
-        config=_build_config(case_id, thread_id),
+        {"messages": [HumanMessage(content=_build_message(request))]},
+        config=_build_config(request.email_thread_id),
     )
 
     # Parse the final message into structured result
@@ -212,23 +208,14 @@ async def handle_outreach(
     return parse_outreach_result(content)
 
 
-def handle_outreach_sync(
-    case_id: str,
-    thread_id: str | None = None,
-) -> OutreachResult:
+def handle_outreach_sync(request: OutreachRequest) -> OutreachResult:
     """Synchronous version of handle_outreach."""
     agent = create_outreach_agent()
 
-    # Build the message for the agent
-    if thread_id:
-        message = f"Handle outreach for case {case_id}, thread {thread_id}."
-    else:
-        message = f"Handle outreach for case {case_id}."
-
     # Run the agent
     result = agent.invoke(
-        {"messages": [HumanMessage(content=message)]},
-        config=_build_config(case_id, thread_id),
+        {"messages": [HumanMessage(content=_build_message(request))]},
+        config=_build_config(request.email_thread_id),
     )
 
     # Parse the final message into structured result

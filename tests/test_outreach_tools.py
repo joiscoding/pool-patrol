@@ -3,7 +3,6 @@
 
 This script tests the individual tools used by the Outreach Agent:
 - get_email_thread
-- get_email_thread_by_case
 - classify_reply
 - send_email
 - send_email_for_review
@@ -84,37 +83,6 @@ def test_get_email_thread():
         return False
 
     print("\n✓ get_email_thread tool working correctly!")
-    return True
-
-
-def test_get_email_thread_by_case():
-    """Test fetching email thread by case_id."""
-    print("\n" + "=" * 60)
-    print("Testing get_email_thread_by_case tool")
-    print("=" * 60)
-
-    from tools.outreach_tools import get_email_thread_by_case
-
-    # Test fetching by case_id
-    print("\n1. Fetching thread for CASE-001...")
-    result = get_email_thread_by_case.invoke({"case_id": "CASE-001"})
-
-    if "error" in result:
-        print(f"   Error: {result['error']}")
-        return False
-
-    print(f"   Thread ID: {result['thread_id']}")
-    print(f"   Case ID: {result['case_id']}")
-    print(f"   Messages: {len(result['messages'])}")
-
-    # Verify it matches THREAD-001
-    if result["thread_id"] == "THREAD-001":
-        print("   ✓ Correctly mapped CASE-001 to THREAD-001")
-    else:
-        print(f"   ✗ Expected THREAD-001 but got {result['thread_id']}")
-        return False
-
-    print("\n✓ get_email_thread_by_case tool working correctly!")
     return True
 
 
@@ -316,7 +284,6 @@ def main():
 
     # Database tool tests
     results["get_email_thread"] = test_get_email_thread()
-    results["get_email_thread_by_case"] = test_get_email_thread_by_case()
 
     # Classification tool tests (needs API key)
     results["classify_reply"] = test_classify_reply()

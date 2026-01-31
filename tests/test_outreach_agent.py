@@ -52,40 +52,41 @@ class TestCase:
     """Definition of an outreach agent test case."""
 
     name: str
-    case_id: str
-    thread_id: str | None = None
+    email_thread_id: str
+    context: str | None = None
     expected_bucket: str | None = None
     expect_no_hitl: bool = False
     description: str = ""
 
 
 # Define all test cases as data
+# Input is email_thread_id (what Case Manager would pass)
 TEST_CASES: list[TestCase] = [
     TestCase(
         name="address_change",
-        case_id="CASE-001",
+        email_thread_id="THREAD-001",
         expected_bucket="address_change",
         expect_no_hitl=True,
         description="has address_change reply",
     ),
     TestCase(
         name="dispute",
-        case_id="CASE-003",
+        email_thread_id="THREAD-003",
         expected_bucket="dispute",
         description="has dispute reply",
     ),
     TestCase(
         name="acknowledgment",
-        case_id="CASE-006",
+        email_thread_id="THREAD-005",
         expected_bucket="acknowledgment",
         expect_no_hitl=True,
         description="has acknowledgment reply",
     ),
     TestCase(
-        name="with_thread_id",
-        case_id="CASE-002",
-        thread_id="THREAD-002",
-        description="explicit thread_id",
+        name="with_context",
+        email_thread_id="THREAD-002",
+        context="New reply detected. Please classify and respond.",
+        description="with Case Manager context",
     ),
 ]
 
@@ -99,7 +100,7 @@ def print_header(title: str) -> None:
 
 def print_result(result) -> None:
     """Print the result of an outreach agent call."""
-    print(f"   Thread ID: {result.thread_id}")
+    print(f"   Email Thread ID: {result.email_thread_id}")
     print(f"   Message ID: {result.message_id}")
     print(f"   Bucket: {result.bucket}")
     print(f"   HITL Required: {result.hitl_required}")
@@ -116,10 +117,10 @@ def check_api_key() -> bool:
 
 def validate_result(result, test_case: TestCase) -> bool:
     """Validate the result against test case expectations."""
-    # Check thread_id if specified
-    if test_case.thread_id and result.thread_id != test_case.thread_id:
-        print(f"\n⚠ Expected thread_id={test_case.thread_id} but got {result.thread_id}")
-        return True  # Still passing - agent behavior may vary
+    # Check email_thread_id matches
+    if result.email_thread_id != test_case.email_thread_id:
+        print(f"\n⚠ Expected email_thread_id={test_case.email_thread_id} but got {result.email_thread_id}")
+        # Still passing - agent behavior may vary
 
     # Check bucket if specified
     if test_case.expected_bucket:
@@ -144,7 +145,7 @@ def validate_result(result, test_case: TestCase) -> bool:
 # =============================================================================
 
 
-def run_hitl_interrupt_test(case_id: str, expected_bucket: str) -> bool | None:
+def run_hitl_interrupt_test(email_thread_id: str, expected_bucket: str) -> bool | None:
     """Test that HITL interrupt fires for dispute/unknown cases.
     
     Verifies:
@@ -152,7 +153,7 @@ def run_hitl_interrupt_test(case_id: str, expected_bucket: str) -> bool | None:
     2. Interrupt contains correct tool name
     3. Resume with approval completes successfully
     """
-    print_header(f"Testing HITL Interrupt - {expected_bucket.title()} Case ({case_id})")
+    print_header(f"Testing HITL Interrupt - {expected_bucket.title()} Case ({email_thread_id})")
 
     if not check_api_key():
         return None
@@ -165,11 +166,11 @@ def run_hitl_interrupt_test(case_id: str, expected_bucket: str) -> bool | None:
 
     try:
         agent = create_outreach_agent()
-        config = _build_config(case_id)
+        config = _build_config(email_thread_id)
 
         # First invocation - should interrupt before sending
         result = agent.invoke(
-            {"messages": [HumanMessage(content=f"Handle outreach for case {case_id}.")]},
+            {"messages": [HumanMessage(content=f"Handle outreach for email thread {email_thread_id}.")]},
             config=config,
         )
 
@@ -200,7 +201,7 @@ def run_hitl_interrupt_test(case_id: str, expected_bucket: str) -> bool | None:
 
         resumed = agent.invoke(
             Command(resume={"decisions": [{"type": "approve"}]}),
-            config=config,  # Same thread_id to resume
+            config=config,  # Same LangGraph thread_id to resume
         )
 
         # Verify completion
@@ -235,15 +236,15 @@ def run_hitl_reject_test() -> bool | None:
     from langchain_core.messages import HumanMessage
     from langgraph.types import Command
 
-    print(f"\n   Testing reject decision on CASE-003 (dispute)...")
+    print(f"\n   Testing reject decision on THREAD-003 (dispute)...")
 
     try:
         agent = create_outreach_agent()
-        config = _build_config("CASE-003")
+        config = _build_config("THREAD-003")
 
         # First invocation - should interrupt
         result = agent.invoke(
-            {"messages": [HumanMessage(content="Handle outreach for case CASE-003.")]},
+            {"messages": [HumanMessage(content="Handle outreach for email thread THREAD-003.")]},
             config=config,
         )
 
@@ -289,16 +290,18 @@ def run_sync_test(test_case: TestCase, is_first: bool = False) -> bool | None:
         return None
 
     from agents.outreach import handle_outreach_sync
+    from agents.structures import OutreachRequest
 
-    print(f"\n   Testing with {test_case.case_id} ({test_case.description})...")
+    print(f"\n   Testing with {test_case.email_thread_id} ({test_case.description})...")
     print("   This may take a moment while the agent reasons...\n")
 
     try:
-        kwargs = {"case_id": test_case.case_id}
-        if test_case.thread_id:
-            kwargs["thread_id"] = test_case.thread_id
+        request = OutreachRequest(
+            email_thread_id=test_case.email_thread_id,
+            context=test_case.context,
+        )
 
-        result = handle_outreach_sync(**kwargs)
+        result = handle_outreach_sync(request)
         print_result(result)
         return validate_result(result, test_case)
 
@@ -316,14 +319,16 @@ def run_async_test() -> bool | None:
         return None
 
     from agents.outreach import handle_outreach
+    from agents.structures import OutreachRequest
 
-    print("\n   Running async agent for CASE-001...")
+    print("\n   Running async agent for THREAD-001...")
     print("   This may take a moment...\n")
 
     try:
-        result = asyncio.run(handle_outreach(case_id="CASE-001"))
+        request = OutreachRequest(email_thread_id="THREAD-001")
+        result = asyncio.run(handle_outreach(request))
 
-        print(f"   Thread ID: {result.thread_id}")
+        print(f"   Email Thread ID: {result.email_thread_id}")
         print(f"   Bucket: {result.bucket}")
         print(f"   Sent: {result.sent}")
 
@@ -376,7 +381,7 @@ def main():
         print("HITL INTERRUPT TESTS")
         print("=" * 60)
         
-        results["hitl_dispute_interrupt"] = run_hitl_interrupt_test("CASE-003", "dispute")
+        results["hitl_dispute_interrupt"] = run_hitl_interrupt_test("THREAD-003", "dispute")
         results["hitl_reject_flow"] = run_hitl_reject_test()
 
         # Standard agent tests

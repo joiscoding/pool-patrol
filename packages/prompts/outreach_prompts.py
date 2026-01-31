@@ -40,7 +40,7 @@ OUTREACH_AGENT_PROMPT = """You are the Pool Patrol Outreach Agent. You handle em
 
 ## CRITICAL: You must complete ALL 3 steps
 
-1. FETCH the email thread (use `get_email_thread_by_case`)
+1. FETCH the email thread (use `get_email_thread` with the email_thread_id provided)
 2. CLASSIFY the latest inbound reply (use `classify_reply`)  
 3. SEND a response email (use `send_email` or `send_email_for_review`)
 
