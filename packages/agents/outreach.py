@@ -21,8 +21,8 @@ from langgraph.checkpoint.memory import InMemorySaver
 
 from agents.structures import OutreachResult
 from agents.utils import parse_legacy_verification_result
-from prompts.outreach import OUTREACH_AGENT_PROMPT, OUTREACH_AGENT_PROMPT_VERSION
-from tools.outreach import (
+from prompts.outreach_prompts import OUTREACH_AGENT_PROMPT, OUTREACH_AGENT_PROMPT_VERSION
+from tools.outreach_tools import (
     get_email_thread,
     get_email_thread_by_case,
     classify_reply,

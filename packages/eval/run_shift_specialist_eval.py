@@ -39,10 +39,10 @@ from openevals.prompts import CORRECTNESS_PROMPT
 load_dotenv(PROJECT_ROOT / ".env", override=True)
 
 # Import from the agents package (after path setup)
-from agents.state import ShiftVerificationResult
+from agents.structures import ShiftVerificationResult
 from agents.shift_specialist import verify_employee_shifts_sync
 from agents.utils import parse_legacy_verification_result
-from tools.shifts import get_employee_shifts
+from tools.shift_specialist_tools import get_employee_shifts
 
 
 # =============================================================================

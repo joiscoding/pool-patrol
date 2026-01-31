@@ -21,8 +21,8 @@ from langgraph.prebuilt import create_react_agent
 
 from agents.state import ShiftVerificationResult
 from agents.utils import parse_legacy_verification_result
-from prompts.shift_specialist import SHIFT_SPECIALIST_PROMPT, SHIFT_SPECIALIST_PROMPT_VERSION
-from tools.shifts import get_employee_shifts
+from prompts.shift_specialist_prompts import SHIFT_SPECIALIST_PROMPT, SHIFT_SPECIALIST_PROMPT_VERSION
+from tools.shift_specialist_tools import get_employee_shifts
 
 
 # =============================================================================
