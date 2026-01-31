@@ -3,10 +3,10 @@
 This agent is responsible for:
 1. Fetching and reviewing email conversation history
 2. Classifying inbound replies into appropriate buckets
-3. Sending appropriate responses (with HITL for disputes/unknown)
+3. Sending appropriate responses (with HITL for escalations)
 
 The agent uses HumanInTheLoopMiddleware to pause for human review
-when sending emails for dispute or unknown classifications.
+when sending emails for escalation classifications.
 """
 
 import os
@@ -62,7 +62,7 @@ def create_outreach_agent():
     """Create the Outreach Agent with HITL support.
 
     The agent uses HumanInTheLoopMiddleware to pause for human review
-    when calling send_email_for_review (for dispute/unknown classifications).
+    when calling send_email_for_review (for escalation classifications).
 
     Returns:
         A LangGraph agent that can handle email outreach tasks.
@@ -110,7 +110,7 @@ def parse_outreach_result(content: str | dict) -> OutreachResult:
         # Agent returned wrong schema (VerificationResult) - create default
         return OutreachResult(
             email_thread_id="unknown",
-            bucket="unknown",
+            bucket="escalation",
             hitl_required=True,
             sent=False,
         )
@@ -124,7 +124,7 @@ def parse_outreach_result(content: str | dict) -> OutreachResult:
         # Wrong schema in JSON
         return OutreachResult(
             email_thread_id="unknown",
-            bucket="unknown", 
+            bucket="escalation", 
             hitl_required=True,
             sent=False,
         )
@@ -138,7 +138,7 @@ def parse_outreach_result(content: str | dict) -> OutreachResult:
         # Last resort - return safe default
         return OutreachResult(
             email_thread_id="unknown",
-            bucket="unknown",
+            bucket="escalation",
             hitl_required=True,
             sent=False,
         )

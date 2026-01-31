@@ -164,7 +164,7 @@ class OutreachResult(BaseModel):
         OutreachResult(
             email_thread_id="THREAD-001",
             message_id="msg_abc123",
-            bucket="address_change",
+            bucket="update",
             hitl_required=False,
             sent=True,
         )
@@ -176,12 +176,10 @@ class OutreachResult(BaseModel):
         description="ID of sent message, None if not sent",
     )
     bucket: Literal[
-        "address_change",
-        "shift_change",
-        "dispute",
         "acknowledgment",
-        "info_request",
-        "unknown",
+        "question",
+        "update",
+        "escalation",
     ] | None = Field(
         default=None,
         description="Classification of inbound reply",

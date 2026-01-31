@@ -10,12 +10,10 @@ CLASSIFICATION_PROMPT = """You are classifying an email reply from a vanpool rid
 
 ## Classification Buckets
 
-- **address_change**: User mentions they moved, address is wrong, or provides a new address
-- **shift_change**: User mentions their work shift changed or provides new shift information
 - **acknowledgment**: Simple confirmation of current situation, no changes needed
-- **info_request**: User asks questions or requests more information about the review
-- **dispute**: User disputes the review, expresses frustration, or pushes back
-- **unknown**: Cannot determine intent or message is unclear
+- **question**: User asks questions or requests more information about the review
+- **update**: User mentions they moved, address is wrong, provides a new address, or their work shift changed
+- **escalation**: User disputes the review, expresses frustration, pushes back, or message intent is unclear
 
 ## Email to Classify
 
@@ -50,15 +48,15 @@ DO NOT return a result until you have sent an email.
 
 | Classification | Tool | HITL? |
 |----------------|------|-------|
-| address_change, shift_change, acknowledgment, info_request | `send_email` | No |
-| dispute, unknown | `send_email_for_review` | Yes |
+| acknowledgment, question, update | `send_email` | No |
+| escalation | `send_email_for_review` | Yes |
 
 ## Response Guidelines
 
-- **address_change / shift_change**: Thank them, direct to Employee Portal to update records
+- **update**: Thank them, direct to Employee Portal to update records
 - **acknowledgment**: Confirm their eligibility is verified
-- **info_request**: Explain why they're under review with specific details
-- **dispute / unknown**: Empathetic response acknowledging concerns (human will review)
+- **question**: Explain why they're under review with specific details
+- **escalation**: Empathetic response acknowledging concerns (human will review)
 
 Be professional and empathetic. You cannot update user records directly.
 
@@ -70,7 +68,7 @@ After completing the steps above, return your result as JSON:
 {
     "email_thread_id": "THREAD-001",
     "message_id": "msg_abc123",
-    "bucket": "address_change",
+    "bucket": "update",
     "hitl_required": false,
     "sent": true
 }
@@ -79,7 +77,7 @@ After completing the steps above, return your result as JSON:
 Fields:
 - **email_thread_id**: The thread ID you processed
 - **message_id**: The ID from send_email/send_email_for_review response (null if not sent)
-- **bucket**: One of: address_change, shift_change, dispute, acknowledgment, info_request, unknown
+- **bucket**: One of: acknowledgment, question, update, escalation
 - **hitl_required**: true if you used send_email_for_review, false otherwise
 - **sent**: true if email was sent successfully, false otherwise
 """

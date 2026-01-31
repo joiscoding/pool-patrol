@@ -27,7 +27,7 @@ EXAMPLES = [
         },
         "outputs": {
             "email_thread_id": "THREAD-001",
-            "bucket": "address_change",
+            "bucket": "update",
             "hitl_required": False,
             "sent": True,
         },
@@ -52,7 +52,7 @@ Pool Patrol Team""",
         },
         "outputs": {
             "email_thread_id": "THREAD-003",
-            "bucket": "dispute",
+            "bucket": "escalation",
             "hitl_required": True,
             "sent": False,
         },

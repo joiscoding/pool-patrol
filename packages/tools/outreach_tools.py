@@ -86,7 +86,7 @@ def classify_reply(message_body: str) -> dict:
 
     Returns:
         A dictionary with:
-        - bucket: Classification bucket (address_change, shift_change, acknowledgment, info_request, dispute, unknown)
+        - bucket: Classification bucket (acknowledgment, question, update, escalation)
         - reasoning: Brief explanation of the classification
     """
     model = ChatOpenAI(
@@ -113,7 +113,7 @@ def classify_reply(message_body: str) -> dict:
         return result
     except (json.JSONDecodeError, IndexError):
         return {
-            "bucket": "unknown",
+            "bucket": "escalation",
             "reasoning": f"Failed to parse classification response: {content[:200]}",
         }
 
@@ -151,10 +151,9 @@ def _send_via_resend(to: list[str], subject: str, body: str) -> dict[str, Any]:
 
 @tool
 def send_email(to: list[str], subject: str, body: str) -> dict:
-    """Send email via Resend API. Use for non-disputed classifications.
+    """Send email via Resend API. Use for non-escalation classifications.
 
-    Use this tool when classify_reply returns: address_change, shift_change,
-    acknowledgment, or info_request.
+    Use this tool when classify_reply returns: acknowledgment, question, or update.
 
     This tool sends the email immediately without human review.
 
@@ -174,9 +173,9 @@ def send_email(to: list[str], subject: str, body: str) -> dict:
 
 @tool
 def send_email_for_review(to: list[str], subject: str, body: str) -> dict:
-    """Send email via Resend API after human review. Use for dispute/unknown classifications.
+    """Send email via Resend API after human review. Use for escalation classifications.
 
-    Use this tool when classify_reply returns: dispute or unknown.
+    Use this tool when classify_reply returns: escalation.
 
     This tool will trigger HITL middleware - human will be able to:
     - Approve: Send email as drafted

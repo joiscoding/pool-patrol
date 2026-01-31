@@ -64,17 +64,17 @@ class TestCase:
 # Input is email_thread_id (what Case Manager would pass)
 TEST_CASES: list[TestCase] = [
     TestCase(
-        name="address_change",
+        name="update",
         email_thread_id="THREAD-001",
-        expected_bucket="address_change",
+        expected_bucket="update",
         expect_no_hitl=True,
-        description="has address_change reply",
+        description="has update reply (address change)",
     ),
     TestCase(
-        name="dispute",
+        name="escalation",
         email_thread_id="THREAD-003",
-        expected_bucket="dispute",
-        description="has dispute reply",
+        expected_bucket="escalation",
+        description="has escalation reply (dispute)",
     ),
     TestCase(
         name="acknowledgment",
@@ -398,13 +398,28 @@ def main():
         from core.database import reset_engine
         reset_engine()
 
-        # Standard agent tests (address_change, dispute, acknowledgment)
+        # Standard agent tests (update, escalation, acknowledgment)
         print("\n" + "=" * 60)
         print("STANDARD AGENT TESTS")
         print("=" * 60)
 
         for i, test_case in enumerate(TEST_CASES):
             results[test_case.name] = run_sync_test(test_case, is_first=False)
+
+        # HITL interrupt tests
+        print("\n" + "=" * 60)
+        print("HITL INTERRUPT TESTS")
+        print("=" * 60)
+
+        results["hitl_interrupt_escalation"] = run_hitl_interrupt_test("THREAD-003", "escalation")
+        results["hitl_reject"] = run_hitl_reject_test()
+
+        # Async test
+        print("\n" + "=" * 60)
+        print("ASYNC AGENT TEST")
+        print("=" * 60)
+
+        results["async_agent"] = run_async_test()
 
     # Summary
     print_header("Test Summary")
