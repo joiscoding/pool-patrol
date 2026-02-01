@@ -69,9 +69,13 @@ class ClassificationBucket(str, Enum):
     """Reply classification buckets."""
 
     ACKNOWLEDGMENT = "acknowledgment"
-    QUESTION = "question"
-    UPDATE = "update"
+    ADDRESS_CHANGE = "address_change"
+    DISPUTE = "dispute"
     ESCALATION = "escalation"
+    QUESTION = "question"
+    SHIFT_CHANGE = "shift_change"
+    UNKNOWN = "unknown"
+    UPDATE = "update"
 
 
 class CaseReason(str, Enum):

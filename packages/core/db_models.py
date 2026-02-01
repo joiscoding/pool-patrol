@@ -107,9 +107,13 @@ class MessageStatusEnum:
 
 class ClassificationBucket:
     ACKNOWLEDGMENT = "acknowledgment"
+    ADDRESS_CHANGE = "address_change"
+    DISPUTE = "dispute"
     QUESTION = "question"
     UPDATE = "update"
     ESCALATION = "escalation"
+    SHIFT_CHANGE = "shift_change"
+    UNKNOWN = "unknown"
 
 
 class TimeType:

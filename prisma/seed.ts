@@ -28,6 +28,9 @@ function toClassificationBucket(value: string): ClassificationBucket {
     'shift_change': 'shift_change',
     'dispute': 'dispute',
     'acknowledgment': 'acknowledgment',
+    'question': 'question',
+    'update': 'update',
+    'escalation': 'escalation',
     'unknown': 'unknown',
   };
   return mapping[value] ?? 'unknown';
