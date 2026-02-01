@@ -263,12 +263,54 @@ Run verification checks. If all pass, return verified. If any fail, use upsert_c
 # =============================================================================
 
 
+def _validate_case_manager_data(data: dict, vanpool_id: str, case_id: str | None) -> CaseManagerResult:
+    """Validate a dict as CaseManagerResult, parsing nested results if present."""
+    if "vanpool_id" not in data:
+        return CaseManagerResult(
+            vanpool_id=vanpool_id,
+            case_id=case_id,
+            outcome="pending",
+            reasoning=f"Agent returned unexpected schema: {str(data)[:300]}",
+            hitl_required=False,
+        )
+    
+    # Parse nested verification results if present
+    if data.get("shift_result") and isinstance(data["shift_result"], dict):
+        data["shift_result"] = ShiftVerificationResult.model_validate(data["shift_result"])
+    if data.get("location_result") and isinstance(data["location_result"], dict):
+        data["location_result"] = LocationVerificationResult.model_validate(data["location_result"])
+    
+    return CaseManagerResult.model_validate(data)
+
+
 def parse_case_manager_result(result: dict, vanpool_id: str, case_id: str | None) -> CaseManagerResult:
     """Parse the agent's response into a structured result.
 
     With response_format, the content may already be a dict or valid JSON.
     Falls back gracefully if the agent returns wrong schema.
     """
+    # Check for HITL interrupt - agent is paused waiting for human approval
+    if "__interrupt__" in result:
+        return CaseManagerResult(
+            vanpool_id=vanpool_id,
+            case_id=case_id,
+            outcome="pending",
+            reasoning="Membership cancellation initiated. Awaiting human-in-the-loop approval.",
+            hitl_required=True,
+        )
+    
+    # Check if structured_response is directly available (some agent implementations)
+    if "structured_response" in result and isinstance(result["structured_response"], CaseManagerResult):
+        return result["structured_response"]
+    
+    # Check for 'output' key (common in some agent implementations)
+    if "output" in result:
+        output = result["output"]
+        if isinstance(output, CaseManagerResult):
+            return output
+        if isinstance(output, dict) and "vanpool_id" in output:
+            return _validate_case_manager_data(output, vanpool_id, case_id)
+    
     final_message = result.get("messages", [])[-1] if result.get("messages") else None
 
     if final_message is None:
@@ -282,38 +324,70 @@ def parse_case_manager_result(result: dict, vanpool_id: str, case_id: str | None
 
     content = final_message.content if hasattr(final_message, "content") else str(final_message)
 
+    # If already a CaseManagerResult (from structured output), return directly
+    if isinstance(content, CaseManagerResult):
+        return content
+
+    # If content is a Pydantic model, convert to dict first
+    if hasattr(content, "model_dump"):
+        content = content.model_dump()
+
     # If already a dict (from structured output), try to validate
     if isinstance(content, dict):
-        if "vanpool_id" in content:
-            return CaseManagerResult.model_validate(content)
-        # Agent returned wrong schema - create default
+        return _validate_case_manager_data(content, vanpool_id, case_id)
+
+    # Handle list content (multi-part messages)
+    if isinstance(content, list):
+        # Try to find a dict or string in the list
+        for item in content:
+            if isinstance(item, dict):
+                if "vanpool_id" in item:
+                    return _validate_case_manager_data(item, vanpool_id, case_id)
+                # Check for text content blocks
+                if item.get("type") == "text" and item.get("text"):
+                    content = item["text"]
+                    break
+            elif isinstance(item, str):
+                content = item
+                break
+        else:
+            # Couldn't find usable content in list
+            return CaseManagerResult(
+                vanpool_id=vanpool_id,
+                case_id=case_id,
+                outcome="pending",
+                reasoning=f"Agent returned list with no parseable content: {str(content)[:300]}",
+                hitl_required=False,
+            )
+
+    # Handle empty content
+    if not content:
         return CaseManagerResult(
             vanpool_id=vanpool_id,
             case_id=case_id,
             outcome="pending",
-            reasoning="Agent returned unexpected schema",
+            reasoning="Agent returned empty response",
             hitl_required=False,
         )
 
-    # Try parsing as JSON first (from response_format)
+    # Ensure content is a string for JSON parsing
+    if not isinstance(content, str):
+        content = str(content)
+
+    # Try parsing as JSON (from response_format)
     try:
         data = json.loads(content)
-        if "vanpool_id" in data:
-            # Parse nested verification results if present
-            if data.get("shift_result") and isinstance(data["shift_result"], dict):
-                data["shift_result"] = ShiftVerificationResult.model_validate(data["shift_result"])
-            if data.get("location_result") and isinstance(data["location_result"], dict):
-                data["location_result"] = LocationVerificationResult.model_validate(data["location_result"])
-            return CaseManagerResult.model_validate(data)
-        # Wrong schema in JSON
+        if isinstance(data, dict):
+            return _validate_case_manager_data(data, vanpool_id, case_id)
+        # JSON parsed but not a dict
         return CaseManagerResult(
             vanpool_id=vanpool_id,
             case_id=case_id,
             outcome="pending",
-            reasoning=content[:500] if content else "Agent returned unexpected response",
+            reasoning=f"Agent returned non-dict JSON: {content[:300]}",
             hitl_required=False,
         )
-    except (json.JSONDecodeError, ValueError):
+    except (json.JSONDecodeError, ValueError, TypeError):
         pass
 
     # Last resort - return with content as reasoning
@@ -321,7 +395,7 @@ def parse_case_manager_result(result: dict, vanpool_id: str, case_id: str | None
         vanpool_id=vanpool_id,
         case_id=case_id,
         outcome="pending",
-        reasoning=content[:500] if content else "Could not parse agent response",
+        reasoning=f"Could not parse agent response: {content[:300]}",
         hitl_required=False,
     )
 

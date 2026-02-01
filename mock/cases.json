@@ -103,7 +103,7 @@
     "status": "pending_reply",
     "metadata": {
       "reason": "shift_mismatch",
-      "details": "Multiple shifts in the vanpool roster: three swing shifts and one night shift",
+      "details": "Existing case with shift mismatch. Awaiting employee response.",
       "additional_info": {
         "shift_breakdown": {
           "swing": 3,

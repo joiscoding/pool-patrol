@@ -28,13 +28,18 @@ PROJECT_ROOT = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(PROJECT_ROOT / "packages"))
 
 from dotenv import load_dotenv
+
+# Load env FIRST, then enable tracing BEFORE importing agents
+load_dotenv(PROJECT_ROOT / ".env", override=True)
+os.environ["LANGSMITH_TRACING"] = "true"
+os.environ.setdefault("LANGSMITH_PROJECT", "pool-patrol-eval")
+
 from langsmith import Client
 from langsmith.evaluation import evaluate
 from openevals.llm import create_llm_as_judge
 from openevals.prompts import CORRECTNESS_PROMPT
 
-load_dotenv(PROJECT_ROOT / ".env", override=True)
-
+# Import agent AFTER tracing is configured
 from agents.case_manager import investigate_vanpool_sync
 from agents.structures import CaseManagerRequest
 
@@ -144,9 +149,6 @@ def run_evaluation(
         raise ValueError("LANGSMITH_API_KEY not set")
     if not os.environ.get("OPENAI_API_KEY"):
         raise ValueError("OPENAI_API_KEY not set")
-    
-    os.environ["LANGSMITH_TRACING"] = "true"
-    os.environ.setdefault("LANGSMITH_PROJECT", "pool-patrol-eval")
     
     client = Client()
     datasets = list(client.list_datasets(dataset_name=dataset_name))
