@@ -19,9 +19,10 @@ Make sure you have:
 
 import os
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from functools import wraps
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 # Add packages to path for development
 project_root = Path(__file__).parent.parent
@@ -35,6 +36,20 @@ load_dotenv(project_root / ".env", override=True)
 # Configure LangSmith tracing
 from agents.utils import configure_langsmith
 langsmith_enabled = configure_langsmith()
+
+# Import modules under test
+from agents.case_manager import (
+    check_timeout,
+    create_case_manager_agent,
+    get_existing_case,
+    investigate_vanpool_sync,
+    parse_case_manager_result,
+    PreloadedContext,
+    _build_config,
+    _preload_investigation_context,
+)
+from agents.structures import CaseManagerRequest, CaseManagerResult
+from core.database import reset_engine
 
 
 # =============================================================================
@@ -54,12 +69,84 @@ def print_subheader(title: str) -> None:
     print(f"\n--- {title} ---")
 
 
-def check_api_key() -> bool:
-    """Check if OPENAI_API_KEY is set."""
-    if not os.environ.get("OPENAI_API_KEY"):
-        print("\n⚠ OPENAI_API_KEY not set. Skipping this test.")
-        return False
-    return True
+class AssertionError(Exception):
+    """Raised when a test assertion fails."""
+    pass
+
+
+def check(condition: bool, success_msg: str, fail_msg: str) -> None:
+    """Assert a condition and print result. Raises AssertionError on failure."""
+    if condition:
+        print(f"   ✓ {success_msg}")
+    else:
+        print(f"   ✗ {fail_msg}")
+        raise AssertionError(fail_msg)
+
+
+def check_equal(actual, expected, field_name: str) -> None:
+    """Assert equality and print result."""
+    check(
+        actual == expected,
+        f"{field_name} is '{actual}'",
+        f"Expected {field_name} '{expected}', got '{actual}'",
+    )
+
+
+def check_contains(haystack: str, needle: str, context: str) -> None:
+    """Assert string contains substring."""
+    check(
+        needle in haystack,
+        f"{context} contains '{needle}'",
+        f"{context} should contain '{needle}'",
+    )
+
+
+def check_is_instance(obj, cls, context: str) -> None:
+    """Assert object is instance of class."""
+    check(
+        isinstance(obj, cls),
+        f"{context} is {cls.__name__}",
+        f"{context} should be {cls.__name__}, got {type(obj).__name__}",
+    )
+
+
+def requires_api_key(func):
+    """Decorator that skips test if OPENAI_API_KEY is not set."""
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if not os.environ.get("OPENAI_API_KEY"):
+            print("\n⚠ OPENAI_API_KEY not set. Skipping this test.")
+            return None
+        return func(*args, **kwargs)
+    return wrapper
+
+
+def print_investigation_result(result) -> None:
+    """Print a CaseManagerResult in a formatted way."""
+    print(f"   Vanpool ID: {result.vanpool_id}")
+    print(f"   Case ID: {result.case_id or 'None (no case needed)'}")
+    print(f"   Outcome: {result.outcome}")
+    print(f"   HITL Required: {result.hitl_required}")
+    
+    if result.reasoning:
+        print_subheader("Reasoning")
+        # Truncate long reasoning
+        reasoning = result.reasoning[:200] + "..." if len(result.reasoning) > 200 else result.reasoning
+        print(f"   {reasoning}")
+
+    if result.shift_result:
+        print_subheader("Shift Verification")
+        print(f"   Verdict: {result.shift_result.verdict}")
+        print(f"   Confidence: {result.shift_result.confidence}")
+
+    if result.location_result:
+        print_subheader("Location Verification")
+        print(f"   Verdict: {result.location_result.verdict}")
+        print(f"   Confidence: {result.location_result.confidence}")
+
+    if result.outreach_summary:
+        print_subheader("Outreach Summary")
+        print(f"   {result.outreach_summary}")
 
 
 # =============================================================================
@@ -71,27 +158,19 @@ def test_get_existing_case():
     """Test the get_existing_case helper function."""
     print_header("Testing get_existing_case helper")
 
-    from agents.case_manager import get_existing_case
-
-    # Test with vanpool that has an existing case
     print("\n1. Looking up case for VP-105 (should have CASE-001)...")
     case = get_existing_case("VP-105")
-
     if case is not None:
-        print(f"   Found case: {case.get('case_id')}")
-        print(f"   Status: {case.get('status')}")
-        print(f"   ✓ get_existing_case found existing case")
+        print(f"   ✓ Found case: {case.get('case_id')} (status: {case.get('status')})")
     else:
-        print("   No case found (case might be resolved/cancelled)")
+        print("   ~ No case found (case might be resolved/cancelled)")
 
-    # Test with vanpool that doesn't have a case
     print("\n2. Looking up case for VP-101 (should have no open case)...")
     no_case = get_existing_case("VP-101")
-
     if no_case is None:
         print("   ✓ No open case found (as expected)")
     else:
-        print(f"   Found case: {no_case.get('case_id')} - may need to verify status")
+        print(f"   ~ Found case: {no_case.get('case_id')} - may need to verify status")
 
     print("\n✓ get_existing_case helper working correctly!")
     return True
@@ -101,88 +180,55 @@ def test_check_timeout():
     """Test the check_timeout helper function."""
     print_header("Testing check_timeout helper")
 
-    from agents.case_manager import check_timeout
+    try:
+        print("\n1. Testing with None case...")
+        check_equal(check_timeout(None), False, "Timeout for None")
 
-    # Test with None case
-    print("\n1. Testing with None case...")
-    result = check_timeout(None)
-    if result is False:
-        print("   ✓ Returns False for None case")
-    else:
-        print("   ✗ Should return False for None case")
+        print("\n2. Testing with recent case (2 days old)...")
+        recent_case = {
+            "case_id": "TEST-RECENT",
+            "created_at": (datetime.now(timezone.utc) - timedelta(days=2)).isoformat(),
+        }
+        check_equal(check_timeout(recent_case), False, "Timeout for recent case")
+
+        print("\n3. Testing with old case (10 days old)...")
+        old_case = {
+            "case_id": "TEST-OLD",
+            "created_at": (datetime.now(timezone.utc) - timedelta(days=10)).isoformat(),
+        }
+        check_equal(check_timeout(old_case), True, "Timeout for old case")
+
+        print("\n✓ check_timeout helper working correctly!")
+        return True
+    except AssertionError:
         return False
-
-    # Test with recent case (within 1 week)
-    print("\n2. Testing with recent case (2 days old)...")
-    recent_case = {
-        "case_id": "TEST-RECENT",
-        "created_at": (datetime.utcnow() - timedelta(days=2)).isoformat(),
-    }
-    result = check_timeout(recent_case)
-    if result is False:
-        print("   ✓ Returns False for case < 1 week old")
-    else:
-        print("   ✗ Should return False for case < 1 week old")
-        return False
-
-    # Test with old case (> 1 week)
-    print("\n3. Testing with old case (10 days old)...")
-    old_case = {
-        "case_id": "TEST-OLD",
-        "created_at": (datetime.utcnow() - timedelta(days=10)).isoformat(),
-    }
-    result = check_timeout(old_case)
-    if result is True:
-        print("   ✓ Returns True for case > 1 week old")
-    else:
-        print("   ✗ Should return True for case > 1 week old")
-        return False
-
-    print("\n✓ check_timeout helper working correctly!")
-    return True
 
 
 def test_parse_case_manager_result():
     """Test the result parsing function."""
     print_header("Testing parse_case_manager_result")
 
-    from agents.case_manager import parse_case_manager_result
-    from agents.structures import CaseManagerResult
-
-    # Test with valid JSON response
-    print("\n1. Testing with valid JSON response...")
-    valid_response = {
-        "messages": [
-            MagicMock(content='{"vanpool_id": "VP-101", "case_id": null, "outcome": "verified", "reasoning": "All checks passed", "hitl_required": false}')
-        ]
-    }
-    result = parse_case_manager_result(valid_response, "VP-101", None)
-
-    if isinstance(result, CaseManagerResult):
-        print(f"   Outcome: {result.outcome}")
+    try:
+        print("\n1. Testing with valid JSON response...")
+        valid_response = {
+            "messages": [
+                MagicMock(content='{"vanpool_id": "VP-101", "case_id": null, "outcome": "verified", "reasoning": "All checks passed", "hitl_required": false}')
+            ]
+        }
+        result = parse_case_manager_result(valid_response, "VP-101", None)
+        check_is_instance(result, CaseManagerResult, "Result")
+        check_equal(result.outcome, "verified", "Outcome")
         print(f"   Reasoning: {result.reasoning}")
-        if result.outcome == "verified":
-            print("   ✓ Correctly parsed verified result")
-        else:
-            print(f"   ✗ Expected 'verified', got '{result.outcome}'")
-            return False
-    else:
-        print("   ✗ Should return CaseManagerResult")
+
+        print("\n2. Testing with empty messages...")
+        empty_response = {"messages": []}
+        result = parse_case_manager_result(empty_response, "VP-101", None)
+        check_equal(result.outcome, "pending", "Outcome for empty messages")
+
+        print("\n✓ parse_case_manager_result working correctly!")
+        return True
+    except AssertionError:
         return False
-
-    # Test with empty messages
-    print("\n2. Testing with empty messages...")
-    empty_response = {"messages": []}
-    result = parse_case_manager_result(empty_response, "VP-101", None)
-
-    if result.outcome == "pending":
-        print("   ✓ Returns pending for empty messages")
-    else:
-        print("   ✗ Should return pending for empty messages")
-        return False
-
-    print("\n✓ parse_case_manager_result working correctly!")
-    return True
 
 
 # =============================================================================
@@ -190,15 +236,10 @@ def test_parse_case_manager_result():
 # =============================================================================
 
 
+@requires_api_key
 def test_verification_pass_flow():
     """Test that verification passing returns 'verified' without opening a case."""
     print_header("Testing Verification Pass Flow")
-
-    if not check_api_key():
-        return None
-
-    from agents.case_manager import investigate_vanpool_sync
-    from agents.structures import CaseManagerRequest
 
     print("\n1. Investigating VP-101 (all employees should pass)...")
     print("   This calls the real Case Manager agent (may take a moment)...\n")
@@ -206,16 +247,7 @@ def test_verification_pass_flow():
     request = CaseManagerRequest(vanpool_id="VP-101")
     result = investigate_vanpool_sync(request)
 
-    print(f"   Vanpool ID: {result.vanpool_id}")
-    print(f"   Case ID: {result.case_id}")
-    print(f"   Outcome: {result.outcome}")
-    print(f"   Reasoning: {result.reasoning[:150]}...")
-    print(f"   HITL Required: {result.hitl_required}")
-
-    if result.shift_result:
-        print(f"   Shift Verdict: {result.shift_result.verdict}")
-    if result.location_result:
-        print(f"   Location Verdict: {result.location_result.verdict}")
+    print_investigation_result(result)
 
     # For a passing verification, we expect:
     # - outcome = "verified" (no case needed)
@@ -225,52 +257,22 @@ def test_verification_pass_flow():
     elif result.outcome == "pending":
         print("\n   ~ Agent returned 'pending' (might need human intervention)")
     else:
-        print(f"\n   Note: Got outcome '{result.outcome}' - may have existing case")
+        print(f"\n   ~ Got outcome '{result.outcome}' - may have existing case")
 
     print("\n✓ Verification pass flow test completed!")
     return True
 
 
+@requires_api_key
 def test_verification_fail_with_mock():
-    """Test that verification failure opens a case (using mocked specialist)."""
-    print_header("Testing Verification Fail Flow (Mocked)")
+    """Test that verification failure opens a case (documented behavior)."""
+    print_header("Testing Verification Fail Flow (Documented)")
 
-    if not check_api_key():
-        return None
-
-    from agents.case_manager import investigate_vanpool_sync
-    from agents.structures import CaseManagerRequest, ShiftVerificationResult
-
-    # Create a mock shift result that fails
-    mock_fail_result = ShiftVerificationResult(
-        verdict="fail",
-        confidence=4,
-        reasoning="Employee EMP-TEST works night shift but vanpool operates during day shift",
-        evidence=[
-            {"type": "shift_mismatch", "employee_id": "EMP-TEST", "expected": "day", "actual": "night"}
-        ],
-    )
-
-    print("\n1. Investigating with mocked failing shift specialist...")
-    print("   This will use a mock to simulate shift verification failure...\n")
-
-    # We can't easily mock within the tool context, so we'll just run the real test
-    # and document expected behavior
-
-    request = CaseManagerRequest(vanpool_id="VP-101")
-
-    # For this test, we note what SHOULD happen:
-    # 1. If shift specialist returns "fail", agent should open_case
-    # 2. Agent should initiate outreach
-    # 3. Outcome should be "pending" (waiting for employee reply)
-
-    print("   Expected behavior when shift fails:")
-    print("   1. Agent calls open_case() with reason")
+    print("\n   Expected behavior when shift fails:")
+    print("   1. Agent calls upsert_case() with reason")
     print("   2. Agent calls run_outreach() to contact employee")
     print("   3. Returns outcome='pending' waiting for reply")
-
     print("\n   Note: Full mock test requires dependency injection in tools")
-    print("   See mock_specialist_flow() for manual verification approach")
 
     print("\n✓ Verification fail flow documented!")
     return True
@@ -280,114 +282,74 @@ def test_agent_creation():
     """Test that the agent can be created without errors."""
     print_header("Testing Agent Creation")
 
-    from agents.case_manager import create_case_manager_agent
-
     print("\n1. Creating Case Manager agent...")
     try:
         agent = create_case_manager_agent()
-        print("   ✓ Agent created successfully")
-        print(f"   Agent type: {type(agent)}")
+        print(f"   ✓ Agent created successfully (type: {type(agent).__name__})")
+        return True
     except Exception as e:
         print(f"   ✗ Failed to create agent: {e}")
         return False
-
-    print("\n✓ Agent creation test passed!")
-    return True
 
 
 def test_preload_context():
     """Test that context preloading works correctly."""
     print_header("Testing Context Preloading")
 
-    from agents.case_manager import _preload_investigation_context, PreloadedContext
-    from agents.structures import CaseManagerResult
+    try:
+        print("\n1. Preloading context for VP-101 (should succeed)...")
+        ctx = _preload_investigation_context("VP-101")
 
-    print("\n1. Preloading context for VP-101 (should have no open case)...")
-    ctx = _preload_investigation_context("VP-101")
+        check(
+            not isinstance(ctx, CaseManagerResult),
+            "Got PreloadedContext (not error)",
+            f"Should not get error result: {getattr(ctx, 'reasoning', '')}",
+        )
+        check_is_instance(ctx, PreloadedContext, "Context")
+        print(f"   Vanpool ID: {ctx.vanpool_id}, Case ID: {ctx.case_id}")
 
-    if isinstance(ctx, CaseManagerResult):
-        print(f"   Got early exit result: {ctx.reasoning}")
-        print("   ✗ Should have returned PreloadedContext, not error")
+        check_contains(ctx.message, "VP-101", "Message")
+        check_contains(ctx.message, "upsert_case", "Message")
+
+        print("\n2. Preloading context for non-existent vanpool...")
+        ctx_err = _preload_investigation_context("VP-FAKE-999")
+
+        check_is_instance(ctx_err, CaseManagerResult, "Error context")
+        check_equal(ctx_err.outcome, "pending", "Error outcome")
+        print(f"   Error reason: {ctx_err.reasoning[:50]}...")
+
+        print("\n✓ Context preloading test passed!")
+        return True
+    except AssertionError:
         return False
-
-    if not isinstance(ctx, PreloadedContext):
-        print("   ✗ Should return PreloadedContext")
-        return False
-
-    print(f"   ✓ Got PreloadedContext")
-    print(f"   Vanpool ID: {ctx.vanpool_id}")
-    print(f"   Case ID: {ctx.case_id}")
-
-    if "VP-101" in ctx.message:
-        print("   ✓ Message contains vanpool ID")
-    else:
-        print("   ✗ Message should contain vanpool ID")
-        return False
-
-    if "upsert_case" in ctx.message:
-        print("   ✓ Message mentions upsert_case tool")
-    else:
-        print("   ✗ Message should mention upsert_case tool")
-        return False
-
-    print("\n2. Preloading context for non-existent vanpool...")
-    ctx_err = _preload_investigation_context("VP-FAKE-999")
-
-    if isinstance(ctx_err, CaseManagerResult):
-        print(f"   ✓ Got early exit result: {ctx_err.reasoning[:50]}...")
-        if ctx_err.outcome == "pending":
-            print("   ✓ Outcome is 'pending' (error case)")
-        else:
-            print(f"   ✗ Expected outcome 'pending', got '{ctx_err.outcome}'")
-            return False
-    else:
-        print("   ✗ Should return CaseManagerResult for invalid vanpool")
-        return False
-
-    print("\n✓ Context preloading test passed!")
-    return True
 
 
 def test_config_building():
     """Test that config building works correctly."""
     print_header("Testing Config Building")
 
-    from agents.case_manager import _build_config
+    try:
+        print("\n1. Building config without case ID...")
+        config = _build_config("VP-101", None)
 
-    print("\n1. Building config without case ID...")
-    config = _build_config("VP-101", None)
+        check("configurable" in config, "Config has configurable section", "Missing configurable")
+        thread_id = config["configurable"]["thread_id"]
+        check(
+            thread_id.startswith("investigation-"),
+            f"Thread ID generated: {thread_id[:30]}...",
+            "Thread ID should start with 'investigation-'",
+        )
 
-    if "configurable" in config:
-        print("   ✓ Config has configurable section")
-    else:
-        print("   ✗ Config should have configurable section")
+        print("\n2. Building config with case ID...")
+        config = _build_config("VP-101", "CASE-123")
+
+        check_equal(config["configurable"]["thread_id"], "CASE-123", "Thread ID")
+        check_equal(config["metadata"]["vanpool_id"], "VP-101", "Metadata vanpool_id")
+
+        print("\n✓ Config building test passed!")
+        return True
+    except AssertionError:
         return False
-
-    thread_id = config["configurable"]["thread_id"]
-    if thread_id.startswith("investigation-"):
-        print(f"   ✓ Thread ID generated: {thread_id[:30]}...")
-    else:
-        print("   ✗ Thread ID should start with 'investigation-'")
-        return False
-
-    print("\n2. Building config with case ID...")
-    config = _build_config("VP-101", "CASE-123")
-
-    thread_id = config["configurable"]["thread_id"]
-    if thread_id == "CASE-123":
-        print(f"   ✓ Thread ID uses case ID: {thread_id}")
-    else:
-        print("   ✗ Thread ID should be the case ID")
-        return False
-
-    if config["metadata"]["vanpool_id"] == "VP-101":
-        print("   ✓ Metadata contains vanpool_id")
-    else:
-        print("   ✗ Metadata should contain vanpool_id")
-        return False
-
-    print("\n✓ Config building test passed!")
-    return True
 
 
 # =============================================================================
@@ -395,15 +357,10 @@ def test_config_building():
 # =============================================================================
 
 
+@requires_api_key
 def test_full_investigation():
     """Run a full investigation and report results."""
     print_header("Full Investigation Test")
-
-    if not check_api_key():
-        return None
-
-    from agents.case_manager import investigate_vanpool_sync
-    from agents.structures import CaseManagerRequest
 
     print("\n1. Running full investigation for VP-101...")
     print("   This is an end-to-end test with real LLM calls.\n")
@@ -411,30 +368,7 @@ def test_full_investigation():
     request = CaseManagerRequest(vanpool_id="VP-101")
     result = investigate_vanpool_sync(request)
 
-    print_subheader("Investigation Result")
-    print(f"   Vanpool ID: {result.vanpool_id}")
-    print(f"   Case ID: {result.case_id or 'None (no case needed)'}")
-    print(f"   Outcome: {result.outcome}")
-    print(f"   HITL Required: {result.hitl_required}")
-
-    print_subheader("Reasoning")
-    print(f"   {result.reasoning}")
-
-    if result.shift_result:
-        print_subheader("Shift Verification")
-        print(f"   Verdict: {result.shift_result.verdict}")
-        print(f"   Confidence: {result.shift_result.confidence}")
-        print(f"   Reasoning: {result.shift_result.reasoning[:100]}...")
-
-    if result.location_result:
-        print_subheader("Location Verification")
-        print(f"   Verdict: {result.location_result.verdict}")
-        print(f"   Confidence: {result.location_result.confidence}")
-        print(f"   Reasoning: {result.location_result.reasoning[:100]}...")
-
-    if result.outreach_summary:
-        print_subheader("Outreach Summary")
-        print(f"   {result.outreach_summary}")
+    print_investigation_result(result)
 
     print("\n✓ Full investigation test completed!")
     return True
@@ -453,7 +387,6 @@ def main():
     print("   For tool-level tests, see: tests/test_case_manager_tools.py")
 
     # Reset database engine once at start
-    from core.database import reset_engine
     reset_engine()
 
     results = {}
