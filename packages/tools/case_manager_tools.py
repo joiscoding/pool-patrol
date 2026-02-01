@@ -78,25 +78,69 @@ def run_location_specialist(employee_ids: list[str], vanpool_id: str) -> dict:
 
 
 @tool
-def open_case(vanpool_id: str, reason: str, failed_checks: list[str]) -> dict:
-    """Create a new investigation case when verification fails.
+def upsert_case(
+    vanpool_id: str,
+    reason: str,
+    failed_checks: list[str],
+    case_id: str | None = None,
+    status: str | None = None,
+) -> dict:
+    """Create or update an investigation case.
 
-    Creates a case in the database and returns the case_id. Only create a case
-    if verification has failed - do not create cases for passing verifications.
+    If case_id is provided, updates the existing case. Otherwise, creates a new case
+    if one doesn't already exist for the vanpool. Use this to:
+    - Open a new case when verification fails
+    - Update case status as investigation progresses
+    - Add new failed checks or update reason
 
     Args:
         vanpool_id: The vanpool ID (e.g., "VP-101")
-        reason: Why the case is being opened (e.g., "Shift mismatch detected")
+        reason: Why the case is being opened/updated (e.g., "Shift mismatch detected")
         failed_checks: Which checks failed (e.g., ["shift"], ["location"], ["shift", "location"])
+        case_id: Optional - if provided, updates this case instead of creating new
+        status: Optional - new status for the case (e.g., "verification", "pending_reply", "re_audit")
 
     Returns:
         A dictionary with:
-        - case_id: The newly created case ID
-        - status: Initial case status
-        - error: Error message if creation failed
+        - case_id: The case ID (new or existing)
+        - status: Current case status
+        - vanpool_id: The vanpool ID
+        - created: True if new case was created, False if updated
+        - error: Error message if operation failed
     """
     with get_session() as session:
-        # Check if an open case already exists for this vanpool
+        # If case_id provided, update that case
+        if case_id:
+            existing_case = (
+                session.query(Case)
+                .filter(Case.case_id == case_id)
+                .first()
+            )
+
+            if existing_case is None:
+                return {"error": f"Case {case_id} not found"}
+
+            # Update metadata
+            current_meta = existing_case.case_metadata or {}
+            current_meta["reason"] = reason
+            current_meta["failed_checks"] = failed_checks
+            current_meta["updated_by"] = "case_manager_agent"
+            existing_case.meta = to_json(current_meta)
+
+            # Update status if provided
+            if status:
+                existing_case.status = status
+
+            session.commit()
+
+            return {
+                "case_id": existing_case.case_id,
+                "status": existing_case.status,
+                "vanpool_id": existing_case.vanpool_id,
+                "created": False,
+            }
+
+        # No case_id - check if an open case already exists for this vanpool
         existing_case = (
             session.query(Case)
             .filter(Case.vanpool_id == vanpool_id)
@@ -105,13 +149,27 @@ def open_case(vanpool_id: str, reason: str, failed_checks: list[str]) -> dict:
         )
 
         if existing_case:
+            # Update the existing case instead of erroring
+            current_meta = existing_case.case_metadata or {}
+            current_meta["reason"] = reason
+            current_meta["failed_checks"] = failed_checks
+            current_meta["updated_by"] = "case_manager_agent"
+            existing_case.meta = to_json(current_meta)
+
+            if status:
+                existing_case.status = status
+
+            session.commit()
+
             return {
-                "error": f"Open case already exists for vanpool {vanpool_id}",
-                "existing_case_id": existing_case.case_id,
+                "case_id": existing_case.case_id,
+                "status": existing_case.status,
+                "vanpool_id": existing_case.vanpool_id,
+                "created": False,
             }
 
         # Generate new case ID
-        case_id = f"CASE-{uuid.uuid4().hex[:8].upper()}"
+        new_case_id = f"CASE-{uuid.uuid4().hex[:8].upper()}"
 
         # Create metadata
         metadata = {
@@ -122,18 +180,19 @@ def open_case(vanpool_id: str, reason: str, failed_checks: list[str]) -> dict:
 
         # Create the case
         new_case = Case(
-            case_id=case_id,
+            case_id=new_case_id,
             vanpool_id=vanpool_id,
-            status=CaseStatus.OPEN,
+            status=status or CaseStatus.OPEN,
             meta=to_json(metadata),
         )
         session.add(new_case)
         session.commit()
 
         return {
-            "case_id": case_id,
-            "status": CaseStatus.OPEN,
+            "case_id": new_case_id,
+            "status": new_case.status,
             "vanpool_id": vanpool_id,
+            "created": True,
         }
 
 

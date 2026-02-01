@@ -284,11 +284,16 @@ One case per vanpool. Use a UUID for the internal `id` and keep `case_id` as a h
 
 The Case Manager uses specialists as tool calls (agent-as-tool). These tools execute the specialist agents and return their structured verdict + evidence.
 
-| Tool | Agent | Purpose |
-|------|-------|---------|
-| `run_location_specialist` | Location Specialist | Validate employee home location vs pickup location |
-| `run_shift_specialist` | Shift Specialist | Validate that employees have compatible shifts for carpooling |
-| `run_outreach_agent` | Outreach Agent | Send inquiry, fetch replies, classify responses |
+| Tool | Agent/Purpose | HITL? |
+|------|---------------|-------|
+| `run_shift_specialist` | Shift Specialist - Validate compatible shifts for carpooling | No |
+| `run_location_specialist` | Location Specialist - Validate home location vs pickup (stubbed) | No |
+| `upsert_case` | Create new case or update existing (status, reason, failed_checks) | No |
+| `run_outreach` | Outreach Agent - Send inquiry, fetch replies, classify responses | No (Outreach has own HITL) |
+| `close_case` | Close case with outcome (resolved, cancelled) | No |
+| `cancel_membership` | Cancel vanpool membership (requires approval) | **Yes** |
+
+**Note:** Case status and vanpool roster are preloaded in the agent's input context, so `get_case_status` is not needed as a tool.
 
 ## Testing the Shift Specialist
 

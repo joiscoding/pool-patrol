@@ -4,7 +4,7 @@
 This script tests the individual tools used by the Case Manager agent:
 - run_shift_specialist
 - run_location_specialist (stubbed)
-- open_case
+- upsert_case (create or update)
 - get_case_status
 - close_case
 - run_outreach
@@ -140,55 +140,85 @@ def test_run_shift_specialist():
 # =============================================================================
 
 
-def test_open_case():
-    """Test opening a new investigation case."""
+def test_upsert_case():
+    """Test creating and updating investigation cases."""
     global _test_case_id
-    print_header("Testing open_case tool")
+    print_header("Testing upsert_case tool")
 
-    from tools.case_manager_tools import open_case
+    from tools.case_manager_tools import upsert_case
     from core.database import get_session
     from core.db_models import Case, CaseStatus
 
     # Use a test-only vanpool ID that won't exist in mock data
-    print("\n1. Opening a new case for VP-TEST-001...")
-    result = open_case.invoke({
+    print("\n1. Creating a new case for VP-TEST-001...")
+    result = upsert_case.invoke({
         "vanpool_id": "VP-TEST-001",
         "reason": "Test case - shift mismatch detected",
         "failed_checks": ["shift"],
     })
 
     if "error" in result:
-        # Might already have an open case from previous test run
-        print(f"   Note: {result.get('error', result.get('existing_case_id'))}")
-        if "existing_case_id" in result:
-            _test_case_id = result['existing_case_id']
-            print(f"   Existing case ID: {_test_case_id}")
-            print("\n✓ open_case correctly detected existing case!")
-            return True
+        print(f"   Error: {result['error']}")
         return False
 
     _test_case_id = result['case_id']
+    created = result.get('created', True)
     print(f"   Case ID: {_test_case_id}")
     print(f"   Status: {result['status']}")
     print(f"   Vanpool ID: {result['vanpool_id']}")
+    print(f"   Created: {created}")
 
     if not _test_case_id:
         print("   ✗ Should have returned a case_id")
         return False
 
-    # Verify case exists in database with correct status
+    # Verify case exists in database
     print("\n2. Verifying case exists in database...")
     with get_session() as session:
         db_case = session.query(Case).filter(Case.case_id == _test_case_id).first()
         if db_case is None:
             print(f"   ✗ Case {_test_case_id} not found in database")
             return False
-        if db_case.status != CaseStatus.OPEN:
-            print(f"   ✗ Expected status 'open', got '{db_case.status}'")
-            return False
         print(f"   ✓ Case found in database with status: {db_case.status}")
 
-    print("\n✓ open_case tool working correctly!")
+    # Test updating the case
+    print("\n3. Updating the case with new status...")
+    update_result = upsert_case.invoke({
+        "vanpool_id": "VP-TEST-001",
+        "case_id": _test_case_id,
+        "reason": "Updated reason - re-verification pending",
+        "failed_checks": ["shift", "location"],
+        "status": "pending_reply",
+    })
+
+    if "error" in update_result:
+        print(f"   Error: {update_result['error']}")
+        return False
+
+    if update_result.get('created', True) is True:
+        print("   ✗ Should have updated existing case, not created new")
+        return False
+
+    print(f"   ✓ Case updated, created={update_result.get('created')}")
+    print(f"   New status: {update_result['status']}")
+
+    # Verify update in database
+    print("\n4. Verifying update in database...")
+    with get_session() as session:
+        db_case = session.query(Case).filter(Case.case_id == _test_case_id).first()
+        if db_case is None:
+            print(f"   ✗ Case {_test_case_id} not found in database")
+            return False
+        if db_case.status != "pending_reply":
+            print(f"   ✗ Expected status 'pending_reply', got '{db_case.status}'")
+            return False
+        meta = db_case.case_metadata or {}
+        if "location" not in meta.get("failed_checks", []):
+            print("   ✗ Failed checks should include 'location'")
+            return False
+        print(f"   ✓ Case updated correctly: status={db_case.status}, failed_checks={meta.get('failed_checks')}")
+
+    print("\n✓ upsert_case tool working correctly!")
     return True
 
 
@@ -228,7 +258,7 @@ def test_get_case_status():
 
 
 def test_close_case():
-    """Test closing a case (closes the case opened by test_open_case)."""
+    """Test closing a case (closes the case created by test_upsert_case)."""
     global _test_case_id
     print_header("Testing close_case tool")
 
@@ -236,12 +266,12 @@ def test_close_case():
     from core.database import get_session
     from core.db_models import Case, CaseStatus
 
-    # Use the case opened by test_open_case
+    # Use the case created by test_upsert_case
     if not _test_case_id:
-        print("   ✗ No case ID from test_open_case - run test_open_case first")
+        print("   ✗ No case ID from test_upsert_case - run test_upsert_case first")
         return False
 
-    print(f"\n1. Closing case {_test_case_id} (opened by test_open_case)...")
+    print(f"\n1. Closing case {_test_case_id} (created by test_upsert_case)...")
     result = close_case.invoke({
         "case_id": _test_case_id,
         "outcome": "resolved",
@@ -392,7 +422,7 @@ def main():
     results["run_shift_specialist"] = test_run_shift_specialist()
 
     # Case lifecycle tests
-    results["open_case"] = test_open_case()
+    results["upsert_case"] = test_upsert_case()
     results["get_case_status"] = test_get_case_status()
     results["close_case"] = test_close_case()
 

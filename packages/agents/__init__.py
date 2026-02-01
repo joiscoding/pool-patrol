@@ -8,6 +8,8 @@ from .structures import (
     CaseManagerState,
     OutreachRequest,
     OutreachResult,
+    CaseManagerRequest,
+    CaseManagerResult,
 )
 from .shift_specialist import (
     verify_employee_shifts,
@@ -18,6 +20,11 @@ from .outreach import (
     handle_outreach,
     handle_outreach_sync,
     create_outreach_agent,
+)
+from .case_manager import (
+    investigate_vanpool,
+    investigate_vanpool_sync,
+    create_case_manager_agent,
 )
 from .utils import configure_langsmith
 
@@ -32,6 +39,8 @@ __all__ = [
     "CaseManagerState",
     "OutreachRequest",
     "OutreachResult",
+    "CaseManagerRequest",
+    "CaseManagerResult",
     # Shift Specialist
     "verify_employee_shifts",
     "verify_employee_shifts_sync",
@@ -40,4 +49,8 @@ __all__ = [
     "handle_outreach",
     "handle_outreach_sync",
     "create_outreach_agent",
+    # Case Manager Agent
+    "investigate_vanpool",
+    "investigate_vanpool_sync",
+    "create_case_manager_agent",
 ]
