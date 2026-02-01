@@ -209,8 +209,8 @@ def _preload_investigation_context(vanpool_id: str) -> PreloadedContext | CaseMa
     Returns:
         PreloadedContext if successful, or CaseManagerResult for early exit on error.
     """
-    # Preload vanpool roster
-    vanpool_context = get_vanpool_roster.invoke({"vanpool_id": vanpool_id})
+    # Preload vanpool roster without tracing tool runs
+    vanpool_context = get_vanpool_roster.func(vanpool_id=vanpool_id)
 
     if "error" in vanpool_context:
         return CaseManagerResult(
@@ -230,7 +230,7 @@ def _preload_investigation_context(vanpool_id: str) -> PreloadedContext | CaseMa
     # Get full case status with email thread info
     case_details = None
     if case_id:
-        case_details = get_case_status.invoke({"case_id": case_id})
+        case_details = get_case_status.func(case_id=case_id)
 
     timeout_elapsed = check_timeout(case)
 

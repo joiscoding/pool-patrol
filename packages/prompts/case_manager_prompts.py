@@ -51,22 +51,7 @@ Note: Case status is preloaded in the context above - no need to fetch it.
 
 ## Output Format
 
-After completing your investigation, return your result as JSON:
-
-```json
-{
-    "vanpool_id": "VP-101",
-    "case_id": "CASE-001",
-    "outcome": "resolved",
-    "reasoning": "Employee updated their shift schedule. Re-verification passed.",
-    "shift_result": { "verdict": "pass", "confidence": 5, "reasoning": "..." },
-    "location_result": { "verdict": "pass", "confidence": 5, "reasoning": "..." },
-    "outreach_summary": "Sent initial outreach, received update reply, re-verified.",
-    "hitl_required": false
-}
-```
-
-Fields:
+After completing your investigation, return your result as JSON with these fields:
 - **vanpool_id**: The vanpool ID that was investigated
 - **case_id**: The case ID, or null if verification passed (no case needed)
 - **outcome**: One of: verified, resolved, cancelled, pending
