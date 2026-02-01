@@ -76,6 +76,8 @@ pool_patrol/
 
 The multi-agent workflow (Case Manager, Location Specialist, Shift Specialist, Outreach Agent) and HITL flow are documented in `docs/AGENT_DESIGN.md`.
 
+> **Design Note:** Case Manager uses a ReAct agent (not StateGraph) for flexibility and explainability. See [TECHNICAL_DESIGN.md](docs/TECHNICAL_DESIGN.md).
+
 ## LangSmith: Evaluation & Observability
 
 We use **LangSmith** for:

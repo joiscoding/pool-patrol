@@ -97,6 +97,26 @@ Self-hosted LangSmith on AWS EKS for observability, tracing, and evaluation. The
 
 The agent workflow, tool contracts, case lifecycle, and evaluation details are documented in `docs/AGENT_DESIGN.md`.
 
+### LangGraph Design Patterns
+
+When building agents with LangGraph, there are two primary architectural approaches:
+
+| Approach        | Pros                                       | Cons                             |
+|-----------------|-------------------------------------------|----------------------------------|
+| **StateGraph**  | Predictable, testable, no LLM routing cost | Rigid, can't explain decisions   |
+| **ReAct Agent** | Flexible, explainable, extensible          | Less predictable, more expensive |
+
+**Agent Architecture Choices:**
+
+- **Shift Specialist:** ReAct Agent - straightforward tool usage with structured output
+- **Outreach Agent:** ReAct Agent - needs flexibility for email classification and response generation
+- **Case Manager:** ReAct Agent - needs to synthesize results from multiple specialists and answer "why did this fail?"
+
+The Case Manager specifically benefits from ReAct because it must:
+1. Reason about combined specialist results
+2. Explain decisions to humans (e.g., why a case was opened or closed)
+3. Handle unexpected situations flexibly (novel reply types, edge cases)
+
 ### UI Pages
 
 | Page | Purpose |
