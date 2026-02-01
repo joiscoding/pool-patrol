@@ -206,3 +206,72 @@ class OutreachAgentState(TypedDict):
     messages: Annotated[list, add_messages]
     email_thread_id: str
     result: OutreachResult | None
+
+
+# =============================================================================
+# Case Manager Agent Input/Output Models
+# =============================================================================
+
+
+class CaseManagerRequest(BaseModel):
+    """Input to the Case Manager agent - a vanpool to investigate.
+
+    The Case Manager orchestrates verification specialists and manages
+    the full case lifecycle including outreach and membership actions.
+
+    Example:
+        CaseManagerRequest(vanpool_id="VP-101")
+    """
+
+    vanpool_id: str = Field(description="The vanpool ID to investigate")
+
+
+class CaseManagerResult(BaseModel):
+    """Output from the Case Manager agent.
+
+    Outcome values:
+    - verified: All checks passed, no issues found (no case created)
+    - resolved: Case existed but is now closed (employee fixed data or false positive)
+    - cancelled: Membership cancelled after timeout + HITL approval
+    - pending: Workflow paused (waiting for employee reply or HITL decision)
+
+    Example:
+        CaseManagerResult(
+            vanpool_id="VP-101",
+            case_id="CASE-001",
+            outcome="resolved",
+            reasoning="Employee updated their shift schedule. Re-verification passed.",
+            shift_result=ShiftVerificationResult(...),
+            location_result=LocationVerificationResult(...),
+            outreach_summary="Sent initial outreach, received update reply.",
+            hitl_required=False,
+        )
+    """
+
+    vanpool_id: str = Field(description="The vanpool ID that was investigated")
+    case_id: str | None = Field(
+        default=None,
+        description="The case ID, or None if verification passed (no case needed)",
+    )
+    outcome: Literal["verified", "resolved", "cancelled", "pending"] = Field(
+        description="The final outcome of the investigation"
+    )
+    reasoning: str = Field(
+        description="Human-readable explanation of the decision"
+    )
+    shift_result: ShiftVerificationResult | None = Field(
+        default=None,
+        description="Result from the Shift Specialist",
+    )
+    location_result: LocationVerificationResult | None = Field(
+        default=None,
+        description="Result from the Location Specialist",
+    )
+    outreach_summary: str | None = Field(
+        default=None,
+        description="Summary of outreach activity for this case",
+    )
+    hitl_required: bool = Field(
+        default=False,
+        description="Whether human-in-the-loop approval was required",
+    )
