@@ -241,8 +241,6 @@ class CaseManagerResult(BaseModel):
             case_id="CASE-001",
             outcome="resolved",
             reasoning="Employee updated their shift schedule. Re-verification passed.",
-            shift_result=ShiftVerificationResult(...),
-            location_result=LocationVerificationResult(...),
             outreach_summary="Sent initial outreach, received update reply.",
             hitl_required=False,
         )
@@ -258,14 +256,6 @@ class CaseManagerResult(BaseModel):
     )
     reasoning: str = Field(
         description="Human-readable explanation of the decision"
-    )
-    shift_result: ShiftVerificationResult | None = Field(
-        default=None,
-        description="Result from the Shift Specialist",
-    )
-    location_result: LocationVerificationResult | None = Field(
-        default=None,
-        description="Result from the Location Specialist",
     )
     outreach_summary: str | None = Field(
         default=None,

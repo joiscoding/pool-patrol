@@ -60,8 +60,6 @@ After completing your investigation, return your result as JSON with these field
   - cancelled: Membership cancelled after timeout + HITL approval
   - pending: Workflow paused (waiting for employee reply or HITL decision)
 - **reasoning**: Human-readable explanation of the decision
-- **shift_result**: Result from the Shift Specialist (or null if not run)
-- **location_result**: Result from the Location Specialist (or null if not run)
 - **outreach_summary**: Summary of outreach activity (or null if no outreach)
 - **hitl_required**: true if cancel_membership was called, false otherwise
 """

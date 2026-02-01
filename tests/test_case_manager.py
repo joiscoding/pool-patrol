@@ -134,16 +134,6 @@ def print_investigation_result(result) -> None:
         reasoning = result.reasoning[:200] + "..." if len(result.reasoning) > 200 else result.reasoning
         print(f"   {reasoning}")
 
-    if result.shift_result:
-        print_subheader("Shift Verification")
-        print(f"   Verdict: {result.shift_result.verdict}")
-        print(f"   Confidence: {result.shift_result.confidence}")
-
-    if result.location_result:
-        print_subheader("Location Verification")
-        print(f"   Verdict: {result.location_result.verdict}")
-        print(f"   Confidence: {result.location_result.confidence}")
-
     if result.outreach_summary:
         print_subheader("Outreach Summary")
         print(f"   {result.outreach_summary}")

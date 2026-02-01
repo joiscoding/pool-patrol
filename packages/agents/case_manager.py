@@ -24,12 +24,7 @@ from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import InMemorySaver
 from langsmith import traceable
 
-from agents.structures import (
-    CaseManagerRequest,
-    CaseManagerResult,
-    LocationVerificationResult,
-    ShiftVerificationResult,
-)
+from agents.structures import CaseManagerRequest, CaseManagerResult
 from agents.utils import configure_langsmith
 from core.database import get_session
 from core.db_models import Case, CaseStatus
@@ -234,17 +229,39 @@ def _preload_investigation_context(vanpool_id: str) -> PreloadedContext | CaseMa
 
     timeout_elapsed = check_timeout(case)
 
-    # Build the message
+    vanpool_summary = {
+        "vanpool_id": vanpool_context.get("vanpool_id"),
+        "work_site": vanpool_context.get("work_site"),
+        "rider_count": vanpool_context.get("rider_count"),
+        "employee_ids": employee_ids,
+    }
+
+    case_summary = None
+    if case_details:
+        metadata = case_details.get("metadata") or {}
+        case_summary = {
+            "case_id": case_details.get("case_id"),
+            "status": case_details.get("status"),
+            "created_at": case_details.get("created_at"),
+            "updated_at": case_details.get("updated_at"),
+            "outcome": case_details.get("outcome"),
+            "resolved_at": case_details.get("resolved_at"),
+            "has_email_thread": case_details.get("has_email_thread"),
+            "email_thread_id": case_details.get("email_thread_id"),
+            "metadata": {
+                "reason": metadata.get("reason"),
+                "failed_checks": metadata.get("failed_checks"),
+            },
+        }
+
+    # Build a compact message to reduce input tokens
     message = f"""Investigate vanpool {vanpool_id}.
 
-## Vanpool Context
-{json.dumps(vanpool_context, indent=2, default=str)}
+## Vanpool Summary
+{json.dumps(vanpool_summary, separators=(",", ":"), default=str)}
 
-## Employees to Verify
-{employee_ids}
-
-## Case Context (preloaded)
-{json.dumps(case_details, indent=2, default=str) if case_details else "No existing case"}
+## Case Summary (preloaded)
+{json.dumps(case_summary, separators=(",", ":"), default=str) if case_summary else "No existing case"}
 
 timeout_elapsed: {timeout_elapsed}
 
@@ -264,7 +281,7 @@ Run verification checks. If all pass, return verified. If any fail, use upsert_c
 
 
 def _validate_case_manager_data(data: dict, vanpool_id: str, case_id: str | None) -> CaseManagerResult:
-    """Validate a dict as CaseManagerResult, parsing nested results if present."""
+    """Validate a dict as CaseManagerResult."""
     if "vanpool_id" not in data:
         return CaseManagerResult(
             vanpool_id=vanpool_id,
@@ -273,12 +290,6 @@ def _validate_case_manager_data(data: dict, vanpool_id: str, case_id: str | None
             reasoning=f"Agent returned unexpected schema: {str(data)[:300]}",
             hitl_required=False,
         )
-    
-    # Parse nested verification results if present
-    if data.get("shift_result") and isinstance(data["shift_result"], dict):
-        data["shift_result"] = ShiftVerificationResult.model_validate(data["shift_result"])
-    if data.get("location_result") and isinstance(data["location_result"], dict):
-        data["location_result"] = LocationVerificationResult.model_validate(data["location_result"])
     
     return CaseManagerResult.model_validate(data)
 
