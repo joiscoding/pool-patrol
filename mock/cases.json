@@ -98,8 +98,8 @@
   {
     "case_id": "CASE-007",
     "vanpool_id": "VP-108",
-    "created_at": "2024-01-18T08:00:00Z",
-    "updated_at": "2024-01-23T10:00:00Z",
+    "created_at": "2026-01-29T08:00:00Z",
+    "updated_at": "2026-01-29T10:00:00Z",
     "status": "pending_reply",
     "metadata": {
       "reason": "shift_mismatch",
