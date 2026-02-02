@@ -15,7 +15,7 @@ from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
 
 from core.database import get_session
-from core.db_models import EmailThread
+from core.db_models import EmailThread, Employee, Rider
 from prompts.outreach_prompts import CLASSIFICATION_PROMPT
 
 
@@ -33,9 +33,10 @@ FROM_EMAIL = "Pool Patrol <contact@send.joyax.co>"
 
 @tool
 def get_email_thread(thread_id: str) -> dict:
-    """Fetch email thread and all messages by thread_id.
+    """Fetch email thread, all messages, and vanpool rider emails by thread_id.
 
     Use this tool to retrieve the full conversation history for a case.
+    Also returns rider_emails so you know who to send emails to.
 
     Args:
         thread_id: The thread ID (e.g., "THREAD-001")
@@ -47,6 +48,7 @@ def get_email_thread(thread_id: str) -> dict:
         - vanpool_id: Associated vanpool ID
         - subject: Email subject line
         - status: Thread status (active, closed, archived)
+        - rider_emails: List of email addresses for vanpool riders (use these as recipients)
         - messages: List of messages in chronological order, each with:
             - message_id: Unique message ID
             - from: Sender email
@@ -67,7 +69,27 @@ def get_email_thread(thread_id: str) -> dict:
         if thread is None:
             return {"error": f"Email thread {thread_id} not found"}
 
-        return thread.to_dict(include_messages=True)
+        result = thread.to_dict(include_messages=True)
+        
+        # Get rider emails for this vanpool
+        riders = (
+            session.query(Rider)
+            .filter(Rider.vanpool_id == thread.vanpool_id)
+            .all()
+        )
+        
+        if riders:
+            employee_ids = [r.employee_id for r in riders]
+            employees = (
+                session.query(Employee)
+                .filter(Employee.employee_id.in_(employee_ids))
+                .all()
+            )
+            result["rider_emails"] = [emp.email for emp in employees if emp.email]
+        else:
+            result["rider_emails"] = []
+        
+        return result
 
 
 # =============================================================================

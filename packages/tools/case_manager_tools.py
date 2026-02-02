@@ -16,7 +16,8 @@ from agents.outreach import handle_outreach_sync
 from agents.shift_specialist import verify_employee_shifts_sync
 from agents.structures import OutreachRequest
 from core.database import get_session
-from core.db_models import Case, CaseStatus, EmailThread, Rider, to_json
+from core.db_models import Case, CaseStatus, EmailThread, Rider, ThreadStatus, to_json
+from prompts.initial_outreach import render_template
 
 
 # =============================================================================
@@ -318,13 +319,64 @@ def close_case(case_id: str, outcome: str, reason: str) -> dict:
 # =============================================================================
 
 
+def _create_email_thread_for_case(session, case: Case, context: str) -> EmailThread:
+    """Create an email thread for a case.
+    
+    Args:
+        session: Database session
+        case: The case object
+        context: Context string to determine issue type
+        
+    Returns:
+        The created EmailThread object
+    """
+    # Determine issue type from case metadata or context
+    metadata = case.case_metadata or {}
+    failed_checks = metadata.get("failed_checks", [])
+    
+    if "shift" in failed_checks and "location" in failed_checks:
+        template_key = "both_mismatch"
+    elif "shift" in failed_checks:
+        template_key = "shift_mismatch"
+    elif "location" in failed_checks:
+        template_key = "location_mismatch"
+    else:
+        # Default to shift_mismatch if unclear
+        template_key = "shift_mismatch"
+    
+    # Get subject from template
+    email_content = render_template(
+        template_key=template_key,
+        vanpool_id=case.vanpool_id,
+    )
+    
+    # Generate thread ID
+    thread_id = f"THREAD-{uuid.uuid4().hex[:8].upper()}"
+    
+    # Create the email thread
+    new_thread = EmailThread(
+        thread_id=thread_id,
+        case_id=case.case_id,
+        vanpool_id=case.vanpool_id,
+        subject=email_content["subject"],
+        status=ThreadStatus.ACTIVE,
+    )
+    session.add(new_thread)
+    session.commit()
+    
+    return new_thread
+
+
 @tool
 def run_outreach(case_id: str, context: str) -> dict:
     """Send outreach email and/or process replies via Outreach Agent.
 
     Calls the Outreach Agent to handle email communication for this case.
-    The Outreach Agent will fetch the email thread, classify any replies,
-    and send appropriate responses.
+    If no email thread exists, one will be created automatically.
+    
+    The Outreach Agent will:
+    - For new threads (no messages): Send initial outreach email
+    - For existing threads: Classify any inbound replies and respond
 
     Args:
         case_id: The case ID (e.g., "CASE-001")
@@ -340,7 +392,17 @@ def run_outreach(case_id: str, context: str) -> dict:
         - error: Error message if outreach failed
     """
     with get_session() as session:
-        # Find email thread for this case
+        # Get the case first
+        case = (
+            session.query(Case)
+            .filter(Case.case_id == case_id)
+            .first()
+        )
+        
+        if case is None:
+            return {"error": f"Case {case_id} not found"}
+        
+        # Find or create email thread for this case
         email_thread = (
             session.query(EmailThread)
             .filter(EmailThread.case_id == case_id)
@@ -348,10 +410,8 @@ def run_outreach(case_id: str, context: str) -> dict:
         )
 
         if email_thread is None:
-            return {
-                "error": f"No email thread found for case {case_id}. "
-                         "Email thread should be created when case is opened.",
-            }
+            # Create the email thread
+            email_thread = _create_email_thread_for_case(session, case, context)
 
         thread_id = email_thread.thread_id
 
