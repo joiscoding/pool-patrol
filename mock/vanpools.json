@@ -390,5 +390,18 @@
     "capacity": 6,
     "status": "active",
     "coordinator_id": "EMP-1053"
+  },
+  {
+    "vanpool_id": "VP-EMPTY",
+    "work_site": "Fremont Factory",
+    "work_site_address": "45500 Fremont Blvd, Fremont, CA 94538",
+    "work_site_coords": {
+      "lat": 37.4949,
+      "lng": -121.9446
+    },
+    "riders": [],
+    "capacity": 8,
+    "status": "suspended",
+    "coordinator_id": null
   }
 ]

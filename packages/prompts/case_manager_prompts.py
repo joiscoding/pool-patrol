@@ -54,11 +54,12 @@ Note: Case status is preloaded in the context above - no need to fetch it.
 After completing your investigation, return your result as JSON with these fields:
 - **vanpool_id**: The vanpool ID that was investigated
 - **case_id**: The case ID, or null if verification passed (no case needed)
-- **outcome**: One of: verified, resolved, cancelled, pending
+- **outcome**: One of: verified, resolved, cancelled, pending, error
   - verified: All checks passed, no issues found (no case created)
   - resolved: Case existed but is now closed (employee fixed data or false positive)
   - cancelled: Membership cancelled after timeout + HITL approval
   - pending: Workflow paused (waiting for employee reply or HITL decision)
+  - error: Invalid input or vanpool not found (e.g., empty vanpool_id, non-existent vanpool)
 - **reasoning**: Human-readable explanation of the decision
 - **outreach_summary**: Summary of outreach activity (or null if no outreach)
 - **hitl_required**: true if cancel_membership was called, false otherwise

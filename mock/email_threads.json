@@ -29,10 +29,21 @@
           "poolpatrol@innovatecorp.com"
         ],
         "sent_at": "2024-01-16T14:30:00Z",
-        "body": "Hi,\n\nI received your email about the vanpool review. I should mention that I recently moved to Los Angeles for family reasons but I'm still commuting to Fremont for work. I stay with a friend during the week.\n\nIs this going to be a problem for the vanpool?\n\nBob Johnson",
+        "body": "Hi,\n\nThis is ridiculous. I've been using this vanpool for 3 years without any issues. Now you're questioning my eligibility? I moved to LA temporarily for family reasons but I'm still working at Fremont. I carpool with coworkers during the week and this vanpool is essential for my commute.\n\nI want to speak to a manager about this. This feels like harassment.\n\nBob Johnson",
         "direction": "inbound",
         "status": "read",
-        "classification_bucket": "update"
+        "classification_bucket": "escalation"
+      },
+      {
+        "message_id": "MSG-001-003",
+        "from": "poolpatrol@innovatecorp.com",
+        "to": [
+          "bob.johnson@innovatecorp.com"
+        ],
+        "sent_at": null,
+        "body": "Dear Bob,\n\nThank you for your response and we understand your frustration. We appreciate your long tenure with the vanpool program.\n\nOur review is a routine eligibility check, not a reflection of your work or commitment. We'd like to understand your current commute situation better to ensure the vanpool arrangement still meets program requirements.\n\nA member of our team will reach out to discuss your options and address your concerns directly.\n\nBest regards,\nPool Patrol Team",
+        "direction": "outbound",
+        "status": "draft"
       }
     ]
   },
@@ -41,7 +52,7 @@
     "case_id": "CASE-002",
     "vanpool_id": "VP-102",
     "subject": "Vanpool Eligibility Review - VP-102 - Action Required",
-    "created_at": "2024-01-10T12:00:00Z",
+    "created_at": "2026-01-31T12:00:00Z",
     "status": "active",
     "messages": [
       {
@@ -53,7 +64,7 @@
           "frank.miller@innovatecorp.com",
           "grace.chen@innovatecorp.com"
         ],
-        "sent_at": "2024-01-10T12:00:00Z",
+        "sent_at": "2026-01-31T12:00:00Z",
         "body": "Dear VP-102 Vanpool Members,\n\nAs part of our routine vanpool program review, we are verifying the eligibility of all participants.\n\nOur records indicate a potential discrepancy with one or more rider home addresses. The registered address may be outside the typical service area for this vanpool route.\n\nEmployee home address is in Sacramento, far from Fremont Factory (approximately 120 miles).\n\nPlease confirm your current home address by replying to this email.\n\n**What we need from you:**\n- Confirm your current home address\n- If your address has changed, please provide your updated information\n\nPlease respond within 5 business days.\n\nThank you for your cooperation.\n\nPool Patrol Team",
         "direction": "outbound",
         "status": "sent"
@@ -64,7 +75,7 @@
         "to": [
           "poolpatrol@innovatecorp.com"
         ],
-        "sent_at": "2024-01-11T09:15:00Z",
+        "sent_at": "2026-02-01T09:15:00Z",
         "body": "Hello,\n\nI apologize for the confusion. My address in your system is outdated. I moved from Sacramento to Hayward three months ago but forgot to update my records.\n\nMy new address is: 456 Lakeline Blvd, Hayward, CA 94541\n\nPlease update my information. I'm much closer to the plant now.\n\nThanks,\nFrank Miller",
         "direction": "inbound",
         "status": "read",
@@ -76,7 +87,7 @@
         "to": [
           "frank.miller@innovatecorp.com"
         ],
-        "sent_at": "2024-01-11T10:30:00Z",
+        "sent_at": "2026-02-01T10:30:00Z",
         "body": "Hi Frank,\n\nThank you for letting us know about your address change. Before we can confirm your vanpool eligibility, please update your address in the Employee Portal.\n\nOnce you've updated your information there, reply to this email and we'll verify your eligibility.\n\nBest regards,\nPool Patrol Team",
         "direction": "outbound",
         "status": "sent"
@@ -222,7 +233,7 @@
     "case_id": "CASE-009",
     "vanpool_id": "VP-111",
     "subject": "Vanpool Eligibility Review - VP-111 - Action Required",
-    "created_at": "2024-01-21T11:00:00Z",
+    "created_at": "2026-01-31T11:00:00Z",
     "status": "active",
     "messages": [
       {
@@ -236,7 +247,7 @@
           "xena.morgan@innovatecorp.com",
           "yusuf.bell@innovatecorp.com"
         ],
-        "sent_at": "2024-01-21T11:00:00Z",
+        "sent_at": "2026-01-31T11:00:00Z",
         "body": "Dear VP-111 Vanpool Members,\n\nAs part of our routine vanpool program review, we are verifying the eligibility of all participants.\n\nOur records indicate a potential discrepancy with one or more rider home addresses. The registered address may be outside the typical service area for this vanpool route.\n\nEmployee in Fresno, 160 miles from Fremont Factory.\n\nPlease confirm your current home address by replying to this email.\n\n**What we need from you:**\n- Confirm your current home address\n- If your address has changed, please provide your updated information\n\nPlease respond within 5 business days.\n\nThank you for your cooperation.\n\nPool Patrol Team",
         "direction": "outbound",
         "status": "sent"
@@ -247,11 +258,11 @@
         "to": [
           "poolpatrol@innovatecorp.com"
         ],
-        "sent_at": "2024-01-22T15:45:00Z",
-        "body": "Hello,\n\nMy address is 333 Central Valley Rd, Fresno, CA 93721. Yes, it's about 160 miles from the plant, but the vanpool route passes through Fresno on the way to Fremont.\n\nThe driver picks me up at 6:15 AM and I'm at the plant by 6:50 AM. It's been working great for 8 months.\n\nPlease don't remove me from the vanpool. This is my only affordable commute option.\n\nVince Reed",
+        "sent_at": "2026-02-01T15:45:00Z",
+        "body": "Hello,\n\nMy address is 333 Central Valley Rd, Fresno, CA 93721. Yes, it's about 160 miles from the plant, but the vanpool route passes through Fresno on the way to Fremont.\n\nThe driver picks me up at 6:15 AM and I'm at the plant by 6:50 AM. It's been working great for 8 months.\n\nThanks for checking,\nVince Reed",
         "direction": "inbound",
         "status": "read",
-        "classification_bucket": "escalation"
+        "classification_bucket": "acknowledgment"
       }
     ]
   },
@@ -346,7 +357,7 @@
     "case_id": "CASE-008",
     "vanpool_id": "VP-109",
     "subject": "Vanpool Schedule Review - VP-109 - Action Required",
-    "created_at": "2024-01-19T14:00:00Z",
+    "created_at": "2026-01-31T14:00:00Z",
     "status": "active",
     "messages": [
       {
@@ -359,7 +370,7 @@
           "nick.parker@innovatecorp.com",
           "olivia.evans@innovatecorp.com"
         ],
-        "sent_at": "2024-01-19T14:00:00Z",
+        "sent_at": "2026-01-31T14:00:00Z",
         "body": "Dear VP-109 Vanpool Members,\n\nAs part of our routine vanpool program review, we are verifying the eligibility of all participants.\n\nOur records indicate a potential mismatch between your work schedule and the vanpool operating hours. The vanpool departure/arrival times may not align with your assigned shift.\n\nMultiple shifts in the vanpool roster: day, swing, and night.\n\nPlease confirm your current work schedule by replying to this email.\n\n**What we need from you:**\n- Confirm your current work shift assignment\n- Let us know if the current vanpool schedule meets your commute needs\n\nPlease respond within 5 business days.\n\nThank you for your cooperation.\n\nPool Patrol Team",
         "direction": "outbound",
         "status": "sent"

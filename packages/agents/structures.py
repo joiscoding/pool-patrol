@@ -234,6 +234,7 @@ class CaseManagerResult(BaseModel):
     - resolved: Case existed but is now closed (employee fixed data or false positive)
     - cancelled: Membership cancelled after timeout + HITL approval
     - pending: Workflow paused (waiting for employee reply or HITL decision)
+    - error: Invalid input or vanpool not found
 
     Example:
         CaseManagerResult(
@@ -251,7 +252,7 @@ class CaseManagerResult(BaseModel):
         default=None,
         description="The case ID, or None if verification passed (no case needed)",
     )
-    outcome: Literal["verified", "resolved", "cancelled", "pending"] = Field(
+    outcome: Literal["verified", "resolved", "cancelled", "pending", "error"] = Field(
         description="The final outcome of the investigation"
     )
     reasoning: str = Field(

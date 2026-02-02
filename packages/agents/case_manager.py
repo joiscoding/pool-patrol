@@ -204,6 +204,16 @@ def _preload_investigation_context(vanpool_id: str) -> PreloadedContext | CaseMa
     Returns:
         PreloadedContext if successful, or CaseManagerResult for early exit on error.
     """
+    # Validate vanpool_id input
+    if not vanpool_id or not vanpool_id.strip():
+        return CaseManagerResult(
+            vanpool_id=vanpool_id,
+            case_id=None,
+            outcome="error",
+            reasoning="Invalid input: vanpool_id is empty.",
+            hitl_required=False,
+        )
+
     # Preload vanpool roster without tracing tool runs
     vanpool_context = get_vanpool_roster.func(vanpool_id=vanpool_id)
 
@@ -211,12 +221,22 @@ def _preload_investigation_context(vanpool_id: str) -> PreloadedContext | CaseMa
         return CaseManagerResult(
             vanpool_id=vanpool_id,
             case_id=None,
-            outcome="pending",
+            outcome="error",
             reasoning=f"Could not load vanpool: {vanpool_context['error']}",
             hitl_required=False,
         )
 
     employee_ids = [r["employee_id"] for r in vanpool_context.get("riders", [])]
+
+    # Check for empty vanpool (no riders)
+    if not employee_ids:
+        return CaseManagerResult(
+            vanpool_id=vanpool_id,
+            case_id=None,
+            outcome="error",
+            reasoning="Vanpool has no riders to verify.",
+            hitl_required=False,
+        )
 
     # Preload case details if exists
     case = get_existing_case(vanpool_id)

@@ -53,7 +53,7 @@ from agents.structures import CaseManagerRequest
 # Configuration
 # =============================================================================
 
-DATASET_NAME = "case-manager-eval-small-with-traj"
+DATASET_NAME = "case-manager-eval-med-with-traj"
 EXPERIMENT_PREFIX = "case-manager"
 
 
@@ -201,8 +201,15 @@ def run_evaluation(
     dataset_name: str = DATASET_NAME,
     experiment_prefix: str = EXPERIMENT_PREFIX,
     max_concurrency: int = 4,
+    model: str | None = None,
 ):
     """Run the evaluation experiment on LangSmith."""
+    # Set model if specified (before any agent imports use it)
+    if model:
+        os.environ["OPENAI_MODEL"] = model
+    
+    actual_model = os.environ.get("OPENAI_MODEL", "gpt-4.1")
+    
     print("=" * 60)
     print("Pool Patrol - Case Manager Agent Evaluation")
     print("=" * 60)
@@ -225,7 +232,7 @@ def run_evaluation(
     
     print(f"\nDataset: {dataset_name}")
     print(f"Examples: {example_count}")
-    print(f"Model: {os.environ.get('OPENAI_MODEL', 'gpt-4.1')}")
+    print(f"Model: {actual_model}")
     print(f"Evaluators: outcome_match, hitl_match, trajectory_match, correctness (LLM-as-judge)")
     
     print("\n" + "-" * 60)
@@ -256,6 +263,7 @@ def main():
     parser.add_argument("--dataset", default=DATASET_NAME)
     parser.add_argument("--prefix", default=EXPERIMENT_PREFIX)
     parser.add_argument("--concurrency", type=int, default=4)
+    parser.add_argument("--model", default=None, help="OpenAI model to use (e.g., gpt-4o, gpt-4o-mini, gpt-4.1)")
     
     args = parser.parse_args()
     
@@ -264,6 +272,7 @@ def main():
             dataset_name=args.dataset,
             experiment_prefix=args.prefix,
             max_concurrency=args.concurrency,
+            model=args.model,
         )
         return 0
     except Exception as e:
