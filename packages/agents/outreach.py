@@ -277,5 +277,3 @@ def handle_outreach_sync(request: OutreachRequest) -> OutreachResult:
     content = final_message.content if hasattr(final_message, "content") else str(final_message)
 
     return parse_outreach_result(content)
-
-

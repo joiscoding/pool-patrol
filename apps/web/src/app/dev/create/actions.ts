@@ -74,13 +74,17 @@ export async function createVanpool(
 
     // Run everything in a transaction
     const result = await prisma.$transaction(async (tx) => {
-      // 1. Generate next vanpool ID
-      const lastVanpool = await tx.vanpool.findFirst({
-        orderBy: { vanpoolId: 'desc' },
+      // 1. Generate next vanpool ID (only consider numeric IDs like VP-101, VP-102, etc.)
+      const allVanpools = await tx.vanpool.findMany({
+        select: { vanpoolId: true },
       });
-      const lastVanpoolNum = lastVanpool
-        ? parseInt(lastVanpool.vanpoolId.replace('VP-', ''), 10)
-        : 100;
+      const numericIds = allVanpools
+        .map((v) => {
+          const match = v.vanpoolId.match(/^VP-(\d+)$/);
+          return match ? parseInt(match[1], 10) : null;
+        })
+        .filter((n): n is number => n !== null);
+      const lastVanpoolNum = numericIds.length > 0 ? Math.max(...numericIds) : 100;
       const vanpoolId = `VP-${lastVanpoolNum + 1}`;
 
       // 2. Get next employee ID (for new employees)

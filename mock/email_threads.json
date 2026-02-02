@@ -40,7 +40,7 @@
         "to": [
           "bob.johnson@innovatecorp.com"
         ],
-        "sent_at": null,
+        "sent_at": "2024-01-16T16:00:00Z",
         "body": "Dear Bob,\n\nThank you for your response and we understand your frustration. We appreciate your long tenure with the vanpool program.\n\nOur review is a routine eligibility check, not a reflection of your work or commitment. We'd like to understand your current commute situation better to ensure the vanpool arrangement still meets program requirements.\n\nA member of our team will reach out to discuss your options and address your concerns directly.\n\nBest regards,\nPool Patrol Team",
         "direction": "outbound",
         "status": "draft"
