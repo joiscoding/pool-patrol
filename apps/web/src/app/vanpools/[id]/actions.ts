@@ -27,6 +27,13 @@ export interface SendDraftResult {
   error?: string;
 }
 
+export interface CancelVanpoolResult {
+  success: boolean;
+  cancelled?: boolean;
+  vanpool_id?: string;
+  error?: string;
+}
+
 /**
  * Triggers a full re-audit of a vanpool using the Case Manager agent.
  * 
@@ -155,6 +162,49 @@ export async function sendDraftMessage(
     };
   } catch (error) {
     console.error('Error sending draft message:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to connect to API',
+    };
+  }
+}
+
+/**
+ * Cancels an entire vanpool service.
+ */
+export async function cancelVanpool(
+  caseId: string,
+  vanpoolId: string
+): Promise<CancelVanpoolResult> {
+  const apiUrl = process.env.POOL_PATROL_API_URL || 'http://localhost:8000';
+
+  try {
+    const response = await fetch(`${apiUrl}/api/cases/${caseId}/cancel-vanpool`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        success: false,
+        error: errorData.detail || `Cancellation failed with status ${response.status}`,
+      };
+    }
+
+    const data = await response.json();
+    revalidatePath(`/vanpools/${vanpoolId}`);
+    revalidatePath('/');
+
+    return {
+      success: true,
+      cancelled: data.cancelled,
+      vanpool_id: data.vanpool_id,
+    };
+  } catch (error) {
+    console.error('Error cancelling vanpool:', error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Failed to connect to API',

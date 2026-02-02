@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import prisma from '@/database/db';
 import { VanpoolMap } from '@/components/VanpoolMap';
 import { AuditButton } from '@/components/AuditButton';
+import { CancelVanpoolButton } from '@/components/CancelVanpoolButton';
 import { DraftMessageEditor } from '@/components/DraftMessageEditor';
 import ReactMarkdown from 'react-markdown';
 import type { Case, Employee, Shift, EmailThread, Message } from '@prisma/client';
@@ -180,12 +181,15 @@ export default async function VanpoolDetailPage({ params }: VanpoolDetailPagePro
             {openCases.map((caseData) => {
               const metadata = parseMetadata(caseData.metadata);
               const isHitlReview = caseData.status === 'hitl_review';
+              const isPreCancel = caseData.status === 'pre_cancel';
               
               return (
                 <div 
                   key={caseData.caseId}
                   className={`p-4 rounded-lg ${
-                    isHitlReview 
+                    isPreCancel
+                      ? 'bg-red-50 border border-red-300'
+                      : isHitlReview 
                       ? 'bg-violet-50 border border-violet-300' 
                       : 'bg-amber-50 border border-amber-200'
                   }`}
@@ -193,17 +197,21 @@ export default async function VanpoolDetailPage({ params }: VanpoolDetailPagePro
                   <div className="flex items-start justify-between">
                     <div>
                       <div className="flex items-center gap-2">
-                        <span className={`text-xs font-mono ${isHitlReview ? 'text-violet-700' : 'text-amber-700'}`}>
+                        <span className={`text-xs font-mono ${
+                          isPreCancel ? 'text-red-700' : isHitlReview ? 'text-violet-700' : 'text-amber-700'
+                        }`}>
                           {caseData.caseId}
                         </span>
                         <span className={`text-xs px-2 py-0.5 rounded font-medium ${
-                          isHitlReview
+                          isPreCancel
+                            ? 'bg-red-200 text-red-800'
+                            : isHitlReview
                             ? 'bg-violet-200 text-violet-800'
                             : caseData.status === 'pending_reply'
                             ? 'bg-amber-200 text-amber-800'
                             : 'bg-neutral-200 text-neutral-700'
                         }`}>
-                          {isHitlReview ? 'REVIEW REQUIRED' : caseData.status.replace('_', ' ').toUpperCase()}
+                          {isPreCancel ? 'CANCELLATION PENDING' : isHitlReview ? 'REVIEW REQUIRED' : caseData.status.replace('_', ' ').toUpperCase()}
                         </span>
                       </div>
                       <p className="font-medium text-neutral-900 mt-1">
@@ -213,7 +221,9 @@ export default async function VanpoolDetailPage({ params }: VanpoolDetailPagePro
                         {metadata.details}
                       </p>
                     </div>
-                    <span className={`text-xs ${isHitlReview ? 'text-violet-600' : 'text-amber-600'}`}>
+                    <span className={`text-xs ${
+                      isPreCancel ? 'text-red-600' : isHitlReview ? 'text-violet-600' : 'text-amber-600'
+                    }`}>
                       {formatDate(caseData.createdAt)}
                     </span>
                   </div>
@@ -227,6 +237,14 @@ export default async function VanpoolDetailPage({ params }: VanpoolDetailPagePro
                       <p className="text-sm text-violet-700">
                         Please review the draft email below and approve or edit before sending.
                       </p>
+                    </div>
+                  )}
+                  {isPreCancel && (
+                    <div className="mt-3 pt-3 border-t border-red-200 flex justify-end">
+                      <CancelVanpoolButton
+                        caseId={caseData.caseId}
+                        vanpoolId={vanpool.vanpoolId}
+                      />
                     </div>
                   )}
                 </div>

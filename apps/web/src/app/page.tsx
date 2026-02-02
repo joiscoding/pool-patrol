@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import prisma from '@/database/db';
-import type { Vanpool, Case, Rider, CaseStatus } from '@prisma/client';
+import type { Vanpool, Case, Rider, CaseStatus, VanpoolStatus } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
 type VanpoolWithRiders = Vanpool & { riders: Rider[] };
+type TabFilter = 'active' | 'suspended' | 'all';
 
 // Case status categories - ordered by priority
 const PRECANCEL_STATUSES: CaseStatus[] = ['pre_cancel'];
@@ -70,7 +71,14 @@ function formatReason(reason: string): string {
   ).join(' ');
 }
 
-export default async function HomePage() {
+interface HomePageProps {
+  searchParams: Promise<{ tab?: string }>;
+}
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const params = await searchParams;
+  const currentTab: TabFilter = (params.tab as TabFilter) || 'active';
+  
   let vanpools: VanpoolWithRiders[] = [];
   let cases: Case[] = [];
   let error: string | null = null;
@@ -91,11 +99,19 @@ export default async function HomePage() {
   const hitlCases = cases.filter(c => [...PRECANCEL_STATUSES, ...HITL_STATUSES].includes(c.status));
 
   // Calculate stats
-  const activeVanpools = vanpools.filter(v => v.status === 'active').length;
+  const activeVanpoolsCount = vanpools.filter(v => v.status === 'active').length;
+  const suspendedVanpoolsCount = vanpools.filter(v => v.status === 'suspended').length;
   const totalRiders = vanpools.reduce((sum, v) => sum + v.riders.length, 0);
 
+  // Filter vanpools based on current tab
+  const filteredVanpools = vanpools.filter(v => {
+    if (currentTab === 'active') return v.status === 'active';
+    if (currentTab === 'suspended') return v.status === 'suspended';
+    return true; // 'all'
+  });
+
   // Sort vanpools: Pre Cancel first, then Review, then open cases, then by ID
-  const sortedVanpools = [...vanpools].sort((a, b) => {
+  const sortedVanpools = [...filteredVanpools].sort((a, b) => {
     const aLevel = getCaseLevelForVanpool(a.vanpoolId, cases);
     const bLevel = getCaseLevelForVanpool(b.vanpoolId, cases);
     
@@ -130,7 +146,7 @@ export default async function HomePage() {
       <div className="mb-8 grid grid-cols-4 gap-4">
         <div className="p-4 bg-neutral-50 rounded-lg">
           <div className="text-2xl font-semibold text-neutral-900">
-            {activeVanpools}<span className="text-neutral-400 font-normal">/{vanpools.length}</span>
+            {activeVanpoolsCount}<span className="text-neutral-400 font-normal">/{vanpools.length}</span>
           </div>
           <div className="text-xs text-neutral-500 mt-1">Active Vanpools</div>
         </div>
@@ -160,73 +176,121 @@ export default async function HomePage() {
 
       {/* Vanpools Table */}
       <div>
-        <h2 className="text-sm font-medium text-neutral-900 mb-4">
-          All Vanpools ({vanpools.length})
-        </h2>
-        
-        <div className="border border-neutral-200 rounded-lg overflow-hidden">
-          {/* Header */}
-          <div className="grid grid-cols-[100px_1fr_70px_100px_140px] bg-neutral-50 border-b border-neutral-200 text-sm">
-            <div className="font-medium text-neutral-600 px-4 py-3">Vanpool</div>
-            <div className="font-medium text-neutral-600 px-4 py-3">Work Site</div>
-            <div className="font-medium text-neutral-600 px-4 py-3 text-center">Riders</div>
-            <div className="font-medium text-neutral-600 px-4 py-3">Issue</div>
-            <div className="font-medium text-neutral-600 px-4 py-3">Status</div>
-          </div>
-          
-          {/* Rows */}
-          <div className="divide-y divide-neutral-100">
-            {sortedVanpools.map((vanpool) => {
-              const { level, case: activeCase } = getCaseLevelForVanpool(vanpool.vanpoolId, cases);
-              const metadata = activeCase ? parseMetadata(activeCase.metadata) : null;
-              
-              // Row background colors based on case level
-              const rowStyles = {
-                precancel: 'bg-red-50 hover:bg-red-100',
-                hitl: 'bg-red-50 hover:bg-red-100',
-                open: 'bg-amber-50 hover:bg-amber-100',
-                none: 'bg-white hover:bg-neutral-50',
-              };
-              
-              // Status indicator styles
-              const statusStyles = {
-                precancel: { dot: 'bg-red-500', text: 'text-red-700' },
-                hitl: { dot: 'bg-red-500', text: 'text-red-700' },
-                open: { dot: 'bg-amber-500', text: 'text-amber-700' },
-                none: { dot: '', text: '' },
-              };
-              
-              return (
-                <Link
-                  key={vanpool.vanpoolId}
-                  href={`/vanpools/${vanpool.vanpoolId}`}
-                  className={`grid grid-cols-[100px_1fr_70px_100px_140px] text-sm cursor-pointer transition-colors ${rowStyles[level]}`}
-                >
-                  <div className="px-4 py-3 font-mono font-medium text-neutral-900">
-                    {vanpool.vanpoolId}
-                  </div>
-                  <div className="px-4 py-3 text-neutral-600">
-                    {vanpool.workSite}
-                  </div>
-                  <div className="px-4 py-3 text-center text-neutral-600">
-                    {vanpool.riders.length}
-                  </div>
-                  <div className="px-4 py-3 text-neutral-600">
-                    {metadata ? formatReason(metadata.reason) : null}
-                  </div>
-                  <div className="px-4 py-3">
-                    {level !== 'none' && activeCase ? (
-                      <span className={`inline-flex items-center gap-1.5 ${statusStyles[level].text}`}>
-                        <span className={`h-1.5 w-1.5 rounded-full ${statusStyles[level].dot}`} />
-                        {formatStatus(activeCase.status)}
-                      </span>
-                    ) : null}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+        {/* Tabs */}
+        <div className="flex items-center gap-1 mb-4 border-b border-neutral-200">
+          <Link
+            href="/?tab=active"
+            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+              currentTab === 'active'
+                ? 'border-neutral-900 text-neutral-900'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700'
+            }`}
+          >
+            Active ({activeVanpoolsCount})
+          </Link>
+          <Link
+            href="/?tab=suspended"
+            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+              currentTab === 'suspended'
+                ? 'border-neutral-900 text-neutral-900'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700'
+            }`}
+          >
+            Suspended ({suspendedVanpoolsCount})
+          </Link>
+          <Link
+            href="/?tab=all"
+            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+              currentTab === 'all'
+                ? 'border-neutral-900 text-neutral-900'
+                : 'border-transparent text-neutral-500 hover:text-neutral-700'
+            }`}
+          >
+            All ({vanpools.length})
+          </Link>
         </div>
+        
+        {sortedVanpools.length === 0 ? (
+          <div className="border border-neutral-200 rounded-lg p-8 text-center">
+            <p className="text-neutral-500">
+              {currentTab === 'suspended' 
+                ? 'No suspended vanpools' 
+                : currentTab === 'active'
+                ? 'No active vanpools'
+                : 'No vanpools found'}
+            </p>
+          </div>
+        ) : (
+          <div className="border border-neutral-200 rounded-lg overflow-hidden">
+            {/* Header */}
+            <div className="grid grid-cols-[100px_1fr_70px_100px_140px] bg-neutral-50 border-b border-neutral-200 text-sm">
+              <div className="font-medium text-neutral-600 px-4 py-3">Vanpool</div>
+              <div className="font-medium text-neutral-600 px-4 py-3">Work Site</div>
+              <div className="font-medium text-neutral-600 px-4 py-3 text-center">Riders</div>
+              <div className="font-medium text-neutral-600 px-4 py-3">Issue</div>
+              <div className="font-medium text-neutral-600 px-4 py-3">Status</div>
+            </div>
+            
+            {/* Rows */}
+            <div className="divide-y divide-neutral-100">
+              {sortedVanpools.map((vanpool) => {
+                const { level, case: activeCase } = getCaseLevelForVanpool(vanpool.vanpoolId, cases);
+                const metadata = activeCase ? parseMetadata(activeCase.metadata) : null;
+                const isSuspended = vanpool.status === 'suspended';
+                
+                // Row background colors based on case level or suspended status
+                const rowStyles = {
+                  precancel: 'bg-red-50 hover:bg-red-100',
+                  hitl: 'bg-red-50 hover:bg-red-100',
+                  open: 'bg-amber-50 hover:bg-amber-100',
+                  none: isSuspended ? 'bg-neutral-100 hover:bg-neutral-200' : 'bg-white hover:bg-neutral-50',
+                };
+                
+                // Status indicator styles
+                const statusStyles = {
+                  precancel: { dot: 'bg-red-500', text: 'text-red-700' },
+                  hitl: { dot: 'bg-red-500', text: 'text-red-700' },
+                  open: { dot: 'bg-amber-500', text: 'text-amber-700' },
+                  none: { dot: '', text: '' },
+                };
+                
+                return (
+                  <Link
+                    key={vanpool.vanpoolId}
+                    href={`/vanpools/${vanpool.vanpoolId}`}
+                    className={`grid grid-cols-[100px_1fr_70px_100px_140px] text-sm cursor-pointer transition-colors ${rowStyles[level]}`}
+                  >
+                    <div className={`px-4 py-3 font-mono font-medium ${isSuspended ? 'text-neutral-500' : 'text-neutral-900'}`}>
+                      {vanpool.vanpoolId}
+                    </div>
+                    <div className={`px-4 py-3 ${isSuspended ? 'text-neutral-500' : 'text-neutral-600'}`}>
+                      {vanpool.workSite}
+                    </div>
+                    <div className={`px-4 py-3 text-center ${isSuspended ? 'text-neutral-500' : 'text-neutral-600'}`}>
+                      {vanpool.riders.length}
+                    </div>
+                    <div className={`px-4 py-3 ${isSuspended ? 'text-neutral-500' : 'text-neutral-600'}`}>
+                      {metadata ? formatReason(metadata.reason) : null}
+                    </div>
+                    <div className="px-4 py-3">
+                      {isSuspended ? (
+                        <span className="inline-flex items-center gap-1.5 text-neutral-500">
+                          <span className="h-1.5 w-1.5 rounded-full bg-neutral-400" />
+                          Suspended
+                        </span>
+                      ) : level !== 'none' && activeCase ? (
+                        <span className={`inline-flex items-center gap-1.5 ${statusStyles[level].text}`}>
+                          <span className={`h-1.5 w-1.5 rounded-full ${statusStyles[level].dot}`} />
+                          {formatStatus(activeCase.status)}
+                        </span>
+                      ) : null}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
