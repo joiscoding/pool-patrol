@@ -110,18 +110,6 @@ export function MessageThreadForm({ threads }: MessageThreadFormProps) {
 
   return (
     <div className="space-y-6">
-      {/* Error/Success messages */}
-      {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-sm text-red-800">{error}</p>
-        </div>
-      )}
-      {success && (
-        <div className="p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
-          <p className="text-sm text-emerald-800">{success}</p>
-        </div>
-      )}
-
       {/* Thread Selector */}
       <div className="border border-neutral-200 rounded-lg">
         <div className="bg-neutral-50 px-4 py-3 border-b border-neutral-200">
@@ -286,6 +274,17 @@ export function MessageThreadForm({ threads }: MessageThreadFormProps) {
                   {isSubmitting ? 'Adding...' : 'Add Message'}
                 </button>
               </div>
+              {/* Error/Success messages */}
+              {error && (
+                <div className="p-3 bg-red-50 border border-red-200 rounded-lg overflow-hidden">
+                  <p className="text-sm text-red-800 break-words whitespace-pre-wrap">{error}</p>
+                </div>
+              )}
+              {success && (
+                <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-lg overflow-hidden">
+                  <p className="text-sm text-emerald-800 break-words">{success}</p>
+                </div>
+              )}
             </div>
           </div>
         </>

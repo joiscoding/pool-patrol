@@ -34,8 +34,7 @@ export async function addMessage(data: AddMessageInput): Promise<AddMessageResul
           },
         },
         messages: {
-          orderBy: { messageId: 'desc' },
-          take: 1,
+          select: { messageId: true },
         },
       },
     });
@@ -45,13 +44,19 @@ export async function addMessage(data: AddMessageInput): Promise<AddMessageResul
     }
 
     // Generate message ID (e.g., MSG-001-003)
+    // Find the maximum message number across all messages in the thread
     const threadNum = data.threadId.replace('THREAD-', '');
-    const lastMessage = thread.messages[0];
-    let nextMsgNum = 1;
-    if (lastMessage) {
-      const parts = lastMessage.messageId.split('-');
-      nextMsgNum = parseInt(parts[2], 10) + 1;
+    let maxMsgNum = 0;
+    for (const msg of thread.messages) {
+      const parts = msg.messageId.split('-');
+      if (parts.length >= 3) {
+        const num = parseInt(parts[2], 10);
+        if (!isNaN(num) && num > maxMsgNum) {
+          maxMsgNum = num;
+        }
+      }
     }
+    const nextMsgNum = maxMsgNum + 1;
     const messageId = `MSG-${threadNum}-${String(nextMsgNum).padStart(3, '0')}`;
 
     // Determine toEmails based on direction
