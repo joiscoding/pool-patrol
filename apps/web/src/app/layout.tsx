@@ -36,14 +36,22 @@ function Navigation() {
           <TeslaLogo className="h-6 w-auto" />
           <span className="text-base font-semibold tracking-tight">Pool Patrol</span>
         </Link>
-        <a 
-          href="https://joyax.co" 
-          target="_blank" 
-          rel="noopener noreferrer"
-          className="text-xs text-neutral-400 hover:text-neutral-600 transition-colors"
-        >
-          Product of Joyax
-        </a>
+        <div className="flex items-center gap-6">
+          <Link
+            href="/dev/create"
+            className="text-sm text-neutral-500 hover:text-neutral-900 transition-colors"
+          >
+            + New Vanpool
+          </Link>
+          <a 
+            href="https://joyax.co" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-xs text-neutral-400 hover:text-neutral-600 transition-colors"
+          >
+            Product of Joyax
+          </a>
+        </div>
       </nav>
     </header>
   );

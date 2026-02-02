@@ -1,4 +1,5 @@
 export { CaseCard } from './CaseCard';
+export { CreateVanpoolForm } from './CreateVanpoolForm';
 export { EmployeeCard } from './EmployeeCard';
 export { ShiftTable } from './ShiftTable';
 export { StatusBadge } from './StatusBadge';
