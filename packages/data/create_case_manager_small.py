@@ -22,6 +22,7 @@ load_dotenv(PROJECT_ROOT / ".env", override=True)
 
 
 # Four scenarios covering the full case lifecycle
+# expected_tools: Tools that MUST be called (superset match - extras OK)
 EXAMPLES = [
     {
         "inputs": {
@@ -33,6 +34,8 @@ EXAMPLES = [
             "outcome": "pending",
             "reasoning": "Case timeout elapsed (>1 week). Attempted membership cancellation requiring HITL approval.",
             "hitl_required": True,
+            # Timeout scenario: must attempt cancellation
+            "expected_tools": ["cancel_membership"],
         },
     },
     {
@@ -45,6 +48,8 @@ EXAMPLES = [
             "outcome": "pending",
             "reasoning": "Existing case with shift mismatch. Awaiting employee response.",
             "hitl_required": False,
+            # Existing case pending reply: must continue outreach
+            "expected_tools": ["run_outreach"],
         },
     },
     {
@@ -57,6 +62,8 @@ EXAMPLES = [
             "outcome": "verified",
             "reasoning": "All verification checks passed. No issues found.",
             "hitl_required": False,
+            # No case: must run verification specialists
+            "expected_tools": ["run_shift_specialist", "run_location_specialist"],
         },
     },
     {
@@ -69,6 +76,8 @@ EXAMPLES = [
             "outcome": "verified",
             "reasoning": "No open case. Verification checks passed.",
             "hitl_required": False,
+            # No case: must run verification specialists
+            "expected_tools": ["run_shift_specialist", "run_location_specialist"],
         },
     },
 ]
@@ -124,7 +133,7 @@ def main():
         print(f"  - {vp_id}: {outcome}")
         print(f"    {reasoning}")
 
-    dataset_name = "case-manager-eval-small"
+    dataset_name = "case-manager-eval-small-with-traj"
     description = "Small evaluation dataset for Case Manager Agent (4 lifecycle scenarios)."
 
     try:

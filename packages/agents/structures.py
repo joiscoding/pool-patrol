@@ -265,3 +265,23 @@ class CaseManagerResult(BaseModel):
         default=False,
         description="Whether human-in-the-loop approval was required",
     )
+
+
+class CaseManagerResultWithTrajectory(BaseModel):
+    """CaseManagerResult bundled with the agent's message trajectory.
+
+    Used for evaluation to assess tool selection via trajectory matching.
+    The messages field contains the full conversation including tool calls.
+
+    Example:
+        CaseManagerResultWithTrajectory(
+            result=CaseManagerResult(...),
+            messages=[HumanMessage(...), AIMessage(...), ToolMessage(...), ...],
+        )
+    """
+
+    result: CaseManagerResult = Field(description="The parsed agent result")
+    messages: list[Any] = Field(
+        default_factory=list,
+        description="Full message trajectory including tool calls",
+    )

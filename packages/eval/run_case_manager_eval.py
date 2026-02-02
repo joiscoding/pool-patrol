@@ -8,7 +8,10 @@ Evaluators:
    - outcome_match: Does outcome match expected? (verified, pending, resolved)
    - hitl_match: Does hitl_required match expected?
 
-2. LLM-AS-JUDGE EVALUATORS:
+2. TRAJECTORY EVALUATORS (tool selection):
+   - trajectory_match: Did the agent call the required tools? (superset match)
+
+3. LLM-AS-JUDGE EVALUATORS:
    - correctness: Is the agent's decision semantically correct?
 
 Usage:
@@ -34,13 +37,15 @@ load_dotenv(PROJECT_ROOT / ".env", override=True)
 os.environ["LANGSMITH_TRACING"] = "true"
 os.environ.setdefault("LANGSMITH_PROJECT", "pool-patrol-eval")
 
+from agentevals.trajectory.match import create_trajectory_match_evaluator
+from langchain_core.messages import AIMessage
 from langsmith import Client
 from langsmith.evaluation import evaluate
 from openevals.llm import create_llm_as_judge
 from openevals.prompts import CORRECTNESS_PROMPT
 
 # Import agent AFTER tracing is configured
-from agents.case_manager import investigate_vanpool_sync
+from agents.case_manager import investigate_vanpool_sync_with_trajectory
 from agents.structures import CaseManagerRequest
 
 
@@ -48,7 +53,7 @@ from agents.structures import CaseManagerRequest
 # Configuration
 # =============================================================================
 
-DATASET_NAME = "case-manager-eval-small"
+DATASET_NAME = "case-manager-eval-small-with-traj"
 EXPERIMENT_PREFIX = "case-manager"
 
 
@@ -64,13 +69,14 @@ def target_function(inputs: dict) -> dict:
         inputs: Dict with "vanpool_id" key
         
     Returns:
-        Dict with vanpool_id, case_id, outcome, reasoning, and hitl_required
+        Dict with vanpool_id, case_id, outcome, reasoning, hitl_required, and messages
     """
     vanpool_id = inputs["vanpool_id"]
     
-    # Run the agent
+    # Run the agent with trajectory capture
     request = CaseManagerRequest(vanpool_id=vanpool_id)
-    result = investigate_vanpool_sync(request)
+    result_with_trajectory = investigate_vanpool_sync_with_trajectory(request)
+    result = result_with_trajectory.result
     
     return {
         "vanpool_id": result.vanpool_id,
@@ -78,6 +84,8 @@ def target_function(inputs: dict) -> dict:
         "outcome": result.outcome,
         "reasoning": result.reasoning,
         "hitl_required": result.hitl_required,
+        # Include messages for trajectory evaluation
+        "messages": result_with_trajectory.messages,
     }
 
 
@@ -115,6 +123,60 @@ def hitl_match(outputs: dict, reference_outputs: dict) -> dict:
     return {
         "key": "hitl_match",
         "score": predicted == expected,
+    }
+
+
+# =============================================================================
+# Trajectory Evaluators (Tool Selection)
+# =============================================================================
+
+# Base trajectory evaluator with superset mode (agent must call at least the expected tools)
+_trajectory_match_evaluator = create_trajectory_match_evaluator(
+    trajectory_match_mode="superset",
+    tool_args_match_mode="ignore",  # Only match tool names, not arguments
+)
+
+
+def trajectory_match(outputs: dict, reference_outputs: dict) -> dict:
+    """Check if the agent called all required tools (superset match).
+    
+    Converts expected_tools list to a reference trajectory and uses
+    agentevals trajectory match with superset mode.
+    
+    - superset: Agent must call AT LEAST the expected tools (extras OK)
+    - tool_args_match_mode="ignore": Only tool names matter, not arguments
+    """
+    expected_tools = reference_outputs.get("expected_tools", [])
+    messages = outputs.get("messages", [])
+    
+    # Handle empty cases
+    if not expected_tools:
+        return {"key": "trajectory_match", "score": True}
+    if not messages:
+        return {"key": "trajectory_match", "score": False}
+    
+    # Build reference trajectory from expected_tools
+    # Each tool becomes a tool_call in an AIMessage
+    reference_trajectory = [
+        AIMessage(
+            content="",
+            tool_calls=[
+                {"id": f"expected_{i}", "name": tool_name, "args": {}}
+                for i, tool_name in enumerate(expected_tools)
+            ],
+        )
+    ]
+    
+    # Run the trajectory match evaluator
+    result = _trajectory_match_evaluator(
+        outputs=messages,
+        reference_outputs=reference_trajectory,
+    )
+    
+    return {
+        "key": "trajectory_match",
+        "score": result.get("score", False),
+        "comment": result.get("comment"),
     }
 
 
@@ -164,7 +226,7 @@ def run_evaluation(
     print(f"\nDataset: {dataset_name}")
     print(f"Examples: {example_count}")
     print(f"Model: {os.environ.get('OPENAI_MODEL', 'gpt-4.1')}")
-    print(f"Evaluators: outcome_match, hitl_match, correctness (LLM-as-judge)")
+    print(f"Evaluators: outcome_match, hitl_match, trajectory_match, correctness (LLM-as-judge)")
     
     print("\n" + "-" * 60)
     print("Running evaluation...")
@@ -173,7 +235,7 @@ def run_evaluation(
     results = evaluate(
         target_function,
         data=dataset_name,
-        evaluators=[outcome_match, hitl_match, correctness_evaluator],
+        evaluators=[outcome_match, hitl_match, trajectory_match, correctness_evaluator],
         experiment_prefix=experiment_prefix,
         max_concurrency=max_concurrency,
     )

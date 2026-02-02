@@ -24,7 +24,7 @@ from langchain_openai import ChatOpenAI
 from langgraph.checkpoint.memory import InMemorySaver
 from langsmith import traceable
 
-from agents.structures import CaseManagerRequest, CaseManagerResult
+from agents.structures import CaseManagerRequest, CaseManagerResult, CaseManagerResultWithTrajectory
 from agents.utils import configure_langsmith
 from core.database import get_session
 from core.db_models import Case, CaseStatus
@@ -470,3 +470,47 @@ def investigate_vanpool_sync(request: CaseManagerRequest) -> CaseManagerResult:
     )
 
     return parse_case_manager_result(result, ctx.vanpool_id, ctx.case_id)
+
+
+@traceable(
+    run_type="chain",
+    name="case_manager_with_trajectory",
+    tags=["agent:case_manager", "component:orchestration", "eval:trajectory"],
+)
+def investigate_vanpool_sync_with_trajectory(
+    request: CaseManagerRequest,
+) -> CaseManagerResultWithTrajectory:
+    """Synchronous version that returns result with full message trajectory.
+
+    Used for evaluation to assess tool selection via trajectory matching.
+    Returns both the parsed result and the raw messages including tool calls.
+
+    Args:
+        request: CaseManagerRequest with vanpool_id
+
+    Returns:
+        CaseManagerResultWithTrajectory with result and messages
+    """
+    # Preload context (returns early if error)
+    ctx = _preload_investigation_context(request.vanpool_id)
+    if isinstance(ctx, CaseManagerResult):
+        return CaseManagerResultWithTrajectory(
+            result=ctx,
+            messages=[],
+        )
+
+    # Run the agent
+    agent = create_case_manager_agent()
+    raw_result = agent.invoke(
+        {"messages": [HumanMessage(content=ctx.message)]},
+        config=_build_config(ctx.vanpool_id, ctx.case_id),
+    )
+
+    # Parse the result
+    parsed_result = parse_case_manager_result(raw_result, ctx.vanpool_id, ctx.case_id)
+
+    # Return both result and trajectory
+    return CaseManagerResultWithTrajectory(
+        result=parsed_result,
+        messages=raw_result.get("messages", []),
+    )
