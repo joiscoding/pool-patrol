@@ -23,7 +23,7 @@ from prompts.outreach_prompts import CLASSIFICATION_PROMPT
 resend.api_key = os.environ.get("RESEND_API_KEY", "")
 
 # Email sender configuration
-FROM_EMAIL = "Pool Patrol <contact@joyax.co>"
+FROM_EMAIL = "Pool Patrol <contact@send.joyax.co>"
 
 
 # =============================================================================
