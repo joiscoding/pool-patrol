@@ -62,26 +62,27 @@ class TestCase:
 
 # Define all test cases as data
 # Input is email_thread_id (what Case Manager would pass)
+# NOTE: Use threads that have unresponded inbound messages
 TEST_CASES: list[TestCase] = [
     TestCase(
         name="update",
         email_thread_id="THREAD-001",
         expected_bucket="update",
         expect_no_hitl=True,
-        description="has update reply (address change)",
+        description="has update reply (address change) - unresponded",
     ),
     TestCase(
         name="escalation",
-        email_thread_id="THREAD-003",
+        email_thread_id="THREAD-007",  # Changed from THREAD-003 (already responded)
         expected_bucket="escalation",
-        description="has escalation reply (dispute)",
+        description="has escalation reply (dispute) - unresponded",
     ),
     TestCase(
         name="acknowledgment",
         email_thread_id="THREAD-005",
         expected_bucket="acknowledgment",
         expect_no_hitl=True,
-        description="has acknowledgment reply",
+        description="has acknowledgment reply - unresponded",
     ),
 ]
 
@@ -153,7 +154,7 @@ def run_hitl_interrupt_test(email_thread_id: str, expected_bucket: str) -> bool 
     if not check_api_key():
         return None
 
-    from agents.outreach import create_outreach_agent, _build_config, _build_message
+    from agents.outreach import create_outreach_agent, _build_config, _build_message, _preload_thread_data
     from agents.structures import OutreachRequest
     from langchain_core.messages import HumanMessage
     from langgraph.types import Command
@@ -166,6 +167,9 @@ def run_hitl_interrupt_test(email_thread_id: str, expected_bucket: str) -> bool 
         
         # Build structured request for tracing
         request = OutreachRequest(email_thread_id=email_thread_id)
+        
+        # Preload thread data (like the main entry points do)
+        thread_data = _preload_thread_data(email_thread_id)
 
         # Wrap invocation in traceable for LangSmith tracing
         @traceable(
@@ -173,14 +177,14 @@ def run_hitl_interrupt_test(email_thread_id: str, expected_bucket: str) -> bool 
             name="outreach_agent",
             tags=["agent:outreach", "component:communication", "test:hitl_interrupt"],
         )
-        def invoke_with_structured_input(request: OutreachRequest):
+        def invoke_with_structured_input(request: OutreachRequest, thread_data: dict):
             return agent.invoke(
-                {"messages": [HumanMessage(content=_build_message(request))]},
+                {"messages": [HumanMessage(content=_build_message(request, thread_data))]},
                 config=config,
             )
 
         # First invocation - should interrupt before sending
-        result = invoke_with_structured_input(request)
+        result = invoke_with_structured_input(request, thread_data)
 
         # Check for interrupt
         interrupt = result.get("__interrupt__")
@@ -240,13 +244,13 @@ def run_hitl_reject_test() -> bool | None:
     if not check_api_key():
         return None
 
-    from agents.outreach import create_outreach_agent, _build_config, _build_message
+    from agents.outreach import create_outreach_agent, _build_config, _build_message, _preload_thread_data
     from agents.structures import OutreachRequest
     from langchain_core.messages import HumanMessage
     from langgraph.types import Command
 
-    email_thread_id = "THREAD-003"
-    print(f"\n   Testing reject decision on {email_thread_id} (dispute)...")
+    email_thread_id = "THREAD-007"  # Has unresponded escalation
+    print(f"\n   Testing reject decision on {email_thread_id} (escalation)...")
 
     try:
         agent = create_outreach_agent()
@@ -254,6 +258,9 @@ def run_hitl_reject_test() -> bool | None:
         
         # Build structured request for tracing
         request = OutreachRequest(email_thread_id=email_thread_id)
+        
+        # Preload thread data (like the main entry points do)
+        thread_data = _preload_thread_data(email_thread_id)
 
         # Wrap invocation in traceable for LangSmith tracing
         @traceable(
@@ -261,14 +268,14 @@ def run_hitl_reject_test() -> bool | None:
             name="outreach_agent",
             tags=["agent:outreach", "component:communication", "test:hitl_reject"],
         )
-        def invoke_with_structured_input(request: OutreachRequest):
+        def invoke_with_structured_input(request: OutreachRequest, thread_data: dict):
             return agent.invoke(
-                {"messages": [HumanMessage(content=_build_message(request))]},
+                {"messages": [HumanMessage(content=_build_message(request, thread_data))]},
                 config=config,
             )
 
         # First invocation - should interrupt
-        result = invoke_with_structured_input(request)
+        result = invoke_with_structured_input(request, thread_data)
 
         interrupt = result.get("__interrupt__")
         if not interrupt:
@@ -411,7 +418,7 @@ def main():
         print("HITL INTERRUPT TESTS")
         print("=" * 60)
 
-        results["hitl_interrupt_escalation"] = run_hitl_interrupt_test("THREAD-003", "escalation")
+        results["hitl_interrupt_escalation"] = run_hitl_interrupt_test("THREAD-007", "escalation")
         results["hitl_reject"] = run_hitl_reject_test()
 
         # Async test

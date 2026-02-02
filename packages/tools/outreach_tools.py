@@ -8,6 +8,8 @@ This module provides tools for:
 
 import json
 import os
+import uuid
+from datetime import datetime
 from typing import Any
 
 import resend
@@ -15,7 +17,15 @@ from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
 
 from core.database import get_session
-from core.db_models import EmailThread, Employee, Rider
+from core.db_models import (
+    EmailThread,
+    Employee,
+    Message,
+    MessageDirection,
+    MessageStatusEnum,
+    Rider,
+    to_json,
+)
 from prompts.outreach_prompts import CLASSIFICATION_PROMPT
 
 
@@ -171,31 +181,75 @@ def _send_via_resend(to: list[str], subject: str, body: str) -> dict[str, Any]:
         }
 
 
-@tool
-def send_email(to: list[str], subject: str, body: str) -> dict:
-    """Send email via Resend API. Use for non-escalation classifications.
+def _save_message_to_db(thread_id: str, to: list[str], body: str, sent: bool) -> str:
+    """Save the sent message to the database.
+    
+    Returns:
+        The generated message_id
+    """
+    message_id = f"MSG-{uuid.uuid4().hex[:8].upper()}"
+    
+    with get_session() as session:
+        new_message = Message(
+            message_id=message_id,
+            thread_id=thread_id,
+            from_email=FROM_EMAIL,
+            to_emails=to_json(to),
+            sent_at=datetime.now(),  # Use local time (PrismaDateTime expects local, not UTC)
+            body=body,
+            direction=MessageDirection.OUTBOUND,
+            status=MessageStatusEnum.SENT if sent else MessageStatusEnum.DRAFT,
+        )
+        session.add(new_message)
+        session.commit()
+    
+    return message_id
 
-    Use this tool when classify_reply returns: acknowledgment, question, or update.
+
+@tool
+def send_email(thread_id: str, to: list[str], subject: str, body: str) -> dict:
+    """Send email via Resend API and save to database.
+
+    Use this tool for initial outreach OR when classify_reply returns: 
+    acknowledgment, question, or update.
 
     This tool sends the email immediately without human review.
 
     Args:
+        thread_id: The thread ID to associate this message with
         to: List of recipient email addresses
         subject: Email subject line
         body: Email body text
 
     Returns:
         A dictionary with:
-        - id: The Resend message ID if successful
+        - message_id: The database message ID
+        - resend_id: The Resend API message ID if successful
         - sent: True if email was sent
         - error: Error message if failed
     """
-    return _send_via_resend(to, subject, body)
+    # Send the email
+    send_result = _send_via_resend(to, subject, body)
+    
+    # Save to database
+    message_id = _save_message_to_db(
+        thread_id=thread_id,
+        to=to,
+        body=body,
+        sent=send_result.get("sent", False),
+    )
+    
+    return {
+        "message_id": message_id,
+        "resend_id": send_result.get("id"),
+        "sent": send_result.get("sent", False),
+        "error": send_result.get("error"),
+    }
 
 
 @tool
-def send_email_for_review(to: list[str], subject: str, body: str) -> dict:
-    """Send email via Resend API after human review. Use for escalation classifications.
+def send_email_for_review(thread_id: str, to: list[str], subject: str, body: str) -> dict:
+    """Send email via Resend API after human review and save to database.
 
     Use this tool when classify_reply returns: escalation.
 
@@ -205,16 +259,33 @@ def send_email_for_review(to: list[str], subject: str, body: str) -> dict:
     - Reject: Cancel sending
 
     Args:
+        thread_id: The thread ID to associate this message with
         to: List of recipient email addresses
         subject: Email subject line
         body: Email body text (draft for human review)
 
     Returns:
         A dictionary with:
-        - id: The Resend message ID if approved and sent
+        - message_id: The database message ID
+        - resend_id: The Resend API message ID if approved and sent
         - sent: True if email was sent (after approval)
         - error: Error message if failed or rejected
     """
     # The actual sending happens here, but the HumanInTheLoopMiddleware
     # will intercept this tool call and pause for human approval
-    return _send_via_resend(to, subject, body)
+    send_result = _send_via_resend(to, subject, body)
+    
+    # Save to database
+    message_id = _save_message_to_db(
+        thread_id=thread_id,
+        to=to,
+        body=body,
+        sent=send_result.get("sent", False),
+    )
+    
+    return {
+        "message_id": message_id,
+        "resend_id": send_result.get("id"),
+        "sent": send_result.get("sent", False),
+        "error": send_result.get("error"),
+    }

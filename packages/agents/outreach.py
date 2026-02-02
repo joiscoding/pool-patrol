@@ -1,7 +1,7 @@
 """Outreach Agent - Handles email communication with vanpool riders.
 
 This agent is responsible for:
-1. Fetching and reviewing email conversation history
+1. Reviewing preloaded email conversation history
 2. Classifying inbound replies into appropriate buckets
 3. Sending appropriate responses (with HITL for escalations)
 
@@ -9,6 +9,7 @@ The agent uses HumanInTheLoopMiddleware to pause for human review
 when sending emails for escalation classifications.
 """
 
+import json
 import os
 import uuid
 from typing import Any
@@ -25,7 +26,7 @@ from agents.structures import OutreachRequest, OutreachResult
 from agents.utils import configure_langsmith
 from prompts.outreach_prompts import OUTREACH_AGENT_PROMPT, OUTREACH_AGENT_PROMPT_VERSION
 from tools.outreach_tools import (
-    get_email_thread,
+    get_email_thread,  # Used for preloading only, not as agent tool
     classify_reply,
     send_email,
     send_email_for_review,
@@ -40,8 +41,8 @@ _langsmith_enabled = configure_langsmith()
 # =============================================================================
 
 # Tools available to the agent
+# Note: get_email_thread is preloaded, not a tool
 TOOLS = [
-    get_email_thread,
     classify_reply,
     send_email,
     send_email_for_review,
@@ -174,11 +175,31 @@ def _build_config(email_thread_id: str) -> dict[str, Any]:
 # =============================================================================
 
 
-def _build_message(request: OutreachRequest) -> str:
-    """Build the input message for the agent from the request."""
-    message = f"Handle outreach for email thread {request.email_thread_id}."
-    if request.context:
-        message += f"\n\nContext from Case Manager: {request.context}"
+def _preload_thread_data(thread_id: str) -> dict | None:
+    """Preload email thread data for the agent.
+    
+    Returns:
+        Thread data dict or None if not found
+    """
+    # Call the underlying function (not the tool wrapper)
+    return get_email_thread.func(thread_id=thread_id)
+
+
+def _build_message(request: OutreachRequest, thread_data: dict) -> str:
+    """Build the input message for the agent with preloaded thread data."""
+    # Compact JSON for token efficiency
+    thread_json = json.dumps(thread_data, separators=(",", ":"), default=str)
+    
+    message = f"""Handle outreach for email thread {request.email_thread_id}.
+
+## Email Thread (preloaded)
+{thread_json}
+
+## Context from Case Manager
+{request.context or "No additional context provided."}
+
+Review the thread and take appropriate action.
+"""
     return message
 
 
@@ -199,11 +220,22 @@ async def handle_outreach(request: OutreachRequest) -> OutreachResult:
     Returns:
         OutreachResult with email_thread_id, message_id, bucket, hitl_required, sent
     """
+    # Preload thread data
+    thread_data = _preload_thread_data(request.email_thread_id)
+    
+    if thread_data is None or "error" in thread_data:
+        return OutreachResult(
+            email_thread_id=request.email_thread_id,
+            bucket=None,
+            hitl_required=False,
+            sent=False,
+        )
+    
     agent = create_outreach_agent()
 
-    # Run the agent
+    # Run the agent with preloaded data
     result = await agent.ainvoke(
-        {"messages": [HumanMessage(content=_build_message(request))]},
+        {"messages": [HumanMessage(content=_build_message(request, thread_data))]},
         config=_build_config(request.email_thread_id),
     )
 
@@ -221,11 +253,22 @@ async def handle_outreach(request: OutreachRequest) -> OutreachResult:
 )
 def handle_outreach_sync(request: OutreachRequest) -> OutreachResult:
     """Synchronous version of handle_outreach."""
+    # Preload thread data
+    thread_data = _preload_thread_data(request.email_thread_id)
+    
+    if thread_data is None or "error" in thread_data:
+        return OutreachResult(
+            email_thread_id=request.email_thread_id,
+            bucket=None,
+            hitl_required=False,
+            sent=False,
+        )
+    
     agent = create_outreach_agent()
 
-    # Run the agent
+    # Run the agent with preloaded data
     result = agent.invoke(
-        {"messages": [HumanMessage(content=_build_message(request))]},
+        {"messages": [HumanMessage(content=_build_message(request, thread_data))]},
         config=_build_config(request.email_thread_id),
     )
 
