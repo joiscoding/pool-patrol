@@ -13,19 +13,22 @@ Automate vanpool misuse detection (location/shift mismatches). Target: reduce ~2
 
 ## Implementation Requirements
 
-- **Frameworks**: Use **LangChain** for tools and **LangGraph** for orchestration, per the interview prompt requirements.
-- **Observability/Evaluation**: Use **LangSmith** for tracing and evaluation.
+- **Frameworks**: **LangChain** for tools + **LangGraph** for orchestration
+  - Case Manager & Outreach Agent: `create_agent` with `HumanInTheLoopMiddleware`
+  - Shift Specialist: `create_react_agent` (simpler, no HITL needed)
+- **Structured Output**: `response_format` parameter enforces deterministic JSON output matching Pydantic models
+- **Observability/Evaluation**: **LangSmith** for tracing and evaluation (auto-configured via `LANGSMITH_API_KEY`)
 
 ## Multi-Agent Architecture
 
 **Approach:** 4 agents in a hierarchical structure with a Case Manager as the orchestrator.
 
-| Agent | Responsibility | Tools / Capabilities |
-|-------|----------------|---------------------|
-| **Case Manager** | Orchestrates verification (parallel or selective), synthesizes specialist results, owns case lifecycle (timeouts, re-audit), routes to Outreach on failures, answers "why did this fail?" | Delegates to specialists - no direct tools |
-| **Location Specialist** | Validates employee home location against vanpool pickup. Returns verdict + reasoning + evidence with citations. | `get_employee_profile`, `check_commute_distance` |
-| **Shift Specialist** | Validates that a group of employees have compatible work shifts for carpooling together. Reasons about dynamic shift types. Returns verdict + reasoning + evidence with citations. | `get_employee_shifts` |
-| **Outreach Agent** | Sends investigation emails, monitors replies, classifies responses into buckets. Returns classification to Case Manager. Uses HITL for dispute/unknown classifications. | `get_email_thread`, `classify_reply`, `send_email`, `send_email_for_review` |
+| Agent | Responsibility | Tools / Capabilities | Model |
+|-------|----------------|---------------------|-------|
+| **Case Manager** | Orchestrates verification, synthesizes specialist results, owns case lifecycle (timeouts, re-audit), routes to Outreach on failures | `run_shift_specialist`, `run_location_specialist`, `upsert_case`, `run_outreach`, `close_case`, `cancel_membership` | gpt-4.1 |
+| **Location Specialist** | Validates employee home location against vanpool pickup. Returns verdict + reasoning + evidence with citations. | `get_employee_profile`, `check_commute_distance` | gpt-4.1-mini |
+| **Shift Specialist** | Validates that a group of employees have compatible work shifts for carpooling together. Returns verdict + reasoning + evidence. | `get_employee_shifts` | gpt-4.1-mini |
+| **Outreach Agent** | Sends investigation emails, classifies inbound replies into buckets (acknowledgment/question/update/escalation). Uses HITL for escalations. | `classify_reply`, `send_email`, `send_email_for_review` | gpt-4.1 |
 
 **Why this architecture?**
 
@@ -34,6 +37,12 @@ Automate vanpool misuse detection (location/shift mismatches). Target: reduce ~2
 3. **Hierarchical over flat** - Hierarchical agent systems (orchestrator + specialists) outperform flat multi-agent systems. The Case Manager provides synthesis and lifecycle management that would be lost in peer-to-peer communication.
 4. **Scalability** - Adding new verification types (badge swipes, parking, expenses) is trivial: implement a new specialist with the same interface (verdict + reasoning + evidence).
 5. **Structured evidence for humans** - Each specialist returns citations and reasoning that the Case Manager aggregates for the dashboard. Users can ask "Why did case 123 fail?" and get specific evidence.
+
+**Implementation Patterns:**
+
+1. **Context Preloading** - Both Case Manager and Outreach Agent preload database context (vanpool roster, case status, email threads) before invoking the LLM. This reduces tool calls and improves latency.
+2. **HITL via Middleware** - Human-in-the-loop is implemented using `HumanInTheLoopMiddleware` which interrupts specific tool calls (`cancel_membership`, `send_email_for_review`) and requires human approval/edit before proceeding.
+3. **Enforced Output Schema** - The `response_format` parameter ensures agents return valid JSON matching Pydantic models (`CaseManagerResult`, `OutreachResult`), eliminating parsing failures.
 
 ## Specialist Output Contract
 
@@ -76,12 +85,12 @@ This enables:
 ```json
 {
   "verdict": "fail",
-  "confidence": 3,
-  "reasoning": "Employee shift does not overlap the vanpool pickup window.",
+  "confidence": 4,
+  "reasoning": "Employee works night shift but is assigned to a day shift vanpool.",
   "evidence": [
-    {"type": "employee_shift", "employee_id": "EMP-5678", "shift_id": "SHIFT-2", "shift_window": "22:00-06:00"},
-    {"type": "vanpool_window", "vanpool_id": "VP-101", "pickup_window": "06:00-08:00"},
-    {"type": "overlap_check", "overlap_minutes": 0}
+    {"type": "employee_shift", "data": {"employee_id": "EMP-1006", "shift_name": "Night Shift"}},
+    {"type": "vanpool_majority_shift", "data": {"vanpool_id": "VP-101", "majority_shift": "Day Shift"}},
+    {"type": "shift_mismatch", "data": {"employee_shift": "Night Shift", "expected_shift": "Day Shift"}}
   ]
 }
 ```
@@ -90,8 +99,8 @@ This enables:
 
 ```json
 {
-  "email_thread_id": "THREAD-001",
-  "message_id": "msg_abc123",
+  "email_thread_id": "THREAD-A3F8B291",
+  "message_id": "MSG-12345678",
   "bucket": "update",
   "hitl_required": false,
   "sent": true
@@ -99,31 +108,38 @@ This enables:
 ```
 
 **Fields:**
-- `email_thread_id`: The email thread ID from the database
-- `message_id`: ID of sent message (null if not sent)
-- `bucket`: Classification of inbound reply - REQUIRED, never null (`acknowledgment`, `question`, `update`, `escalation`)
-- `hitl_required`: Whether human review was needed (true for `escalation`)
-- `sent`: Whether email was actually sent
+- `email_thread_id`: The email thread ID from the database (format: `THREAD-{8-char-hex}`)
+- `message_id`: ID of sent message (format: `MSG-{8-char-hex}`), null if not sent
+- `bucket`: Classification of inbound reply (`acknowledgment`, `question`, `update`, `escalation`), null if no inbound to classify
+- `hitl_required`: Whether human review was needed (true for `escalation` bucket)
+- `sent`: Whether email was actually sent (false for drafts awaiting HITL review)
 
 ## Verification Workflow (Sequence Diagram)
 
 ```
-                        Pool Patrol Case Verification Workflow
+                              Pool Patrol Case Verification Workflow
 
 ┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
 │ Case Manager │   │   Location   │   │    Shift     │   │   Outreach   │
 │              │   │  Specialist  │   │  Specialist  │   │    Agent     │
 └──────┬───────┘   └──────┬───────┘   └──────┬───────┘   └──────┬───────┘
        │                  │                  │                  │
-       │  ╔═══════════════════════════════════════════╗        │
-       │  ║         Parallel Verification             ║        │
-       │  ╚═══════════════════════════════════════════╝        │
+       │  ╔═══════════════════════════════════════════════════════════╗
+       │  ║    1. Preload Context (no LLM call)                       ║
+       │  ║    - Vanpool roster & employee IDs                        ║
+       │  ║    - Existing case status (if any)                        ║
+       │  ╚═══════════════════════════════════════════════════════════╝
+       │                  │                  │                  │
+       │  ╔═══════════════════════════════════════════════════════════╗
+       │  ║    2. Run Verification Specialists (parallel)             ║
+       │  ╚═══════════════════════════════════════════════════════════╝
+       │                  │                  │                  │
   par  │                  │                  │                  │
 ┌──────┼──────────────────┼──────────────────┼──────────────────┤
-│      │ Request Location │                  │                  │
+│      │ run_location     │                  │                  │
 │      │─────────────────>│                  │                  │
 │      │                  │                  │                  │
-│      │    Request Shift │                  │                  │
+│      │    run_shift     │                  │                  │
 │      │─────────────────────────────────────>                  │
 └──────┼──────────────────┼──────────────────┼──────────────────┤
        │                  │                  │                  │
@@ -133,29 +149,26 @@ This enables:
        │     Shift Result │                  │                  │
        │<─────────────────────────────────────                  │
        │                  │                  │                  │
-       │  ╔═══════════════════════════════════════════╗        │
-       │  ║  Synthesize: if ANY FAIL → Outreach       ║        │
-       │  ╚═══════════════════════════════════════════╝        │
+       │  ╔═══════════════════════════════════════════════════════════╗
+       │  ║  3. Synthesize: if ANY FAIL → Outreach                    ║
+       │  ╚═══════════════════════════════════════════════════════════╝
        │                  │                  │                  │
-       │          Send Investigation (failures + evidence)     │
-       │───────────────────────────────────────────────────────>│
+       │                       run_outreach (creates email thread)    │
+       │─────────────────────────────────────────────────────────────>│
        │                  │                  │                  │
-       │                  │                  │  Reply or Timeout│
-       │<───────────────────────────────────────────────────────│
+       │                       OutreachResult (bucket, sent, hitl)    │
+       │<─────────────────────────────────────────────────────────────│
        │                  │                  │                  │
-       │  ╔═══════════════════════════════════════════╗        │
-       │  ║  HITL review state (unknown / pre-cancel) ║        │
-       │  ╚═══════════════════════════════════════════╝        │
+       │  ╔═══════════════════════════════════════════════════════════╗
+       │  ║  4. HITL if escalation bucket                             ║
+       │  ║     (send_email_for_review interrupted)                   ║
+       │  ╚═══════════════════════════════════════════════════════════╝
        │                  │                  │                  │
-       │  ╔═══════════════════════════════════════════╗        │
-       │  ║  Decide: re-audit / escalate / close      ║        │
-       │  ╚═══════════════════════════════════════════╝        │
+       │  ╔═══════════════════════════════════════════════════════════╗
+       │  ║  5. Decide: re-audit / close / cancel                     ║
+       │  ╚═══════════════════════════════════════════════════════════╝
        │                  │                  │                  │
        ▼                  ▼                  ▼                  ▼
-┌──────────────┐   ┌──────────────┐   ┌──────────────┐   ┌──────────────┐
-│ Case Manager │   │   Location   │   │    Shift     │   │   Outreach   │
-│              │   │  Specialist  │   │  Specialist  │   │    Agent     │
-└──────────────┘   └──────────────┘   └──────────────┘   └──────────────┘
 
     Case Manager orchestrates specialists and manages case lifecycle.
 ```
@@ -169,9 +182,9 @@ This enables:
                            │
                            ▼
             ┌──────────────────────────────┐
-            │     VERIFICATION (parallel)   │
-            │  Location ──┬── Shift         │
-            └─────────────┴─────────────────┘
+            │     VERIFICATION (parallel)  │
+            │       Shift + Location        │
+            └──────────────────────────────┘
                           │
             ┌─────────────┴─────────────┐
             ▼                           ▼
@@ -179,13 +192,13 @@ This enables:
             │                           │
             ▼                           ▼
     ┌──────────────┐           ┌──────────────┐
-    │ CASE CLOSED  │           │   OUTREACH   │
-    │  (verified)  │           │   PENDING    │
+    │   VERIFIED   │           │   OUTREACH   │
+    │  (no case)   │           │   PENDING    │
     └──────────────┘           └──────┬───────┘
                                       │
                     ┌─────────────────┼─────────────────┐
                     ▼                 ▼                 ▼
-             "data_updated"      "unknown"         TIMEOUT
+             "data_updated"     "escalation"       TIMEOUT
                     │                 │                 │
                     ▼                 ▼                 ▼
               RE-AUDIT         HITL REVIEW       RE-AUDIT
@@ -201,12 +214,12 @@ This enables:
 ```
 
 **Key flows:**
-1. **Initial verification** → Case Manager calls Location + Shift specialists in parallel
-2. **Any fail** → Case Manager routes to Outreach Agent with failure evidence
-3. **Employee replies "data_updated"** → Case Manager triggers re-audit (can be selective or full)
-4. **Timeout (no reply)** → Case Manager triggers re-audit to catch silent fixes, then escalates if still failing
-5. **Re-audit passes** → Case closed (data was fixed)
-6. **Re-audit fails after timeout** → Pre-cancel with HITL approval
+1. **Initial verification** → Case Manager runs Location + Shift specialists in parallel
+2. **Any fail** → Case Manager creates case via `upsert_case` and routes to Outreach Agent
+3. **Employee replies "update"** → Case Manager triggers re-audit (can be selective or full)
+4. **Timeout (1 week, no reply)** → Case Manager triggers re-audit to catch silent fixes
+5. **Re-audit passes** → Close case as "resolved"
+6. **Re-audit fails after timeout** → Call `cancel_membership` (triggers HITL approval)
 
 **Reply Buckets (from Outreach Agent):**
 
@@ -219,23 +232,39 @@ This enables:
 
 **Loop Termination:** Max 3 re-audit attempts. After 3 failures → automatic escalation to pre-cancel + HITL.
 
-## Human-in-the-Loop (HITL State)
+## Human-in-the-Loop (HITL)
 
-The workflow enters a **HITL review state** at two decision points:
-1. **Unknown Bucket Review** - When reply classification confidence <= 2 or bucket = "unknown", pause for human to label the reply category
-2. **Pre-Cancel Approval** - Before any cancellation action, human reviews case summary + evidence and approves/rejects
+HITL is implemented via `HumanInTheLoopMiddleware` which intercepts specific tool calls and pauses execution until human decision is received.
+
+### HITL Triggers
+
+| Agent | Tool | Trigger | Human Actions |
+|-------|------|---------|---------------|
+| **Case Manager** | `cancel_membership` | Always | `approve`, `reject` |
+| **Outreach Agent** | `send_email_for_review` | When bucket = `escalation` | `approve`, `edit`, `reject` |
+
+### How It Works
+
+1. **Middleware Interception**: When the agent calls an HITL-protected tool, the middleware interrupts execution
+2. **State Persistence**: Agent state is saved via `InMemorySaver` checkpointer, keyed by `thread_id`
+3. **Human Decision**: The UI presents the pending action for human review
+4. **Resume**: After human decision, the agent resumes from the checkpoint with the decision injected
+
+### Case Status Updates
+
+When `run_outreach` returns `hitl_required=True`, the case status is automatically updated to `hitl_review` to surface it in the dashboard.
 
 ## Case Model
 
-One case per vanpool. Use a UUID for the internal `id` and keep `case_id` as a human-readable display identifier. Store flags in the `metadata` JSON string to align with the database schema.
+One case per vanpool. The `case_id` is a human-readable identifier with format `CASE-{8-char-hex}`. Store verification metadata in the `meta` JSON column.
 
 ```json
 {
-  "id": "2b56c8f8-38d1-4c4b-bbd2-4b3f3d6b8a63",
-  "case_id": "CASE-001",
+  "id": 1,
+  "case_id": "CASE-A3F8B291",
   "vanpool_id": "VP-101",
   "status": "pending_reply",
-  "metadata": "{\"reason\":\"location_mismatch\",\"details\":\"Multiple verification failures detected\",\"additional_info\":{\"distance_miles\":380,\"employee_zip\":\"90026\",\"work_site_zip\":\"94538\"}}",
+  "meta": "{\"reason\":\"shift_mismatch\",\"details\":\"Employee works night shift but vanpool operates during day\",\"failed_checks\":[\"shift\"],\"opened_by\":\"case_manager_agent\"}",
   "outcome": null,
   "resolved_at": null,
   "created_at": "2026-01-27T04:25:31.000Z",
@@ -243,80 +272,115 @@ One case per vanpool. Use a UUID for the internal `id` and keep `case_id` as a h
 }
 ```
 
+**Metadata Fields (in `meta` JSON):**
+- `reason`: Standardized reason (`shift_mismatch`, `location_mismatch`, `unknown`)
+- `details`: Human-readable description of the failure
+- `failed_checks`: Array of which checks failed (`["shift"]`, `["location"]`, `["shift", "location"]`)
+- `opened_by` / `updated_by`: Agent identifier for audit trail
+
 **Related records (stored separately):**
-- Email outreach lives in `email_threads` and `messages` tables, linked by `case_id` and `thread_id`.
-- Rider membership is represented by `riders` (vanpool ↔ employee), not duplicated on `cases`.
- - Specialist outputs can be summarized into `cases.metadata` for UI display; detailed outreach classification lives on `messages.classification_*`.
+- Email outreach lives in `email_threads` and `messages` tables, linked by `case_id` and `thread_id`
+- Thread IDs follow format `THREAD-{8-char-hex}`, message IDs follow `MSG-{8-char-hex}`
+- Rider membership is represented by `riders` (vanpool ↔ employee), not duplicated on `cases`
 
 ## LangChain Tools
 
-**Location Specialist Tools:**
+### Location Specialist Tools
 
 | Tool | Data Source | Purpose |
 |------|-------------|---------|
-| `get_employee_profile` | Mock/Internal DB | Fetch home ZIP, home coordinates, site assignment |
-| `check_commute_distance` | Google Maps API | Calculate distance from home to vanpool pickup |
+| `get_employee_profile` | PostgreSQL (Prisma) | Fetch home ZIP, home coordinates, site assignment |
+| `check_commute_distance` | Google Maps API | Calculate distance from employee home to vanpool pickup |
 
-**Shift Specialist Tools:**
-
-| Tool | Data Source | Purpose |
-|------|-------------|---------|
-| `get_employee_shifts` | Mock/Internal DB | Fetch shift schedule + PTO (dynamic structures) |
-
-**Vanpool Tools:**
+### Shift Specialist Tools
 
 | Tool | Data Source | Purpose |
 |------|-------------|---------|
-| `get_vanpool_roster` | Internal DB | Fetch vanpool's full roster with rider profiles |
-| `get_vanpool_info` | Internal DB | Get basic vanpool info (location, capacity, status) |
-| `list_vanpools` | Internal DB | List all vanpools, optionally filtered by status |
+| `get_employee_shifts` | PostgreSQL (Prisma) | Fetch employee's shift assignment, schedule, and PTO dates |
 
-**Outreach Agent Tools:**
+### Outreach Agent Tools
 
 | Tool | Data Source | Purpose | HITL? |
 |------|-------------|---------|-------|
-| `get_email_thread` | Database | Fetch thread and all messages by email_thread_id | No |
-| `classify_reply` | LLM | Classify inbound reply into bucket (`acknowledgment`, `question`, `update`, `escalation`) | No |
+| `classify_reply` | LLM (gpt-4.1-mini) | Classify inbound reply into bucket (`acknowledgment`, `question`, `update`, `escalation`) | No |
 | `send_email` | Resend API | Send email directly (for `acknowledgment`, `question`, `update`) | No |
-| `send_email_for_review` | Resend API | Send email with human review (for `escalation`). Human can approve, edit, or reject. | **Yes** |
+| `send_email_for_review` | Database (draft) | Save email as draft for human review (for `escalation`). Human can approve, edit, or reject via UI. | **Yes** |
 
-**Case Manager Tools (agent tool calls):**
+> **Note:** `get_email_thread` is used for preloading only, not exposed as an agent tool. Thread data is injected into the agent's context before invocation.
+
+### Case Manager Tools
 
 The Case Manager uses specialists as tool calls (agent-as-tool). These tools execute the specialist agents and return their structured verdict + evidence.
 
-| Tool | Agent/Purpose | HITL? |
-|------|---------------|-------|
-| `run_shift_specialist` | Shift Specialist - Validate compatible shifts for carpooling | No |
-| `run_location_specialist` | Location Specialist - Validate home location vs pickup (stubbed) | No |
+| Tool | Purpose | HITL? |
+|------|---------|-------|
+| `run_shift_specialist` | Execute Shift Specialist agent for a list of employee IDs | No |
+| `run_location_specialist` | Execute Location Specialist agent to validate home-to-pickup commute distance | No |
 | `upsert_case` | Create new case or update existing (status, reason, failed_checks) | No |
-| `run_outreach` | Outreach Agent - Send inquiry, fetch replies, classify responses | No (Outreach has own HITL) |
-| `close_case` | Close case with outcome (resolved, cancelled) | No |
-| `cancel_membership` | Cancel vanpool membership (requires approval) | **Yes** |
+| `run_outreach` | Execute Outreach Agent for a case's email thread | No (Outreach has own HITL) |
+| `close_case` | Close case with outcome (`resolved` or `cancelled`) | No |
+| `cancel_membership` | Cancel vanpool membership - removes rider from vanpool | **Yes** |
 
-**Note:** Case status and vanpool roster are preloaded in the agent's input context, so `get_case_status` is not needed as a tool.
+> **Note:** `get_case_status` and `get_vanpool_roster` are used for preloading only. Vanpool roster and case status are injected into the agent's context, reducing unnecessary tool calls.
 
-## Testing the Shift Specialist
+### Vanpool Tools (Preload Only)
 
-The Shift Specialist agent is fully implemented and can be tested.
+| Tool | Data Source | Purpose |
+|------|-------------|---------|
+| `get_vanpool_roster` | PostgreSQL | Fetch vanpool's full roster with rider profiles (used in Case Manager preload) |
 
-### Run the Test Suite
+### Email Templates
+
+Initial outreach emails are generated using templates in `prompts/initial_outreach.py`. Template selection is automatic based on `failed_checks`:
+
+| Template Key | Trigger |
+|--------------|---------|
+| `shift_mismatch` | `["shift"]` in failed_checks |
+| `location_mismatch` | `["location"]` in failed_checks |
+| `both_mismatch` | Both `shift` and `location` in failed_checks |
+
+## Testing
+
+### Available Test Suites
+
+| Test File | What It Tests |
+|-----------|---------------|
+| `tests/test_shift_specialist.py` | Shift Specialist agent with various shift combinations |
+| `tests/test_case_manager.py` | Case Manager orchestration and tool usage |
+| `tests/test_case_manager_tools.py` | Case Manager tools (upsert_case, close_case, etc.) |
+| `tests/test_outreach_agent.py` | Outreach Agent classification and email handling |
+| `tests/test_outreach_tools.py` | Outreach tools (classify_reply, send_email, etc.) |
+| `tests/test_resend.py` | Resend API integration for email sending |
+
+### Running Tests
 
 ```bash
-# Requires OPENAI_API_KEY in environment or .env
-poetry run python tests/test_shift_specialist.py
+# Requires OPENAI_API_KEY and database connection
+# Run all tests
+poetry run pytest tests/
+
+# Run specific agent tests
+poetry run pytest tests/test_shift_specialist.py -v
+poetry run pytest tests/test_case_manager.py -v
+poetry run pytest tests/test_outreach_agent.py -v
+
+# Run with LangSmith tracing (optional)
+LANGSMITH_API_KEY=your_key poetry run pytest tests/test_shift_specialist.py -v
 ```
 
 ---
 
 ## LangSmith Evaluation Plan
 
-### Overview
+### Current State
 
-Comprehensive evaluation strategy for the Shift Specialist agent covering dataset creation, automated evaluation, model comparison, and agent behavior analysis.
+- **Tracing**: Auto-configured when `LANGSMITH_API_KEY` is set. All agent runs are traced with metadata (agent name, model, prompt version, etc.)
+- **Evaluation Datasets**: Created via `packages/data/create_*_small.py` scripts
+- **Evaluation Runners**: Located in `packages/eval/run_*_eval.py`
 
 ### Evaluator Strategy by Agent
 
-**Specialists (Location + Shift):**
+**Shift Specialist:**
 - **Primary:** Heuristic evaluators with fixed datapoints should yield deterministic, correct verdicts.
 - **Secondary:** LLM-as-judge to score reasoning clarity and evidence faithfulness (does not gate pass/fail).
 
