@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import Image from "next/image";
 import Link from "next/link";
 import "./globals.css";
 
@@ -22,7 +23,14 @@ function Navigation() {
   return (
     <header className="border-b border-neutral-200">
       <nav className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
-        <Link href="/" className="flex items-center gap-3">
+        <Link href="/" className="flex items-center gap-2">
+          <Image
+            src="/pool-patrol-logo.png"
+            alt="Pool Patrol Logo"
+            width={32}
+            height={32}
+            className="rounded"
+          />
           <span className="text-base font-semibold tracking-tight">Pool Patrol</span>
         </Link>
         <a 
