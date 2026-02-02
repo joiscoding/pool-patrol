@@ -76,24 +76,46 @@ The database contains the following tables:
 | Table | Description |
 |-------|-------------|
 | `shifts` | Shift templates with schedules (Day Shift, Night Shift, etc.) |
-| `vanpools` | Vanpool routes with work site info |
+| `vanpools` | Vanpool routes with work site info and optional coordinator |
 | `employees` | Employee records with address and shift reference |
-| `riders` | Junction table linking employees to vanpools |
+| `riders` | Junction table linking employees to vanpools (many-to-many) |
 | `cases` | Investigation cases for potential misuse |
 | `email_threads` | Email conversations related to cases |
 | `messages` | Individual emails within threads |
 
+### Key Fields
+
+**Vanpool**:
+- `coordinatorId` (optional): References an Employee who coordinates the vanpool. This is a unique constraint, so each employee can coordinate at most one vanpool.
+
+**Employee**:
+- `shiftId`: References the Shift this employee works
+- `timeType`: Employment type (full_time, part_time, contract)
+
+**Rider**:
+- `participantId`: External ID from source system (not a foreign key)
+- Composite unique constraint on `(vanpoolId, employeeId)`
+
 ### Relationships
 
 ```
-Shift ←── Employee
-              │
+Shift ←── Employee ──┐
+              │      │ (coordinator)
 Vanpool ←──┬── Rider ──→ Employee (via employee_id)
+   ↑       │
+   └───────┤ (coordinator_id → employee_id)
            │
            ├── Case ←── EmailThread ←── Message
            │
            └── EmailThread
 ```
+
+- **Shift → Employee**: One-to-many (each employee has one shift)
+- **Vanpool → Rider → Employee**: Many-to-many through junction table
+- **Vanpool → Employee (coordinator)**: One-to-one optional (vanpool can have a coordinator)
+- **Vanpool → Case**: One-to-many (vanpool can have multiple cases)
+- **Case → EmailThread**: One-to-one (each case has one thread)
+- **EmailThread → Message**: One-to-many (thread contains messages)
 
 ## Initial Setup
 
@@ -140,7 +162,7 @@ model Employee {
   // ... existing fields ...
   homeZip       String         @map("home_zip")
   phoneNumber   String?        @map("phone_number")  // NEW FIELD
-  shifts        String
+  shiftId       String         @map("shift_id")
   // ...
 }
 ```
@@ -173,7 +195,7 @@ class Employee(Base):
     # ... existing fields ...
     home_zip = Column(String, nullable=False)
     phone_number = Column(String, nullable=True)  # NEW FIELD
-    shifts = Column(Text, nullable=False)
+    shift_id = Column(String, ForeignKey("shifts.id"), nullable=False)
     # ...
     
     def to_dict(self) -> dict:
@@ -213,12 +235,12 @@ The following enums are defined in the schema:
 |------|--------|---------|
 | `VanpoolStatus` | active, inactive, suspended | Vanpool.status |
 | `EmployeeStatus` | active, inactive, on_leave | Employee.status |
-| `TimeType` | full_time, part_time, contract | Employee.time_type |
+| `TimeType` | full_time, part_time, contract | Employee.timeType |
 | `CaseStatus` | open, verification, pending_reply, re_audit, hitl_review, pre_cancel, resolved, cancelled | Case.status |
 | `ThreadStatus` | active, closed, archived | EmailThread.status |
 | `MessageDirection` | inbound, outbound | Message.direction |
 | `MessageStatus` | draft, sent, read, archived | Message.status |
-| `ClassificationBucket` | acknowledgment, question, update, escalation | Message.classification_bucket |
+| `ClassificationBucket` | acknowledgment, address_change, dispute, escalation, question, shift_change, unknown, update | Message.classificationBucket |
 
 ## Quick Reference: What to Update
 
@@ -250,28 +272,31 @@ Some fields store JSON data as TEXT (for SQLite compatibility):
 
 | Model | Field | JSON Structure |
 |-------|-------|----------------|
-| `Vanpool` | `work_site_coords` | `{ "lat": number, "lng": number }` |
+| `Vanpool` | `workSiteCoords` | `{ "lat": number, "lng": number }` |
 | `Shift` | `schedule` | `[{ "day": string, "start_time": string, "end_time": string }, ...]` |
-| `Employee` | `pto_dates` | `["2024-12-25", "2024-12-26"]` |
+| `Employee` | `ptoDates` | `["2024-12-25", "2024-12-26"]` |
 | `Case` | `metadata` | `{ "reason": string, "details": string, "additional_info": {...} }` |
-| `Message` | `to_emails` | `["email1@...", "email2@..."]` |
+| `Message` | `toEmails` | `["email1@...", "email2@..."]` |
 
-Note: `Message.classification` is now stored as two separate fields:
-- `classification_bucket`: enum value (address_change, shift_change, dispute, acknowledgment, unknown)
-- `classification_confidence`: integer value (1-5 scale)
+Note: Message classification is stored as a single enum field `classificationBucket` with values: acknowledgment, address_change, dispute, escalation, question, shift_change, unknown, update.
 
-In Python, use the helper methods:
+In Python (SQLAlchemy), use the helper properties:
 
 ```python
 # Reading JSON
 shift.schedule_info      # Returns list of day schedules
 employee.pto_dates_list  # Returns list of PTO date strings
 vanpool.coords           # Returns { lat, lng }
+case.case_metadata       # Returns { reason, details, additional_info }
+message.to_list          # Returns list of recipient emails
+message.classification   # Returns { bucket: str } or None
 
 # Writing JSON
 from core.db_models import to_json
 shift.schedule = to_json([{"day": "Mon", "start_time": "07:00", "end_time": "16:00"}])
 ```
+
+Note: The `Case` model uses `meta` as the Python attribute (since `metadata` is reserved by SQLAlchemy), but it maps to the `metadata` column in the database. Use `case.case_metadata` to get the parsed dict.
 
 ## Migrating to PostgreSQL
 
