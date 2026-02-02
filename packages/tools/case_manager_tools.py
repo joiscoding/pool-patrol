@@ -77,6 +77,21 @@ def run_location_specialist(employee_ids: list[str], vanpool_id: str) -> dict:
 # =============================================================================
 
 
+def _derive_reason_from_failed_checks(failed_checks: list[str]) -> str:
+    """Derive standardized reason from failed checks.
+
+    Maps failed checks to standardized reason values:
+    - ["shift"] -> "shift_mismatch"
+    - ["location"] -> "location_mismatch"
+    - ["shift", "location"] -> "shift_mismatch" (shift takes priority)
+    """
+    if "shift" in failed_checks:
+        return "shift_mismatch"
+    if "location" in failed_checks:
+        return "location_mismatch"
+    return "unknown"
+
+
 @tool
 def upsert_case(
     vanpool_id: str,
@@ -95,7 +110,8 @@ def upsert_case(
 
     Args:
         vanpool_id: The vanpool ID (e.g., "VP-101")
-        reason: Why the case is being opened/updated (e.g., "Shift mismatch detected")
+        reason: Human-readable description of why the case is being opened/updated
+                (e.g., "Shift mismatch detected: employee works night shift")
         failed_checks: Which checks failed (e.g., ["shift"], ["location"], ["shift", "location"])
         case_id: Optional - if provided, updates this case instead of creating new
         status: Optional - new status for the case (e.g., "verification", "pending_reply", "re_audit")
@@ -108,6 +124,9 @@ def upsert_case(
         - created: True if new case was created, False if updated
         - error: Error message if operation failed
     """
+    # Derive standardized reason from failed_checks
+    standardized_reason = _derive_reason_from_failed_checks(failed_checks)
+
     with get_session() as session:
         # If case_id provided, update that case
         if case_id:
@@ -120,9 +139,10 @@ def upsert_case(
             if existing_case is None:
                 return {"error": f"Case {case_id} not found"}
 
-            # Update metadata
+            # Update metadata - use standardized reason, store description in details
             current_meta = existing_case.case_metadata or {}
-            current_meta["reason"] = reason
+            current_meta["reason"] = standardized_reason
+            current_meta["details"] = reason
             current_meta["failed_checks"] = failed_checks
             current_meta["updated_by"] = "case_manager_agent"
             existing_case.meta = to_json(current_meta)
@@ -151,7 +171,8 @@ def upsert_case(
         if existing_case:
             # Update the existing case instead of erroring
             current_meta = existing_case.case_metadata or {}
-            current_meta["reason"] = reason
+            current_meta["reason"] = standardized_reason
+            current_meta["details"] = reason
             current_meta["failed_checks"] = failed_checks
             current_meta["updated_by"] = "case_manager_agent"
             existing_case.meta = to_json(current_meta)
@@ -171,9 +192,10 @@ def upsert_case(
         # Generate new case ID
         new_case_id = f"CASE-{uuid.uuid4().hex[:8].upper()}"
 
-        # Create metadata
+        # Create metadata - use standardized reason, store description in details
         metadata = {
-            "reason": reason,
+            "reason": standardized_reason,
+            "details": reason,
             "failed_checks": failed_checks,
             "opened_by": "case_manager_agent",
         }

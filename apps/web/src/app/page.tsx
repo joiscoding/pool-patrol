@@ -54,8 +54,17 @@ function parseMetadata(metadata: string): { reason: string; details: string } {
 }
 
 function formatReason(reason: string): string {
+  // Handle standardized values
   if (reason === 'shift_mismatch') return 'Shift';
   if (reason === 'location_mismatch') return 'Location';
+  
+  // Handle legacy format where reason might be a full description
+  // Check for keywords to derive the issue type
+  const lowerReason = reason.toLowerCase();
+  if (lowerReason.includes('shift')) return 'Shift';
+  if (lowerReason.includes('location') || lowerReason.includes('distance') || lowerReason.includes('address')) return 'Location';
+  
+  // Fallback: capitalize words separated by underscores
   return reason.split('_').map(word => 
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ');

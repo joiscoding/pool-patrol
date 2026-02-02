@@ -15,6 +15,17 @@ type EmployeeWithShift = Employee & { shift: Shift };
 type EmailThreadWithMessages = EmailThread & { messages: Message[] };
 
 function formatReason(reason: string): string {
+  // Handle standardized values
+  if (reason === 'shift_mismatch') return 'Shift Mismatch';
+  if (reason === 'location_mismatch') return 'Location Mismatch';
+  
+  // Handle legacy format where reason might be a full description
+  // Check for keywords to derive the issue type
+  const lowerReason = reason.toLowerCase();
+  if (lowerReason.includes('shift')) return 'Shift Mismatch';
+  if (lowerReason.includes('location') || lowerReason.includes('distance') || lowerReason.includes('address')) return 'Location Mismatch';
+  
+  // Fallback: capitalize words separated by underscores
   return reason.split('_').map(word => 
     word.charAt(0).toUpperCase() + word.slice(1)
   ).join(' ');
