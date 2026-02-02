@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import prisma from '@/database/db';
 import { VanpoolMap } from '@/components/VanpoolMap';
 import { AuditButton } from '@/components/AuditButton';
+import { DraftMessageEditor } from '@/components/DraftMessageEditor';
 import ReactMarkdown from 'react-markdown';
 import type { Case, Employee, Shift, EmailThread, Message } from '@prisma/client';
 
@@ -103,7 +104,7 @@ export default async function VanpoolDetailPage({ params }: VanpoolDetailPagePro
   const emailThreads: EmailThreadWithMessages[] = vanpool.emailThreads;
 
   const openCases = cases.filter(c => 
-    ['open', 'pending_reply', 'under_review'].includes(c.status)
+    ['open', 'verification', 'pending_reply', 'hitl_review', 're_audit', 'pre_cancel'].includes(c.status)
   );
 
   const coords = parseCoords(vanpool.workSiteCoords);
@@ -178,14 +179,33 @@ export default async function VanpoolDetailPage({ params }: VanpoolDetailPagePro
           <div className="space-y-3">
             {openCases.map((caseData) => {
               const metadata = parseMetadata(caseData.metadata);
+              const isHitlReview = caseData.status === 'hitl_review';
+              
               return (
                 <div 
                   key={caseData.caseId}
-                  className="p-4 bg-amber-50 border border-amber-200 rounded-lg"
+                  className={`p-4 rounded-lg ${
+                    isHitlReview 
+                      ? 'bg-violet-50 border border-violet-300' 
+                      : 'bg-amber-50 border border-amber-200'
+                  }`}
                 >
                   <div className="flex items-start justify-between">
                     <div>
-                      <span className="text-xs font-mono text-amber-700">{caseData.caseId}</span>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-xs font-mono ${isHitlReview ? 'text-violet-700' : 'text-amber-700'}`}>
+                          {caseData.caseId}
+                        </span>
+                        <span className={`text-xs px-2 py-0.5 rounded font-medium ${
+                          isHitlReview
+                            ? 'bg-violet-200 text-violet-800'
+                            : caseData.status === 'pending_reply'
+                            ? 'bg-amber-200 text-amber-800'
+                            : 'bg-neutral-200 text-neutral-700'
+                        }`}>
+                          {isHitlReview ? 'REVIEW REQUIRED' : caseData.status.replace('_', ' ').toUpperCase()}
+                        </span>
+                      </div>
                       <p className="font-medium text-neutral-900 mt-1">
                         {formatReason(metadata.reason)}
                       </p>
@@ -193,13 +213,20 @@ export default async function VanpoolDetailPage({ params }: VanpoolDetailPagePro
                         {metadata.details}
                       </p>
                     </div>
-                    <span className="text-xs text-amber-600">
+                    <span className={`text-xs ${isHitlReview ? 'text-violet-600' : 'text-amber-600'}`}>
                       {formatDate(caseData.createdAt)}
                     </span>
                   </div>
                   {metadata.additional_info?.distance_miles != null && (
                     <div className="mt-3 text-xs text-neutral-500">
                       {String(metadata.additional_info.distance_miles)} miles from work site
+                    </div>
+                  )}
+                  {isHitlReview && (
+                    <div className="mt-3 pt-3 border-t border-violet-200">
+                      <p className="text-sm text-violet-700">
+                        Please review the draft email below and approve or edit before sending.
+                      </p>
                     </div>
                   )}
                 </div>
@@ -282,38 +309,65 @@ export default async function VanpoolDetailPage({ params }: VanpoolDetailPagePro
                 </div>
                 
                 <div className="divide-y divide-neutral-100">
-                  {thread.messages.map((message) => (
-                    <div key={message.messageId} className="px-4 py-3">
-                      <div className="flex items-start justify-between mb-2">
-                        <div className="text-sm">
-                          <span className={`font-medium ${
-                            message.direction === 'outbound' 
-                              ? 'text-blue-700' 
-                              : 'text-neutral-900'
-                          }`}>
-                            {message.fromEmail.split('@')[0]}
+                  {thread.messages.map((message) => {
+                    // Check if this is a draft message that needs review
+                    const isDraft = message.status === 'draft';
+                    
+                    if (isDraft && message.direction === 'outbound') {
+                      // Parse toEmails from JSON string
+                      let toEmails: string[] = [];
+                      try {
+                        toEmails = JSON.parse(message.toEmails);
+                      } catch {
+                        toEmails = [];
+                      }
+                      
+                      return (
+                        <DraftMessageEditor
+                          key={message.messageId}
+                          messageId={message.messageId}
+                          vanpoolId={vanpool.vanpoolId}
+                          initialBody={message.body}
+                          fromEmail={message.fromEmail}
+                          toEmails={toEmails}
+                          sentAt={message.sentAt}
+                        />
+                      );
+                    }
+                    
+                    return (
+                      <div key={message.messageId} className="px-4 py-3">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="text-sm">
+                            <span className={`font-medium ${
+                              message.direction === 'outbound' 
+                                ? 'text-blue-700' 
+                                : 'text-neutral-900'
+                            }`}>
+                              {message.fromEmail.split('@')[0]}
+                            </span>
+                            {message.direction === 'outbound' && (
+                              <span className="text-xs text-neutral-400 ml-2">(Pool Patrol)</span>
+                            )}
+                          </div>
+                          <span className="text-xs text-neutral-400">
+                            {formatDateTime(message.sentAt)}
                           </span>
-                          {message.direction === 'outbound' && (
-                            <span className="text-xs text-neutral-400 ml-2">(Pool Patrol)</span>
-                          )}
                         </div>
-                        <span className="text-xs text-neutral-400">
-                          {formatDateTime(message.sentAt)}
-                        </span>
-                      </div>
-                      <div className="text-sm text-neutral-600 markdown-content">
-                        <ReactMarkdown>{message.body}</ReactMarkdown>
-                      </div>
-                      {message.classificationBucket && (
-                        <div className="mt-2">
-                          <span className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded">
-                            {message.classificationBucket.replace('_', ' ')} 
-                            {message.classificationConfidence && ` (${message.classificationConfidence}/5)`}
-                          </span>
+                        <div className="text-sm text-neutral-600 markdown-content">
+                          <ReactMarkdown>{message.body}</ReactMarkdown>
                         </div>
-                      )}
-                    </div>
-                  ))}
+                        {message.classificationBucket && (
+                          <div className="mt-2">
+                            <span className="text-xs px-2 py-0.5 bg-neutral-100 text-neutral-600 rounded">
+                              {message.classificationBucket.replace('_', ' ')} 
+                              {message.classificationConfidence && ` (${message.classificationConfidence}/5)`}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             ))}

@@ -2,6 +2,7 @@ export { AuditButton } from './AuditButton';
 export { CaseCard } from './CaseCard';
 export { CreateVanpoolForm } from './CreateVanpoolForm';
 export { DeleteVanpoolForm } from './DeleteVanpoolForm';
+export { DraftMessageEditor } from './DraftMessageEditor';
 export { EmployeeCard } from './EmployeeCard';
 export { MessageThreadForm } from './MessageThreadForm';
 export { ShiftTable } from './ShiftTable';

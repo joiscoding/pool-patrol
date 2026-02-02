@@ -378,6 +378,9 @@ def run_outreach(case_id: str, context: str) -> dict:
     - For new threads (no messages): Send initial outreach email
     - For existing threads: Classify any inbound replies and respond
 
+    When the outreach result indicates hitl_required (escalation bucket),
+    the case status will be updated to 'hitl_review'.
+
     Args:
         case_id: The case ID (e.g., "CASE-001")
         context: Context for the outreach (e.g., "Shift verification failed - employee
@@ -421,6 +424,18 @@ def run_outreach(case_id: str, context: str) -> dict:
         context=context,
     )
     result = handle_outreach_sync(request)
+
+    # If HITL is required, update case status to hitl_review
+    if result.hitl_required:
+        with get_session() as session:
+            case = (
+                session.query(Case)
+                .filter(Case.case_id == case_id)
+                .first()
+            )
+            if case:
+                case.status = CaseStatus.HITL_REVIEW
+                session.commit()
 
     return result.model_dump()
 

@@ -249,14 +249,12 @@ def send_email(thread_id: str, to: list[str], subject: str, body: str) -> dict:
 
 @tool
 def send_email_for_review(thread_id: str, to: list[str], subject: str, body: str) -> dict:
-    """Send email via Resend API after human review and save to database.
+    """Save email as draft for human review. Does NOT send automatically.
 
     Use this tool when classify_reply returns: escalation.
 
-    This tool will trigger HITL middleware - human will be able to:
-    - Approve: Send email as drafted
-    - Edit: Modify content before sending
-    - Reject: Cancel sending
+    This tool saves the email as a draft for human review in the UI.
+    The human can then edit and approve/send via the web interface.
 
     Args:
         thread_id: The thread ID to associate this message with
@@ -267,25 +265,19 @@ def send_email_for_review(thread_id: str, to: list[str], subject: str, body: str
     Returns:
         A dictionary with:
         - message_id: The database message ID
-        - resend_id: The Resend API message ID if approved and sent
-        - sent: True if email was sent (after approval)
-        - error: Error message if failed or rejected
+        - sent: False (always - email is saved as draft for review)
+        - hitl_required: True (human must review and send)
     """
-    # The actual sending happens here, but the HumanInTheLoopMiddleware
-    # will intercept this tool call and pause for human approval
-    send_result = _send_via_resend(to, subject, body)
-    
-    # Save to database
+    # Save as draft for human review - DO NOT send automatically
     message_id = _save_message_to_db(
         thread_id=thread_id,
         to=to,
         body=body,
-        sent=send_result.get("sent", False),
+        sent=False,  # Always save as draft
     )
     
     return {
         "message_id": message_id,
-        "resend_id": send_result.get("id"),
-        "sent": send_result.get("sent", False),
-        "error": send_result.get("error"),
+        "sent": False,
+        "hitl_required": True,
     }
