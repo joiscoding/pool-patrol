@@ -1,5 +1,27 @@
 """FastAPI application entry point."""
 
+import sys
+from pathlib import Path
+
+# Project root is 4 levels up from this file
+_project_root = Path(__file__).parent.parent.parent.parent
+
+# Load environment variables from project root .env file
+from dotenv import load_dotenv
+load_dotenv(_project_root / ".env", override=True)
+
+# Add packages directory to Python path (must be before other imports)
+# This ensures pool_patrol's packages are found before any conflicting packages
+_packages_dir = _project_root / "packages"
+if str(_packages_dir) not in sys.path:
+    sys.path.insert(0, str(_packages_dir))
+
+# Remove any cached 'tools' module that might be from a different project
+# This is needed because another project's 'tools' package may have been imported
+for _mod_name in list(sys.modules.keys()):
+    if _mod_name == "tools" or _mod_name.startswith("tools."):
+        del sys.modules[_mod_name]
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 

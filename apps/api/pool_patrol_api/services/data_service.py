@@ -12,6 +12,7 @@ from core.models import (
     EmployeeStatus,
     Message,
     Rider,
+    Shift,
     Shifts,
     ThreadStatus,
     Vanpool,
@@ -36,6 +37,7 @@ class DataService:
             self._mock_path = mock_data_path
 
         # Load data on initialization
+        self._shifts: dict[str, Shift] = {}  # Shift templates by ID
         self._vanpools: list[Vanpool] = []
         self._employees: list[Employee] = []
         self._cases: list[Case] = []
@@ -45,10 +47,19 @@ class DataService:
 
     def _load_all_data(self) -> None:
         """Load all mock data files."""
+        self._load_shifts()  # Load shifts first (needed for employee transformation)
         self._load_vanpools()
         self._load_employees()
         self._load_cases()
         self._load_email_threads()
+
+    def _load_shifts(self) -> None:
+        """Load shift templates from JSON file."""
+        shifts_file = self._mock_path / "shifts.json"
+        if shifts_file.exists():
+            with open(shifts_file) as f:
+                data = json.load(f)
+                self._shifts = {item["id"]: Shift(**item) for item in data}
 
     def _load_vanpools(self) -> None:
         """Load vanpools from JSON file."""
@@ -59,12 +70,40 @@ class DataService:
                 self._vanpools = [Vanpool(**item) for item in data]
 
     def _load_employees(self) -> None:
-        """Load employees from JSON file."""
+        """Load employees from JSON file.
+        
+        Transforms the raw employee data by combining shift_id + pto_dates
+        into a proper Shifts object.
+        """
         employees_file = self._mock_path / "employees.json"
         if employees_file.exists():
             with open(employees_file) as f:
                 data = json.load(f)
-                self._employees = [Employee(**item) for item in data]
+                
+                employees = []
+                for item in data:
+                    # Transform shift_id + pto_dates into shifts object
+                    shift_id = item.pop("shift_id", None)
+                    pto_dates = item.pop("pto_dates", [])
+                    
+                    if shift_id and shift_id in self._shifts:
+                        shift_template = self._shifts[shift_id]
+                        item["shifts"] = Shifts(
+                            type=shift_template.name,
+                            schedule=shift_template.schedule,
+                            pto_dates=pto_dates,
+                        )
+                    else:
+                        # Fallback: create empty shifts if no template found
+                        item["shifts"] = Shifts(
+                            type="Unknown",
+                            schedule=[],
+                            pto_dates=pto_dates,
+                        )
+                    
+                    employees.append(Employee(**item))
+                
+                self._employees = employees
 
     def _load_cases(self) -> None:
         """Load cases from JSON file."""

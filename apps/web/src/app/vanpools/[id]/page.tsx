@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import prisma from '@/database/db';
 import { VanpoolMap } from '@/components/VanpoolMap';
+import { AuditButton } from '@/components/AuditButton';
 import ReactMarkdown from 'react-markdown';
 import type { Case, Employee, Shift, EmailThread, Message } from '@prisma/client';
 
@@ -118,20 +119,25 @@ export default async function VanpoolDetailPage({ params }: VanpoolDetailPagePro
       </Link>
 
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold text-neutral-900">
-            {vanpool.vanpoolId}
-          </h1>
-          {openCases.length > 0 && (
-            <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-amber-100 text-amber-800 text-xs rounded">
-              {openCases.length} open case{openCases.length !== 1 ? 's' : ''}
-            </span>
-          )}
+      <div className="mb-8 relative z-10">
+        <div className="flex items-center justify-between">
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-semibold text-neutral-900">
+                {vanpool.vanpoolId}
+              </h1>
+              {openCases.length > 0 && (
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 bg-amber-100 text-amber-800 text-xs rounded">
+                  {openCases.length} open case{openCases.length !== 1 ? 's' : ''}
+                </span>
+              )}
+            </div>
+            <p className="mt-1 text-sm text-neutral-500">
+              {vanpool.workSite} · {vanpool.workSiteAddress}
+            </p>
+          </div>
+          <AuditButton vanpoolId={vanpool.vanpoolId} />
         </div>
-        <p className="mt-1 text-sm text-neutral-500">
-          {vanpool.workSite} · {vanpool.workSiteAddress}
-        </p>
       </div>
 
       {/* Map */}

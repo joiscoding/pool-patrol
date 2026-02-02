@@ -241,7 +241,7 @@ def test_send_email_no_api_key(mock_send):
     print("=" * 60)
 
     # Temporarily clear the API key
-    import tools.outreach_tools as outreach_tools
+    import pool_patrol_tools.outreach_tools as outreach_tools
     original_key = outreach_tools.resend.api_key
     outreach_tools.resend.api_key = ""
 

@@ -118,12 +118,13 @@ export default function VanpoolMapClient({ factoryCoords, factoryName, employees
   );
 
   return (
-    <div className="rounded-lg overflow-hidden border border-neutral-200">
+    <div className="rounded-lg overflow-hidden border border-neutral-200 relative z-0">
       <style>{`
         .leaflet-container {
           height: 350px;
           width: 100%;
           background: #f5f5f5;
+          z-index: 0 !important;
         }
       `}</style>
 

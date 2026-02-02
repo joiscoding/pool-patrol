@@ -1,0 +1,60 @@
+'use server';
+
+export interface AuditResult {
+  success: boolean;
+  vanpool_id?: string;
+  case_id?: string | null;
+  outcome?: string;
+  reasoning?: string;
+  outreach_summary?: string | null;
+  hitl_required?: boolean;
+  error?: string;
+}
+
+/**
+ * Triggers a full re-audit of a vanpool using the Case Manager agent.
+ * 
+ * This calls the FastAPI backend which runs:
+ * 1. Verification specialists (shift, location)
+ * 2. Case creation/updates if issues found
+ * 3. Outreach handling (emails, reply processing)
+ * 4. HITL flow for membership cancellation
+ */
+export async function auditVanpool(vanpoolId: string): Promise<AuditResult> {
+  const apiUrl = process.env.POOL_PATROL_API_URL || 'http://localhost:8000';
+
+  try {
+    const response = await fetch(`${apiUrl}/api/vanpools/${vanpoolId}/audit`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      return {
+        success: false,
+        error: errorData.detail || `Audit failed with status ${response.status}`,
+      };
+    }
+
+    const data = await response.json();
+
+    return {
+      success: true,
+      vanpool_id: data.vanpool_id,
+      case_id: data.case_id,
+      outcome: data.outcome,
+      reasoning: data.reasoning,
+      outreach_summary: data.outreach_summary,
+      hitl_required: data.hitl_required,
+    };
+  } catch (error) {
+    console.error('Error auditing vanpool:', error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Failed to connect to API',
+    };
+  }
+}

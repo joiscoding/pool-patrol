@@ -1,3 +1,4 @@
+export { AuditButton } from './AuditButton';
 export { CaseCard } from './CaseCard';
 export { CreateVanpoolForm } from './CreateVanpoolForm';
 export { DeleteVanpoolForm } from './DeleteVanpoolForm';
